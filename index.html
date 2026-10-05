@@ -395,7 +395,7 @@ footer{padding-bottom:calc(34px + env(safe-area-inset-bottom))}
     Fonte única: arquivos públicos de divulgação de resultados do Tribunal Superior Eleitoral (<code>https://resultados.tse.jus.br/oficial</code>), conforme as
     “Informações técnicas sobre a divulgação de resultados 2026”. Este site bloqueia, via Content-Security-Policy, qualquer conexão a outro endereço.
     Resultados parciais podem mudar até o fim da totalização.
-    <div class="ver">Versão 2026-10-05 · 09h40</div>
+    <div class="ver">Versão 2026-10-05 · 11h30</div>
   </div>
 </footer>
 
@@ -978,6 +978,7 @@ document.addEventListener("keydown", e => { if (e.key === "Escape") closeDetail(
 function openDetail(cargo, sq){
   const r = state.data[cargo]; if (!r) return;
   const c = r.cands.find(x => x.sq === sq); if (!c) return;
+  contarConsulta();
   const pos = r.cands.indexOf(c) + 1;
   const s = situacao(c, r);
   const vices = c.vs.length ? `<div class="note">${c.vs.map(v => `${v.tp === "v" ? "Vice" : v.tp === "s1" ? "1º suplente" : v.tp === "s2" ? "2º suplente" : "Chapa"}: ${esc(v.nm)}${v.sg ? " ("+esc(v.sg)+")" : ""}`).join(" · ")}</div>` : "";
@@ -1320,22 +1321,23 @@ $("#refresh").addEventListener("click", async () => { const b = $("#refresh"); b
 /* ---------- Contador de acessos silencioso (GoatCounter) ----------
    Exceção autorizada à regra "só TSE". Só conta no site publicado, sem cookies,
    sem enviar buscas ou dados pessoais: apenas a página aberta e de onde a pessoa veio. Nada aparece na tela. */
-(function contarAcesso(){
+function contar(extra){
   try {
     if (location.hostname !== "ifcealuniojb.github.io") return;          // não conta testes locais
     if (navigator.webdriver) return;                                       // ignora robôs/automação
-    const q = new URLSearchParams({
-      p: location.pathname,
-      t: document.title,
-      r: document.referrer || "",
+    const q = new URLSearchParams(Object.assign({
       s: [screen.width, screen.height, Math.round(devicePixelRatio || 1)].join(","),
       rnd: Math.random().toString(36).slice(2)
-    });
+    }, extra));
     const img = new Image();
     img.referrerPolicy = "no-referrer";
     img.src = "https://apuracao2026.goatcounter.com/count?" + q.toString();
   } catch(e){ /* contador nunca pode quebrar o site */ }
-})();
+}
+// 1) visita ao site
+contar({p: location.pathname, t: document.title, r: document.referrer || ""});
+// 2) consulta = abrir a ficha de um candidato (evento; NÃO envia qual candidato)
+function contarConsulta(){ contar({p: "consulta-candidato", t: "Consulta de candidato (ficha aberta)", e: "true"}); }
 
 (async () => {
   render();
