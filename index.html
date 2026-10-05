@@ -395,7 +395,7 @@ footer{padding-bottom:calc(34px + env(safe-area-inset-bottom))}
     Fonte única: arquivos públicos de divulgação de resultados do Tribunal Superior Eleitoral (<code>https://resultados.tse.jus.br/oficial</code>), conforme as
     “Informações técnicas sobre a divulgação de resultados 2026”. Este site bloqueia, via Content-Security-Policy, qualquer conexão a outro endereço.
     Resultados parciais podem mudar até o fim da totalização.
-    <div class="ver">Versão 2026-10-05 · 11h30</div>
+    <div class="ver">Versão 2026-10-05 · 13h30</div>
   </div>
 </footer>
 
@@ -999,11 +999,12 @@ function openDetail(cargo, sq){
       <div class="situ ${s.cls}${s.proj ? " proj" : ""}"><span class="ic">${s.icon}</span><div><b>${esc(s.label)}</b><small>${esc(s.txt)}${r.final ? " · totalização final" : " · apuração em " + pctFmt(r.pst)}</small></div></div>
       <div class="kpis">
         <div class="kpi big"><span>Total de votos · ${esc(UF_NOME[r.uf] || r.uf)}</span><b>${fmt(c.votos)}</b><small>${pctFmt(c.pct)} dos votos válidos</small></div>
-        <div class="kpi"><span>Ranking geral</span><b>${pos}º</b><small>mais votado de ${fmt(r.cands.length)}${r.vagas ? " · " + r.vagas + " " + cad(r.vagas) : ""}</small></div>
+        <div class="kpi"><span>Ranking geral</span><b>${pos}º</b><small>mais votado de ${fmt(r.cands.length)}${r.vagas ? " · " + r.vagas + " " + (PROPORCIONAIS.has(r.cargo) ? cad(r.vagas) : (r.vagas === 1 ? "vaga" : "vagas")) : ""}</small></div>
         <div class="kpi"><span>Seções apuradas</span><b>${pctFmt(r.pst)}</b><small>${esc(r.data)} ${esc(r.hora)}</small></div>
       </div>
       ${vices}
       ${projBox(c, r)}
+      ${disputaBox(c, r)}
       <div id="br-total"></div>
       <div id="geo"></div>
     </div>`;
@@ -1018,6 +1019,67 @@ function openDetail(cargo, sq){
   } else {
     loadMunicipios(c, r, r.uf, token, $("#geo"));
   }
+}
+
+/* Cargos majoritários: diferença de votos para o líder / 2º colocado / corte das vagas */
+const pp = n => (n ?? 0).toLocaleString("pt-BR", {minimumFractionDigits:2, maximumFractionDigits:2}) + " p.p.";
+function disputaBox(c, r){
+  if (PROPORCIONAIS.has(r.cargo)) return "";
+  const L = r.cands.filter(elegivel);
+  const i = L.findIndex(x => x.sq === c.sq);
+  if (i < 0 || L.length < 2) return "";
+  const pos = i + 1, nv = r.cargo === "5" ? Math.max(1, r.vagas || 1) : 1;
+  const onde = r.uf === "BR" ? "no Brasil" : (r.cargo === "1" ? "neste estado" : "");
+  const dif = (a, b) => ({v: Math.abs(a.votos - b.votos), p: Math.abs(a.pct - b.pct)});
+  const nome = x => `<b>${esc(x.nmu)}</b> (${esc(x.sg)})`;
+  const linhas = [];
+  let destaque = null;                       // {rotulo, valor, cor}
+
+  if (nv > 1){                               // Senador com mais de uma vaga: corte das vagas
+    if (pos <= nv && L[nv]){
+      const d = dif(c, L[nv]);
+      destaque = {rotulo:`Folga sobre o ${nv + 1}º colocado`, valor: fmt(d.v), cor:"var(--accent)"};
+      linhas.push(`Está <b>${fmt(d.v)}</b> votos (${pp(d.p)}) à frente de ${nome(L[nv])}, o 1º fora das ${nv} vagas.`);
+    } else if (pos > nv){
+      const d = dif(L[nv - 1], c);
+      destaque = {rotulo:`Atrás do ${nv}º colocado`, valor: fmt(d.v), cor:"var(--red)"};
+      linhas.push(`Faltam <b>${fmt(d.v + 1)}</b> votos para passar ${nome(L[nv - 1])}, que ocupa a última vaga (${nv}ª).`);
+    }
+    if (pos > 1){ const d = dif(L[0], c); linhas.push(`Está ${fmt(d.v)} votos (${pp(d.p)}) atrás do mais votado, ${nome(L[0])}.`); }
+  } else if (pos === 1){
+    const d = dif(c, L[1]);
+    destaque = {rotulo:"À frente do 2º colocado", valor: fmt(d.v), cor:"var(--accent)"};
+    linhas.push(`Está <b>${fmt(d.v)}</b> votos à frente de ${nome(L[1])}, uma diferença de <b>${pp(d.p)}</b>${onde ? " " + onde + "." : ""}`);
+  } else {
+    const d = dif(L[0], c);
+    destaque = {rotulo:"Atrás do líder", valor: fmt(d.v), cor:"var(--red)"};
+    linhas.push(`Está <b>${fmt(d.v)}</b> votos (${pp(d.p)}) atrás do líder, ${nome(L[0])}${onde ? ", " + onde : ""}.`);
+    const turno1Exec = r.turno !== "2" && (r.cargo === "3" || r.cargo === "1");
+    if (pos > 2 && !(turno1Exec && pos === 3)){ const a = dif(L[i - 1], c); linhas.push(`Faltam ${fmt(a.v + 1)} votos para passar ${nome(L[i - 1])}, o ${pos - 1}º colocado.`); }
+  }
+
+  // 1º turno de Governador/Presidente: vaga no 2º turno e maioria absoluta
+  const turno1 = r.turno !== "2" && (r.cargo === "3" || r.cargo === "1");
+  if (turno1 && nv === 1){
+    if (pos === 2 && L[2]){ const d = dif(c, L[2]); linhas.push(`Vantagem sobre o 3º colocado, ${nome(L[2])}: ${fmt(d.v)} votos (${pp(d.p)}).`); }
+    if (pos > 2){ const d = dif(L[1], c); linhas.push(`Para ir ao 2º turno, precisaria passar ${nome(L[1])}: faltam ${fmt(d.v + 1)} votos.`); }
+    const validos = r.validos || L.reduce((s, x) => s + x.votos, 0);
+    const metade = Math.floor(validos / 2) + 1;
+    if (pos === 1){
+      if (c.votos >= metade) linhas.push(`Tem maioria absoluta: ${fmt(c.votos - metade + 1)} votos acima da metade dos válidos${onde ? " " + onde : ""}.`);
+      else linhas.push(`Faltam ${fmt(metade - c.votos)} votos para passar de 50% dos válidos${onde ? " " + onde : ""} (o que evitaria o 2º turno).`);
+    }
+  }
+
+  const titulo = nv > 1 ? `Disputa · ${nv} vagas` : (r.turno === "2" ? "Disputa · 2º turno" : "Disputa");
+  return `<div class="projbox"><h5>${titulo}${onde ? " · " + (r.uf === "BR" ? "Brasil" : esc(UF_NOME[r.uf] || r.uf)) : ""}</h5>
+    <div class="projgrid">
+      <div><span>Colocação</span><b>${pos}º de ${L.length}</b></div>
+      ${destaque ? `<div><span>${destaque.rotulo}</span><b style="color:${destaque.cor}">${destaque.valor}</b></div>` : ""}
+      <div><span>% dos válidos</span><b>${pctFmt(c.pct)}</b></div>
+    </div>
+    ${linhas.map(l => `<div class="callout">${l}</div>`).join("")}
+  </div>`;
 }
 
 function projBox(c, r){
