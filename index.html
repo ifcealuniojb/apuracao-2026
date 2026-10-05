@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <!-- Política do projeto: SOMENTE a API oficial do TSE. Qualquer outra conexão é bloqueada pelo navegador. -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: https://resultados.tse.jus.br; connect-src https://resultados.tse.jus.br; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
@@ -290,6 +290,28 @@ footer code{color:var(--lime)}
 .t2c b{display:block;font-size:16px}
 .t2c small{color:var(--ink-3);font-size:12.5px}
 .t2vs .vs{font-size:22px;font-weight:800;color:var(--ink-3)}
+/* Áreas seguras do iPhone (barra de status / barra do Safari) */
+header.top{padding-top:env(safe-area-inset-top)}
+.wrap{padding-left:max(16px, env(safe-area-inset-left));padding-right:max(16px, env(safe-area-inset-right))}
+footer{padding-bottom:calc(34px + env(safe-area-inset-bottom))}
+.drawer{height:100vh;height:100dvh}
+.dhead{padding-top:calc(20px + env(safe-area-inset-top))}
+.dbody{padding-bottom:calc(40px + env(safe-area-inset-bottom))}
+@media (max-width:760px){
+  .drawer{display:block;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .dbody{overflow:visible;padding:14px 14px calc(96px + env(safe-area-inset-bottom))}
+  .dhead{gap:12px;padding:calc(14px + env(safe-area-inset-top)) 56px 16px 14px}
+  .dhead .ph{width:68px;height:90px;border-radius:12px}
+  .dhead .ph .cad{font-size:11px;padding:2px 0 3px}
+  .dhead h2{font-size:20px;line-height:1.2}
+  .dhead .sub{font-size:12.5px;line-height:1.35;margin-top:2px}
+  .dhead .x{position:fixed;top:calc(10px + env(safe-area-inset-top));right:12px;z-index:5;width:38px;height:38px;border-radius:12px;background:rgba(27,42,56,.88);border-color:rgba(255,255,255,.25);color:#fff;font-size:20px;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+  .kpis{gap:8px}
+  .kpi{padding:11px}
+  .kpi.big b{font-size:34px}
+  .projgrid{gap:12px 10px}
+  .ac{max-height:min(380px,50vh)}
+}
 .ph .cad:not(.sup):not(.out),.seat.in{color:var(--on-accent)}
 </style>
 </head>
