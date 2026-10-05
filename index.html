@@ -394,7 +394,7 @@ footer{padding-bottom:calc(34px + env(safe-area-inset-bottom))}
     Fonte única: arquivos públicos de divulgação de resultados do Tribunal Superior Eleitoral (<code>https://resultados.tse.jus.br/oficial</code>), conforme as
     “Informações técnicas sobre a divulgação de resultados 2026”. Este site bloqueia, via Content-Security-Policy, qualquer conexão a outro endereço.
     Resultados parciais podem mudar até o fim da totalização.
-    <div class="ver">Versão 2026-10-05 · 01h10</div>
+    <div class="ver">Versão 2026-10-05 · 09h15</div>
   </div>
 </footer>
 
@@ -814,7 +814,8 @@ function matches(c, q){
   if (/^\d+$/.test(qn)) return c.n.startsWith(qn) || c.nPar === qn;
   // cada termo digitado precisa ser o COMEÇO de alguma palavra (nome, nome completo, partido, coligação/federação)
   const words = norm([c.nmu, c.nm, c.sg, c.partido, c.agr, c.fed, c.agrCom, c.n].join(" ")).split(/[\s\/\-.,()]+/).filter(Boolean);
-  return qn.split(/\s+/).filter(Boolean).every(t => words.some(w => w.startsWith(t)));
+  // o texto digitado é quebrado pelos mesmos separadores (espaço, hífen, barra, pontuação)
+  return qn.split(/[\s\/\-.,()]+/).filter(Boolean).every(t => words.some(w => w.startsWith(t)));
 }
 
 /* ---------- Coluna "Cadeira": que cadeira o candidato ocupa entre as conquistadas pelo partido/federação ---------- */
