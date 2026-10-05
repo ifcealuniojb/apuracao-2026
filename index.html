@@ -293,6 +293,11 @@ footer code{color:var(--lime)}
 .t2c b{display:block;font-size:16px}
 .t2c small{color:var(--ink-3);font-size:12.5px}
 .t2vs .vs{font-size:22px;font-weight:800;color:var(--ink-3)}
+/* iPhone: campos com letra < 16px fazem o Safari dar zoom ao tocar (e o zoom não volta) */
+@media (max-width:860px), (hover:none) and (pointer:coarse){
+  input, select, textarea, input[type=search], .mfilter input{font-size:16px !important}
+}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 /* Enquadramento no celular: nada pode alargar a página */
 html,body{max-width:100%;overflow-x:hidden}
 @supports (overflow:clip){html,body{overflow-x:clip}}
