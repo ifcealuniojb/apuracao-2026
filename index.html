@@ -181,13 +181,7 @@ main{padding:18px 0 60px}
 .dhead .av{width:64px;height:64px;font-size:20px;border-radius:16px;flex:none}
 .dhead h2{font-family:var(--serif);font-size:24px;line-height:1.15;margin:0;font-weight:600;letter-spacing:-.01em}
 .dhead .sub{color:var(--ink-2);font-size:13px;margin-top:3px}
-.dhead > .x{margin-left:auto}
-.dacts{margin-left:auto;display:flex;gap:8px;flex:none;align-items:center}
-.dhead .sh{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px;border-radius:10px;border:1px solid rgba(255,255,255,.25);background:var(--lime);color:var(--navy);font-weight:700;font-size:13px;cursor:pointer}
-.dhead .sh:hover{filter:brightness(1.05)}
-.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translate(-50%,20px);background:var(--navy);color:#fff;padding:10px 16px;border-radius:12px;font-size:14px;font-weight:600;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:40}
-.toast.on{opacity:1;transform:translate(-50%,0)}
-.dhead .x{flex:none;width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-size:18px;line-height:1;color:var(--ink-2)}
+.dhead .x{margin-left:auto;flex:none;width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-size:18px;line-height:1;color:var(--ink-2)}
 .dbody{overflow:auto;padding:16px 18px 40px;flex:1}
 .kpis{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:10px;margin-bottom:14px}
 @media (max-width:520px){.kpis{grid-template-columns:1fr 1fr}.kpis .big{grid-column:1/-1}}
@@ -322,11 +316,7 @@ footer{padding-bottom:calc(34px + env(safe-area-inset-bottom))}
 @media (max-width:760px){
   .drawer{display:block;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
   .dbody{overflow:visible;padding:14px 14px calc(96px + env(safe-area-inset-bottom))}
-  .dhead{gap:12px;padding:calc(14px + env(safe-area-inset-top)) 104px 16px 14px}
-  .dhead .dacts{position:fixed;top:calc(10px + env(safe-area-inset-top));right:12px;z-index:5;gap:8px}
-  .dhead .dacts .x{position:static}
-  .dhead .sh{width:38px;height:38px;padding:0;justify-content:center;border-radius:12px}
-  .dhead .sh span{display:none}
+  .dhead{gap:12px;padding:calc(14px + env(safe-area-inset-top)) 56px 16px 14px}
   .dhead .ph{width:68px;height:90px;border-radius:12px}
   .dhead .ph .cad{font-size:11px;padding:2px 0 3px}
   .dhead h2{font-size:20px;line-height:1.2}
@@ -405,7 +395,7 @@ footer{padding-bottom:calc(34px + env(safe-area-inset-bottom))}
     Fonte única: arquivos públicos de divulgação de resultados do Tribunal Superior Eleitoral (<code>https://resultados.tse.jus.br/oficial</code>), conforme as
     “Informações técnicas sobre a divulgação de resultados 2026”. Este site bloqueia, via Content-Security-Policy, qualquer conexão a outro endereço.
     Resultados parciais podem mudar até o fim da totalização.
-    <div class="ver">Versão 2026-10-05 · 16h30</div>
+    <div class="ver">Versão 2026-10-05 · 13h30</div>
   </div>
 </footer>
 
@@ -734,24 +724,6 @@ function situacao(c, res){
 /* ---------- Estado ---------- */
 const state = { uf:"CE", cargo:"all", q:"", data:{}, errors:{}, loading:false, expanded:{}, soEleitos:false, sort:{key:"votos", dir:1}, turno:"1", info:{} };
 try { const s = JSON.parse(localStorage.getItem("apur26") || "{}"); if (s.uf) state.uf = s.uf; if (s.cargo) state.cargo = s.cargo; if (s.sort && s.sort.key) state.sort = s.sort; if (s.turno === "1" || s.turno === "2") state.turno = s.turno; } catch(e){}
-/* Link da ficha: ?uf=CE&turno=1&cargo=6&c=<sqcand> */
-const LINK = (() => {
-  try {
-    const u = new URLSearchParams(location.search);
-    const uf = String(u.get("uf") || "").toUpperCase(), turno = u.get("turno"), cargo = u.get("cargo"), c = u.get("c");
-    const ok = uf && (UF_NOME[uf]) && CARGOS[cargo] && /^[0-9]+$/.test(String(c || ""));
-    if (!ok) return null;
-    state.uf = uf; state.cargo = cargo; state.turno = turno === "2" ? "2" : "1";
-    return {cargo, sq: String(c)};
-  } catch(e){ return null; }
-})();
-function linkDaFicha(cargo, sq){
-  const u = new URL(location.origin + location.pathname);
-  u.searchParams.set("uf", state.uf); u.searchParams.set("turno", state.turno);
-  u.searchParams.set("cargo", cargo); u.searchParams.set("c", sq);
-  return u.toString();
-}
-function marcarURL(url){ try { history.replaceState(null, "", url); } catch(e){} }
 const save = () => { try { localStorage.setItem("apur26", JSON.stringify({uf:state.uf, cargo:state.cargo, sort:state.sort, turno:state.turno})); } catch(e){} };
 
 /* ---------- Carregamento da UF ---------- */
@@ -999,26 +971,7 @@ $("#main").addEventListener("click", e => {
 /* ---------- Detalhe do candidato ---------- */
 const drawer = $("#drawer"), scrim = $("#scrim");
 let detailToken = 0;
-function closeDetail(){ drawer.classList.remove("on"); scrim.classList.remove("on"); detailToken++; if (location.search) marcarURL(location.pathname); }
-
-async function compartilharFicha(c, r, link){
-  const s = situacao(c, r);
-  const onde = r.uf === "BR" ? "Brasil" : (UF_NOME[r.uf] || r.uf);
-  const texto = `${c.nmu} - ${c.sg} · ${r.cargoNome} (${onde}${r.turno === "2" ? ", 2º turno" : ""}): ${fmt(c.votos)} votos · ${s.label}`;
-  contar({p: "compartilhar-ficha", t: "Ficha compartilhada", e: "true"});
-  if (navigator.share){
-    try { await navigator.share({title: `${c.nmu} - ${c.sg} · Apuração 2026`, text: texto, url: link}); return; }
-    catch(e){ if (e && e.name === "AbortError") return; }      // usuário cancelou
-  }
-  try { await navigator.clipboard.writeText(texto + "\n" + link); aviso("Link da ficha copiado"); }
-  catch(e){ window.prompt("Copie o link da ficha:", link); }
-}
-function aviso(msg){
-  let t = document.querySelector(".toast");
-  if (!t){ t = document.createElement("div"); t.className = "toast"; t.setAttribute("role", "status"); document.body.appendChild(t); }
-  t.textContent = msg; t.classList.add("on");
-  clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("on"), 2200);
-}
+function closeDetail(){ drawer.classList.remove("on"); scrim.classList.remove("on"); detailToken++; }
 scrim.addEventListener("click", closeDetail);
 document.addEventListener("keydown", e => { if (e.key === "Escape") closeDetail(); });
 
@@ -1040,10 +993,7 @@ function openDetail(cargo, sq){
         ${c.agr ? `<div class="sub">${c.agrTp === "f" ? "Federação" : "Coligação"}: ${esc(c.agr)}${c.agrCom ? " (" + esc(c.agrCom) + ")" : ""}</div>` : ""}
         ${c.fed && c.fed !== c.agr ? `<div class="sub">Federação: ${esc(c.fed)}</div>` : ""}
       </div>
-      <div class="dacts">
-        <button class="sh" aria-label="Compartilhar link da ficha" title="Compartilhar link da ficha"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 8 5-5 5 5"/><path d="M5 13v5a3 3 0 0 0 3 3h8a3 3 0 0 0 3-3v-5"/></svg><span>Compartilhar</span></button>
-        <button class="x" aria-label="Fechar">×</button>
-      </div>
+      <button class="x" aria-label="Fechar">×</button>
     </div>
     <div class="dbody">
       <div class="situ ${s.cls}${s.proj ? " proj" : ""}"><span class="ic">${s.icon}</span><div><b>${esc(s.label)}</b><small>${esc(s.txt)}${r.final ? " · totalização final" : " · apuração em " + pctFmt(r.pst)}</small></div></div>
@@ -1060,10 +1010,7 @@ function openDetail(cargo, sq){
     </div>`;
   drawer.classList.add("on"); scrim.classList.add("on");
   $(".x", drawer).addEventListener("click", closeDetail);
-  if (!matchMedia("(hover: none)").matches) $(".x", drawer).focus();   // foco só no computador (teclado)
-  const link = linkDaFicha(cargo, sq);
-  marcarURL(link);
-  $(".sh", drawer).addEventListener("click", () => compartilharFicha(c, r, link));
+  $(".x", drawer).focus();
 
   const token = ++detailToken;
   if (cargo === "1"){
@@ -1458,11 +1405,7 @@ function contarConsulta(){ contar({p: "consulta-candidato", t: "Consulta de cand
   render();
   const ok = await loadEleConfig();
   setConn(ok ? "ok" : "warn", ok ? "Configuração oficial carregada" : "Usando códigos de eleição padrão");
-  await loadUF();
-  if (LINK){
-    if (state.data[LINK.cargo] && state.data[LINK.cargo].cands.some(x => x.sq === LINK.sq)) openDetail(LINK.cargo, LINK.sq);
-    else { aviso("Não encontramos esse candidato nos dados do TSE"); marcarURL(location.pathname); }
-  }
+  loadUF();
 })();
 </script>
 </body>
