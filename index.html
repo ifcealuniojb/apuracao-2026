@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
 <!-- Política do projeto: SOMENTE a API oficial do TSE. Qualquer outra conexão é bloqueada pelo navegador. -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: https://resultados.tse.jus.br; connect-src https://resultados.tse.jus.br; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
@@ -285,6 +285,7 @@ table.mun th{background:var(--surface)}
 .ac{border-radius:14px}
 footer{background:var(--navy);color:var(--navy-mute);border-top:0;margin-top:30px;padding:22px 0 34px}
 footer code{color:var(--lime)}
+footer .ver{margin-top:8px;font-size:11px;opacity:.7}
 .t2box{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px 18px}
 .t2box p{margin:12px 0 0;color:var(--ink-2);font-size:14px}
 .t2vs{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
@@ -393,6 +394,7 @@ footer{padding-bottom:calc(34px + env(safe-area-inset-bottom))}
     Fonte única: arquivos públicos de divulgação de resultados do Tribunal Superior Eleitoral (<code>https://resultados.tse.jus.br/oficial</code>), conforme as
     “Informações técnicas sobre a divulgação de resultados 2026”. Este site bloqueia, via Content-Security-Policy, qualquer conexão a outro endereço.
     Resultados parciais podem mudar até o fim da totalização.
+    <div class="ver">Versão 2026-10-05 · 01h10</div>
   </div>
 </footer>
 
