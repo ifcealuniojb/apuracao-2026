@@ -3,8 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
-<!-- Política do projeto: SOMENTE a API oficial do TSE. Qualquer outra conexão é bloqueada pelo navegador. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: https://resultados.tse.jus.br; connect-src https://resultados.tse.jus.br; base-uri 'none'; form-action 'none'">
+<!-- Política do projeto: SOMENTE a API oficial do TSE. Qualquer outra conexão é bloqueada pelo navegador.
+     Única exceção autorizada: contador de acessos silencioso (GoatCounter, sem cookies, só imagem de contagem). -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: https://resultados.tse.jus.br https://apuracao2026.goatcounter.com; connect-src https://resultados.tse.jus.br; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
 <title>Apuração 2026 · Busca de candidatos</title>
 <style>
@@ -394,7 +395,7 @@ footer{padding-bottom:calc(34px + env(safe-area-inset-bottom))}
     Fonte única: arquivos públicos de divulgação de resultados do Tribunal Superior Eleitoral (<code>https://resultados.tse.jus.br/oficial</code>), conforme as
     “Informações técnicas sobre a divulgação de resultados 2026”. Este site bloqueia, via Content-Security-Policy, qualquer conexão a outro endereço.
     Resultados parciais podem mudar até o fim da totalização.
-    <div class="ver">Versão 2026-10-05 · 09h15</div>
+    <div class="ver">Versão 2026-10-05 · 09h40</div>
   </div>
 </footer>
 
@@ -1315,6 +1316,26 @@ acBox.addEventListener("mousedown", e => { const it = e.target.closest(".ac-it")
 document.addEventListener("click", e => { if (!e.target.closest(".qwrap")) acClose(); });
 $("#soEleitos").addEventListener("change", e => { state.soEleitos = e.target.checked; state.expanded = {}; render(); });
 $("#refresh").addEventListener("click", async () => { const b = $("#refresh"); b.disabled = true; cache.clear(); await loadUF(true); b.disabled = false; });
+
+/* ---------- Contador de acessos silencioso (GoatCounter) ----------
+   Exceção autorizada à regra "só TSE". Só conta no site publicado, sem cookies,
+   sem enviar buscas ou dados pessoais: apenas a página aberta e de onde a pessoa veio. Nada aparece na tela. */
+(function contarAcesso(){
+  try {
+    if (location.hostname !== "ifcealuniojb.github.io") return;          // não conta testes locais
+    if (navigator.webdriver) return;                                       // ignora robôs/automação
+    const q = new URLSearchParams({
+      p: location.pathname,
+      t: document.title,
+      r: document.referrer || "",
+      s: [screen.width, screen.height, Math.round(devicePixelRatio || 1)].join(","),
+      rnd: Math.random().toString(36).slice(2)
+    });
+    const img = new Image();
+    img.referrerPolicy = "no-referrer";
+    img.src = "https://apuracao2026.goatcounter.com/count?" + q.toString();
+  } catch(e){ /* contador nunca pode quebrar o site */ }
+})();
 
 (async () => {
   render();
