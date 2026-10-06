@@ -327,6 +327,10 @@ footer{padding-bottom:calc(34px + env(safe-area-inset-bottom))}
   .kpi.big b{font-size:34px}
   .projgrid{gap:12px 10px}
   .ac{max-height:min(380px,50vh)}
+  /* Ficha aberta no celular vira a própria página (quem rola é a página, não a ficha):
+     assim o "Página inteira" do iPhone (captura de tela / PDF) pega a ficha completa */
+  body.ficha-aberta > header.top, body.ficha-aberta > .wrap, body.ficha-aberta > footer, body.ficha-aberta > .scrim{display:none}
+  body.ficha-aberta .drawer{position:relative;top:auto;right:auto;bottom:auto;width:100%;height:auto;min-height:100vh;overflow:visible;transform:none;transition:none;box-shadow:none}
 }
 .ph .cad:not(.sup):not(.out),.seat.in{color:var(--on-accent)}
 </style>
@@ -395,7 +399,7 @@ footer{padding-bottom:calc(34px + env(safe-area-inset-bottom))}
     Fonte única: arquivos públicos de divulgação de resultados do Tribunal Superior Eleitoral (<code>https://resultados.tse.jus.br/oficial</code>), conforme as
     “Informações técnicas sobre a divulgação de resultados 2026”. Este site bloqueia, via Content-Security-Policy, qualquer conexão a outro endereço.
     Resultados parciais podem mudar até o fim da totalização.
-    <div class="ver">Versão 2026-10-05 · 13h30</div>
+    <div class="ver">Versão 2026-10-06 · 12h20</div>
   </div>
 </footer>
 
@@ -971,7 +975,24 @@ $("#main").addEventListener("click", e => {
 /* ---------- Detalhe do candidato ---------- */
 const drawer = $("#drawer"), scrim = $("#scrim");
 let detailToken = 0;
-function closeDetail(){ drawer.classList.remove("on"); scrim.classList.remove("on"); detailToken++; }
+/* Celular: com a ficha aberta, a página mostra só a ficha (ver CSS "ficha-aberta"); ao fechar, volta para onde estava */
+const FICHA_CELULAR = window.matchMedia("(max-width: 760px)");
+let fichaScrollY = 0;
+function fichaNaPagina(){
+  if (!FICHA_CELULAR.matches) return;
+  if (!document.body.classList.contains("ficha-aberta")){
+    fichaScrollY = window.scrollY;
+    document.body.classList.add("ficha-aberta");
+  }
+  window.scrollTo(0, 0);
+}
+function closeDetail(){
+  drawer.classList.remove("on"); scrim.classList.remove("on"); detailToken++;
+  if (document.body.classList.contains("ficha-aberta")){
+    document.body.classList.remove("ficha-aberta");
+    window.scrollTo(0, fichaScrollY);
+  }
+}
 scrim.addEventListener("click", closeDetail);
 document.addEventListener("keydown", e => { if (e.key === "Escape") closeDetail(); });
 
@@ -1011,6 +1032,7 @@ function openDetail(cargo, sq){
   drawer.classList.add("on"); scrim.classList.add("on");
   $(".x", drawer).addEventListener("click", closeDetail);
   $(".x", drawer).focus();
+  fichaNaPagina();
 
   const token = ++detailToken;
   if (cargo === "1"){
@@ -1144,6 +1166,7 @@ function openVagas(cargo){
   drawer.classList.add("on"); scrim.classList.add("on");
   $(".x", drawer).addEventListener("click", closeDetail);
   drawer.querySelectorAll("tr.clk").forEach(tr => tr.addEventListener("click", () => openDetail(tr.dataset.c, tr.dataset.sq)));
+  fichaNaPagina();
   detailToken++;
 }
 
