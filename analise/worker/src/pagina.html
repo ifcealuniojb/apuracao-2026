@@ -299,7 +299,7 @@ const S={muns:{},reg:{},cands:[],tse:{},G:null,T:{},C:null,linhas:[],caminho:[],
 
 let nCarreg=0;
 function busy(d){nCarreg+=d;$("#carreg").hidden=nCarreg<=0}
-async function api(path){busy(1);try{const r=await fetch(path,{credentials:"same-origin"});if(!r.ok)throw new Error((await r.json().catch(()=>({}))).erro||("erro "+r.status));return await r.json()}finally{busy(-1)}}
+async function api(path){busy(1);try{let ult;for(let t=0;t<4;t++){if(t)await new Promise(r=>setTimeout(r,600*t*t));try{const r=await fetch(path,{credentials:"same-origin"});if(r.ok)return await r.json();ult=new Error(((await r.json().catch(()=>({}))).erro||("erro "+r.status)).replace(/\.$/,""));if(r.status<500)break}catch(e){ult=e}}throw ult}finally{busy(-1)}}
 const bloco=k=>api("/api/bloco?k2="+encodeURIComponent(`${ANO}/${TURNO}/${UF}/${k}`));
 
 /* nomes de urna, partidos, situação e fotos: ambiente oficial de resultados do TSE */
@@ -549,7 +549,7 @@ $("#ff-nivel").addEventListener("click",e=>{const b=e.target.closest("button");i
 $("#ref").addEventListener("click",e=>{const b=e.target.closest("button");if(b){S.ref=b.dataset.v;explorar()}});
 $("#agrup").addEventListener("click",e=>{const b=e.target.closest("button");if(b){S.agrup=b.dataset.v;explorar()}});
 document.querySelector(".lista .cab").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;const k=b.dataset.o;S.ordem={col:k,dir:S.ordem.col===k?-S.ordem.dir:(k==="nome"?1:-1)};explorar()});
-function falha(e){$("#vazio").hidden=false;$("#vazio").replaceChildren(el("b",{},"Não foi possível carregar"),String(e.message||e)+". Recarregue a página; se continuar, avise.")}
+function falha(e){$("#vazio").hidden=false;$("#vazio").replaceChildren(el("b",{},"Não foi possível carregar"),String(e.message||e).replace(/\.$/,"")+". Recarregue a página; se continuar, avise.")}
 inicio().catch(falha);
 </script>
 </body>
