@@ -919,12 +919,14 @@ function renderNacional(c, N){
   let html = `<section class="group"><h3>${esc(N.cargoNome)} <span class="meta">Brasil · ${ufs.length} estados${N.falhas.length ? " · sem resposta do TSE: " + esc(N.falhas.join(", ")) : ""}</span></h3>
     <div class="nacbox"><div class="kpis">${kpis}</div>
       ${chips ? `<div class="nac-sub">${tituloBanc} · toque para filtrar</div><div class="pchips">${chips}</div>` : ""}</div>`;
+  // busca igual à sigla de um partido com eleitos (ex.: "PT", "PL"): filtra só esse partido, sem pegar a federação inteira
+  const qPartido = state.q && partidos.has(state.q.trim().toUpperCase()) ? state.q.trim().toUpperCase() : null;
   // lista por estado, em ordem alfabética
   let mostrados = 0;
   for (const uf of ufs){
     const r = N.porUF[uf];
     const porUfInteiro = ufCombina(uf, state.q);
-    let lista = selecionados(c, r).filter(x => porUfInteiro || matches(x, state.q));
+    let lista = selecionados(c, r).filter(x => qPartido ? x.sg.toUpperCase() === qPartido : (porUfInteiro || matches(x, state.q)));
     if (state.soEleitos) lista = lista.filter(x => situacao(x, r).cls === "yes");
     if (!lista.length) continue;
     if (c === "6") lista = ordenar(lista, r);
