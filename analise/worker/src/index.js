@@ -6,15 +6,14 @@ import REGIOES_CE from "../../regioes/ce-ipece.json";
 
 const BASE = {
   "x-content-type-options": "nosniff",
-  "x-robots-tag": "noindex, nofollow",
   "referrer-policy": "strict-origin-when-cross-origin",
 };
-const API = { ...BASE, "content-type": "application/json; charset=utf-8", "cache-control": "private, max-age=300" };
+const API = { ...BASE, "x-robots-tag": "noindex", "content-type": "application/json; charset=utf-8", "cache-control": "private, max-age=300" };
 const CSP = [
   "default-src 'none'",
   "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com",
   "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com",
-  "img-src 'self' data: https://tile.openstreetmap.org https://cdnjs.cloudflare.com https://resultados.tse.jus.br",
+  "img-src 'self' data: https://tile.openstreetmap.org https://cdnjs.cloudflare.com https://resultados.tse.jus.br https://apuracao2026.goatcounter.com",
   "connect-src 'self' https://resultados.tse.jus.br",
   "font-src 'self'",
   "frame-ancestors 'none'",

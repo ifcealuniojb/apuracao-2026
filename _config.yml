@@ -1,0 +1,5 @@
+# GitHub Pages: publica só a página inicial e a apuração.
+# A pasta analise/ é o código do Mapa de Votos (Cloudflare) e não vai para o site.
+exclude:
+  - analise
+  - README.md

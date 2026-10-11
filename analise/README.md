@@ -1,9 +1,9 @@
-# Análise eleitoral por área (em validação, fora do site)
+# Mapa de Votos 2026 (Cloudflare)
 
-Este ramo (`analise-bairros`) não é publicado no GitHub Pages.
+Código do Mapa de Votos. Esta pasta **não** vai para o GitHub Pages (ver `_config.yml`).
 
 - `carga/carga.py`: lê os arquivos oficiais do TSE (Portal de Dados Abertos) e gera o SQL para o banco D1.
-- `worker/`: API só de leitura no Cloudflare Workers.
-- `.github/workflows/analise-carga.yml`: baixa do TSE, carrega no D1 e publica a API. Usa o segredo `CLOUDFLARE_API_TOKEN`.
+- `worker/`: página e API só de leitura no Cloudflare Workers (`https://analise-eleitoral.joao-antonio-araujo62.workers.dev/`).
+- `regioes/ce-ipece.json`: municípios por Região de Planejamento do Ceará (IPECE).
 
-Fonte única: TSE. O Cloudflare só guarda e entrega os dados.
+Publicação e carga: ver o `README.md` da raiz.
