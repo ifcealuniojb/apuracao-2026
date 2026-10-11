@@ -161,6 +161,31 @@ def main():
     for (mun, zona, cargo), d in por_zona.items():
         blob(f"{pref_t}/z/{mun}/{zona}/{cargo}", d)
 
+    # totais por seção e cargo: [válidos, total de votos (= comparecimento)]; 95 branco, 96 nulo
+    totais = defaultdict(lambda: defaultdict(lambda: defaultdict(dict)))
+    for (mun, zona, cargo), d in por_zona.items():
+        for sec, vs in d.items():
+            tot = sum(vs.values())
+            val = tot - vs.get("95", 0) - vs.get("96", 0)
+            totais[cargo][mun][zona][sec] = [val, tot]
+    for cargo, d in totais.items():
+        blob(f"{pref_t}/t/{cargo}", d)
+
+    # resumo geral do estado: seções principais (aptos somando as agregadas) e locais
+    g_sec = defaultdict(lambda: defaultdict(dict))
+    g_loc = defaultdict(lambda: defaultdict(dict))
+    for (mun, zona), secs in secoes.items():
+        for sec, (nr_local, aptos, tipo, principal) in secs.items():
+            alvo = str(principal) if tipo == "A" and principal else sec
+            atual = g_sec[mun][zona].get(alvo)
+            if atual is None:
+                base = secs.get(alvo, [nr_local])[0]
+                atual = g_sec[mun][zona][alvo] = [base, 0]
+            atual[1] += aptos
+        for nr_local, (nome, bairro, _end, lat, lon) in locais[(mun, zona)].items():
+            g_loc[mun][zona][nr_local] = [nome, " ".join(bairro.upper().split()) or "(SEM BAIRRO)", lat, lon]
+    blob(f"{pref_t}/g", {"sec": g_sec, "loc": g_loc})
+
     for (cargo, nr), d in por_cand.items():
         c = cands[(cargo, nr)]
         w(f"INSERT INTO candidato(ano,turno,uf,cargo,ds_cargo,nr,sq,nome,total) VALUES({ano},{turno},{sql_txt(uf)},"

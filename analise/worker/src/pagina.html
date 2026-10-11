@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Mapa de Votos Ceará</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+/* Layout: barra de filtros fixa no topo; resumo; tabela de áreas + mapa lado a lado (empilha no celular); rankings; votos esperados. */
+:root{
+  --marinho:#13233f; --limao:#c8f03c;
+  --bg:#f3f5f8; --sup:#ffffff; --sup2:#eef1f6; --linha:#d9dee8;
+  --tx:#17202e; --tx2:#566174; --ac:#1d4ed8;
+  --forte:#0f8a5f; --forte-bg:#dff3ea; --fraco:#c2410c; --fraco-bg:#fde9dd; --neutro:#7b8597;
+  --f-ui: system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --f-num: ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e1420; --sup:#161e2d; --sup2:#1d2738; --linha:#2b3649;
+  --tx:#e6ebf3; --tx2:#9aa6ba; --ac:#7aa2ff;
+  --forte:#3ccf95; --forte-bg:#123528; --fraco:#ff8a50; --fraco-bg:#3a2216; --neutro:#8792a6; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e1420; --sup:#161e2d; --sup2:#1d2738; --linha:#2b3649;
+  --tx:#e6ebf3; --tx2:#9aa6ba; --ac:#7aa2ff;
+  --forte:#3ccf95; --forte-bg:#123528; --fraco:#ff8a50; --fraco-bg:#3a2216; --neutro:#8792a6; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--tx);font:15px/1.45 var(--f-ui);padding-bottom:env(safe-area-inset-bottom,0px)}
+header{background:var(--marinho);color:#fff;padding:calc(10px + env(safe-area-inset-top,0px)) 16px 10px}
+.topo{max-width:1280px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px}
+.topo h1{font-size:18px;margin:0;letter-spacing:.2px}
+.topo h1 b{color:var(--limao)}
+.selo{font-size:11px;text-transform:uppercase;letter-spacing:.08em;background:var(--limao);color:var(--marinho);padding:3px 8px;border-radius:3px;font-weight:700}
+.topo .info{margin-left:auto;font-size:12px;opacity:.8}
+.filtros{position:sticky;top:0;z-index:500;background:var(--sup);border-bottom:1px solid var(--linha);padding:10px 16px}
+.filtros .in{max-width:1280px;margin:0 auto;display:flex;flex-wrap:wrap;gap:10px 14px;align-items:end}
+label.cp{display:flex;flex-direction:column;gap:3px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);min-width:0}
+select,input{font:16px var(--f-ui);color:var(--tx);background:var(--sup2);border:1px solid var(--linha);border-radius:6px;padding:7px 9px;min-width:0}
+input:focus,select:focus,button:focus-visible,a:focus-visible{outline:2px solid var(--ac);outline-offset:1px}
+#cand{width:min(420px,88vw)}
+main{max-width:1280px;margin:0 auto;padding:14px 16px 40px;display:flex;flex-direction:column;gap:16px}
+.migalha{display:flex;flex-wrap:wrap;gap:4px;align-items:center;font-size:14px}
+.migalha button{all:unset;cursor:pointer;color:var(--ac);padding:2px 4px;border-radius:4px}
+.migalha button:hover{background:var(--sup2)}
+.migalha span.sep{color:var(--tx2)}
+.migalha .atual{font-weight:700;padding:2px 4px}
+.resumo{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.kpi{background:var(--sup);border:1px solid var(--linha);border-radius:8px;padding:10px 12px;min-width:0}
+.kpi .r{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2)}
+.kpi .v{font:600 22px var(--f-num);font-variant-numeric:tabular-nums;margin-top:2px}
+.kpi .s{font-size:12px;color:var(--tx2)}
+.grade{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:900px){.grade{grid-template-columns:minmax(0,1fr)}}
+.caixa{background:var(--sup);border:1px solid var(--linha);border-radius:8px;min-width:0}
+.caixa h2{font-size:15px;margin:0;padding:10px 12px;border-bottom:1px solid var(--linha);display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;text-wrap:balance}
+.caixa h2 .dir{margin-left:auto;display:flex;gap:8px;align-items:center;font-weight:400}
+.caixa .nota{font-size:12px;color:var(--tx2);padding:8px 12px}
+.rolagem{overflow-x:auto;max-height:560px;overflow-y:auto}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th,td{padding:7px 10px;border-bottom:1px solid var(--linha);text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left;white-space:normal;min-width:160px}
+thead th{position:sticky;top:0;background:var(--sup2);font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);cursor:pointer;user-select:none}
+thead th[aria-sort] {color:var(--tx)}
+td.n{font-family:var(--f-num);font-variant-numeric:tabular-nums}
+tbody tr:hover{background:var(--sup2)}
+tr.click td:first-child{color:var(--ac);cursor:pointer}
+.sub{display:block;font-size:11.5px;color:var(--tx2)}
+.chip{display:inline-block;font:600 11px var(--f-ui);padding:2px 7px;border-radius:10px;letter-spacing:.02em}
+.chip.f{background:var(--forte-bg);color:var(--forte)}
+.chip.d{background:var(--fraco-bg);color:var(--fraco)}
+.chip.m{background:var(--sup2);color:var(--neutro)}
+#mapa{height:560px;border-radius:0 0 8px 8px}
+@media (max-width:900px){#mapa{height:380px}}
+.leg{display:flex;flex-wrap:wrap;gap:6px 14px;padding:8px 12px;font-size:12px;color:var(--tx2);border-top:1px solid var(--linha)}
+.leg i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+.duas{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:16px}
+.vazio{padding:28px 16px;text-align:center;color:var(--tx2)}
+button.bt{font:600 14px var(--f-ui);background:var(--marinho);color:#fff;border:0;border-radius:6px;padding:8px 12px;cursor:pointer}
+button.bt.sec{background:var(--sup2);color:var(--tx);border:1px solid var(--linha)}
+.linha-acoes{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:10px 12px}
+.carreg{position:fixed;inset:auto 16px calc(16px + env(safe-area-inset-bottom,0px)) auto;background:var(--marinho);color:#fff;padding:8px 12px;border-radius:6px;font-size:13px;z-index:900}
+footer{max-width:1280px;margin:0 auto;padding:0 16px 30px;font-size:12px;color:var(--tx2)}
+footer p{margin:4px 0;max-width:90ch}
+.leaflet-container{background:var(--sup2);font:13px var(--f-ui)}
+.leaflet-popup-content{margin:10px 12px;line-height:1.4}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<header><div class="topo">
+  <h1>Mapa de Votos <b>Ceará</b></h1>
+  <span class="selo">Em validação · não publicado</span>
+  <span class="info" id="info">Eleições 2026 · 1º turno</span>
+</div></header>
+
+<div class="filtros"><div class="in">
+  <label class="cp">Cargo <select id="cargo"></select></label>
+  <label class="cp">Candidato ou legenda <input id="cand" list="lista" placeholder="Nome ou número" autocomplete="off"></label>
+  <datalist id="lista"></datalist>
+  <label class="cp">Índice comparado com
+    <select id="ref"><option value="uf">Média no estado</option><option value="pai">Média na área aberta</option></select>
+  </label>
+</div></div>
+
+<main>
+  <nav class="migalha" id="migalha" aria-label="Área"></nav>
+  <section class="resumo" id="resumo"></section>
+
+  <div class="grade">
+    <section class="caixa">
+      <h2><span id="t-areas">Áreas</span>
+        <span class="dir" id="agrup-box" hidden><label class="cp" style="flex-direction:row;align-items:center;gap:6px">Ver por
+          <select id="agrup"><option value="bairro">Bairro</option><option value="zona">Zona eleitoral</option></select></label></span>
+      </h2>
+      <div class="rolagem"><table id="tab"><thead></thead><tbody></tbody></table></div>
+      <div class="nota">Clique no nome para abrir a área. Índice = % do candidato na área ÷ média de referência. Acima de 1,10 = reduto; abaixo de 0,90 = deficiência.</div>
+    </section>
+    <section class="caixa">
+      <h2>Locais de votação no mapa</h2>
+      <div id="mapa" role="region" aria-label="Mapa dos locais de votação"></div>
+      <div class="leg"><span><i style="background:var(--forte)"></i>Reduto</span><span><i style="background:var(--neutro)"></i>Na média</span><span><i style="background:var(--fraco)"></i>Deficiência</span><span>Tamanho do círculo = votos</span></div>
+    </section>
+  </div>
+
+  <section class="caixa">
+    <h2>Redutos e deficiências
+      <span class="dir">
+        <label class="cp" style="flex-direction:row;align-items:center;gap:6px">Nível
+          <select id="rk-nivel"><option value="municipio">Município</option><option value="bairro" selected>Bairro</option><option value="local">Local de votação</option><option value="secao">Seção</option></select></label>
+        <label class="cp" style="flex-direction:row;align-items:center;gap:6px">Mínimo de votos válidos
+          <input id="rk-piso" type="number" min="0" step="50" value="200" style="width:90px"></label>
+      </span>
+    </h2>
+    <div class="duas" style="padding:12px">
+      <div><h3 style="margin:0 0 6px;font-size:14px;color:var(--forte)">Maiores redutos</h3><div class="rolagem" style="max-height:420px"><table id="rk-f"><thead></thead><tbody></tbody></table></div></div>
+      <div><h3 style="margin:0 0 6px;font-size:14px;color:var(--fraco)">Onde mais faltaram votos</h3><div class="rolagem" style="max-height:420px"><table id="rk-d"><thead></thead><tbody></tbody></table></div></div>
+    </div>
+    <div class="nota">"Faltaram" = votos que o candidato teria a mais se tivesse alcançado a média de referência naquela área. Áreas com poucos votos válidos ficam de fora para não distorcer.</div>
+  </section>
+
+  <section class="caixa">
+    <h2>Votos esperados × obtidos</h2>
+    <div class="nota">Carregue a planilha do candidato (CSV). Ela é lida só neste navegador e não é enviada a lugar nenhum. Colunas aceitas: <code>municipio</code>, <code>bairro</code>, <code>local</code>, <code>zona</code>, <code>secao</code> e <code>esperado</code>. Preencha só as colunas do nível desejado.</div>
+    <div class="linha-acoes">
+      <input type="file" id="arq" accept=".csv,text/csv">
+      <button class="bt sec" id="modelo" type="button">Baixar modelo da área aberta</button>
+    </div>
+    <div class="rolagem" style="max-height:480px"><table id="tab-esp"><thead></thead><tbody></tbody></table></div>
+  </section>
+</main>
+
+<footer>
+  <p id="fonte">Dados: Tribunal Superior Eleitoral (TSE), Portal de Dados Abertos: votação por seção eleitoral e eleitorado por local de votação.</p>
+  <p>Regiões de planejamento: IPECE (Governo do Ceará). Mapa: © colaboradores do OpenStreetMap. Bairro = bairro do local de votação informado ao TSE, não o endereço do eleitor.</p>
+</footer>
+<div class="carreg" id="carreg" hidden>Carregando…</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+"use strict";
+const ANO=2026, TURNO=1, UF="CE";
+const $=s=>document.querySelector(s);
+const fmt=new Intl.NumberFormat("pt-BR");
+const pct=x=>isFinite(x)?(x*100).toLocaleString("pt-BR",{minimumFractionDigits:1,maximumFractionDigits:1})+"%":"–";
+const idx=x=>isFinite(x)?x.toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2}):"–";
+const norm=s=>String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toUpperCase().replace(/\s+/g," ").trim();
+const el=(t,a={},...f)=>{const e=document.createElement(t);for(const[k,v]of Object.entries(a)){if(k==="class")e.className=v;else if(k.startsWith("on"))e.addEventListener(k.slice(2),v);else e.setAttribute(k,v)}for(const x of f)e.append(x instanceof Node?x:document.createTextNode(x??""));return e};
+
+const S={muns:{},reg:{},regioes:[],cands:[],G:null,T:{},C:null,linhas:[],caminho:[],ordem:{col:"v",dir:-1},esperados:null};
+let carregando=0;
+function busy(d){carregando+=d;$("#carreg").hidden=carregando<=0}
+async function api(path){busy(1);try{const r=await fetch(path,{credentials:"same-origin"});if(!r.ok)throw new Error((await r.json().catch(()=>({}))).erro||("HTTP "+r.status));return await r.json()}finally{busy(-1)}}
+const bloco=k=>api("/api/bloco?k2="+encodeURIComponent(`${ANO}/${TURNO}/${UF}/${k}`));
+const CARGOS={1:"Presidente",3:"Governador",5:"Senador",6:"Deputado Federal",7:"Deputado Estadual"};
+
+/* ---------- carga inicial ---------- */
+async function inicio(){
+  const [muns,reg,status]=await Promise.all([api(`/api/municipios?ano=${ANO}&turno=${TURNO}&uf=${UF}`),api(`/api/regioes?uf=${UF}`),api("/api/status")]);
+  for(const m of muns)S.muns[m.cd_mun]=m.nome;
+  S.reg=reg.municipio_regiao||{}; S.regioes=reg.regioes||[];
+  const st=status.find(s=>s.chave===`carga/${ANO}/${TURNO}/${UF}`);
+  if(st)$("#fonte").textContent=`Dados: Tribunal Superior Eleitoral (TSE), Portal de Dados Abertos: votação por seção eleitoral (gerado em ${st.geracao_tse}) e eleitorado por local de votação. Carregado em ${st.carregado_em}.`;
+  S.G=await bloco("g");
+  const cs=await api(`/api/candidatos?ano=${ANO}&turno=${TURNO}&uf=${UF}`);
+  S.cands=cs;
+  const cargos=[...new Set(cs.map(c=>c.cargo))].sort((a,b)=>a-b);
+  $("#cargo").replaceChildren(...cargos.map(c=>el("option",{value:c},CARGOS[c]||cs.find(x=>x.cargo===c).ds_cargo)));
+  const q=new URLSearchParams(location.search);
+  $("#cargo").value=q.get("cargo")||"3";
+  await trocaCargo(q.get("n"));
+  if(q.get("area"))try{S.caminho=JSON.parse(q.get("area"))}catch{}
+  desenha();
+}
+
+function rotulo(c){return c.nr===95?"Voto branco":c.nr===96?"Voto nulo":`${c.nr} - ${c.nome}${String(c.nr).length===2&&c.cargo>=6?" (legenda)":""}`}
+async function trocaCargo(nrInicial){
+  const cargo=+$("#cargo").value;
+  const lista=S.cands.filter(c=>c.cargo===cargo&&c.nr!==95&&c.nr!==96);
+  $("#lista").replaceChildren(...lista.map(c=>el("option",{value:rotulo(c)})));
+  if(!S.T[cargo])S.T[cargo]=await bloco("t/"+cargo);
+  const esc=lista.find(c=>String(c.nr)===String(nrInicial))||lista[0];
+  $("#cand").value=esc?rotulo(esc):"";
+  await trocaCand(esc);
+}
+async function trocaCand(c){
+  if(!c)return;
+  S.cand=c;
+  S.C=await bloco(`c/${c.cargo}/${c.nr}`);
+  montaLinhas();
+  desenha();
+}
+
+/* ---------- base por seção ---------- */
+function montaLinhas(){
+  const T=S.T[S.cand.cargo], G=S.G, C=S.C, out=[];
+  for(const [mun,zs] of Object.entries(T)){
+    for(const [zona,secs] of Object.entries(zs)){
+      for(const [sec,[val,tot]] of Object.entries(secs)){
+        const gs=G.sec[mun]?.[zona]?.[sec]; const nrl=gs?gs[0]:null;
+        const lc=nrl!=null?G.loc[mun]?.[zona]?.[nrl]:null;
+        out.push({mun:+mun,zona:+zona,sec:+sec,nrl,local:lc?lc[0]:"(local não informado)",bairro:lc?lc[1]:"(SEM BAIRRO)",lat:lc?lc[2]:null,lon:lc?lc[3]:null,
+          reg:S.reg[mun]||"(sem região)",val,tot,aptos:gs?gs[1]:0,v:C[mun]?.[zona]?.[sec]||0});
+      }
+    }
+  }
+  S.linhas=out;
+  S.ufTot=soma(out);
+}
+function soma(rs){let v=0,val=0,tot=0,aptos=0;for(const r of rs){v+=r.v;val+=r.val;tot+=r.tot;aptos+=r.aptos}return{v,val,tot,aptos,n:rs.length,p:val?v/val:NaN}}
+
+/* ---------- níveis ---------- */
+const NIVEIS=["regiao","municipio","grupo","local","secao"];
+const chaveDe={
+  regiao:r=>r.reg, municipio:r=>String(r.mun),
+  bairro:r=>r.mun+"|"+r.bairro, zona:r=>r.mun+"|Z"+r.zona,
+  local:r=>r.mun+"|"+r.zona+"|"+r.nrl, secao:r=>r.mun+"|"+r.zona+"|"+r.sec};
+function nomeDe(tipo,k,r){
+  if(tipo==="regiao")return k;
+  if(tipo==="municipio")return S.muns[k]||k;
+  if(tipo==="bairro")return r.bairro;
+  if(tipo==="zona")return "Zona "+r.zona;
+  if(tipo==="local")return r.local;
+  if(tipo==="secao")return "Seção "+r.sec;
+}
+function subDe(tipo,r){
+  if(tipo==="bairro"||tipo==="zona")return S.muns[r.mun];
+  if(tipo==="local")return `${r.bairro} · Zona ${r.zona} · ${S.muns[r.mun]}`;
+  if(tipo==="secao")return `${r.local} · Zona ${r.zona}`;
+  if(tipo==="municipio")return r.reg;
+  return "";
+}
+function tipoNivel(i){const n=NIVEIS[i];return n==="grupo"?$("#agrup").value:n}
+function linhasDoCaminho(){
+  let rs=S.linhas;
+  S.caminho.forEach((p,i)=>{const f=chaveDe[p.tipo];rs=rs.filter(r=>f(r)===p.k)});
+  return rs;
+}
+function agrupa(rs,tipo){
+  const f=chaveDe[tipo],m=new Map();
+  for(const r of rs){const k=f(r);let g=m.get(k);if(!g){g={k,tipo,nome:nomeDe(tipo,k,r),sub:subDe(tipo,r),rs:[]};m.set(k,g)}g.rs.push(r)}
+  return [...m.values()].map(g=>Object.assign(g,soma(g.rs)));
+}
+function referencia(pai){return $("#ref").value==="pai"?pai.p:S.ufTot.p}
+function calc(g,ref){g.ind=ref?g.p/ref:NaN;g.falt=Math.max(0,Math.round(ref*g.val-g.v));g.part=S.ufTot.v?g.v/S.ufTot.v:NaN;return g}
+function chip(g,piso=0){
+  if(g.val<piso||!isFinite(g.ind))return el("span",{class:"chip m"},"poucos votos");
+  if(g.ind>=1.1)return el("span",{class:"chip f"},"reduto");
+  if(g.ind<=0.9)return el("span",{class:"chip d"},"deficiência");
+  return el("span",{class:"chip m"},"na média");
+}
+
+/* ---------- desenho ---------- */
+function desenha(){
+  if(!S.cand||!S.linhas.length)return;
+  const rs=linhasDoCaminho(), pai=soma(rs), ref=referencia(pai);
+  const nivel=Math.min(S.caminho.length,NIVEIS.length-1), tipo=tipoNivel(nivel);
+  $("#agrup-box").hidden=NIVEIS[nivel]!=="grupo";
+  // migalha
+  const mg=[el("button",{type:"button",onclick:()=>{S.caminho=[];desenha()}},"Ceará")];
+  S.caminho.forEach((p,i)=>{mg.push(el("span",{class:"sep"},"›"));const ult=i===S.caminho.length-1;mg.push(ult?el("span",{class:"atual"},p.nome):el("button",{type:"button",onclick:()=>{S.caminho=S.caminho.slice(0,i+1);desenha()}},p.nome))});
+  $("#migalha").replaceChildren(...mg);
+  // resumo
+  const area=S.caminho.length?S.caminho.at(-1).nome:"Ceará";
+  const indArea=S.ufTot.p?pai.p/S.ufTot.p:NaN;
+  $("#resumo").replaceChildren(
+    kpi("Votos em "+area,fmt.format(pai.v),rotulo(S.cand)),
+    kpi("% dos válidos",pct(pai.p),"Válidos: "+fmt.format(pai.val)),
+    kpi("Peso na votação total",pct(S.ufTot.v?pai.v/S.ufTot.v:NaN),"Total no estado: "+fmt.format(S.ufTot.v)),
+    kpi("Índice vs. estado",idx(indArea),indArea>=1.1?"reduto":indArea<=0.9?"deficiência":"na média"),
+    kpi("Comparecimento",pct(pai.aptos?pai.tot/pai.aptos:NaN),fmt.format(pai.tot)+" de "+fmt.format(pai.aptos)+" aptos"));
+  // tabela de áreas
+  const titulos={regiao:"Regiões",municipio:"Municípios",bairro:"Bairros",zona:"Zonas",local:"Locais de votação",secao:"Seções"};
+  $("#t-areas").textContent=titulos[tipo]+" em "+area;
+  const gs=agrupa(rs,tipo).map(g=>calc(g,ref));
+  const {col,dir}=S.ordem; gs.sort((a,b)=>col==="nome"?dir*a.nome.localeCompare(b.nome,"pt-BR"):dir*((a[col]??-1)-(b[col]??-1)));
+  const podeAbrir=nivel<NIVEIS.length-1;
+  tabela("#tab",[["nome","Área"],["v","Votos"],["p","% válidos"],["ind","Índice"],["falt","Faltaram"],["part","Peso"],["val","Válidos"]],gs,g=>{
+    const nome=el("td",{},g.nome,el("span",{class:"sub"},g.sub||""));
+    const tr=el("tr",podeAbrir?{class:"click"}:{},nome,num(g.v),el("td",{class:"n"},pct(g.p)),el("td",{class:"n"},idx(g.ind)," ",chip(g)),num(g.falt),el("td",{class:"n"},pct(g.part)),num(g.val));
+    if(podeAbrir)nome.addEventListener("click",()=>{S.caminho.push({tipo,k:g.k,nome:g.nome});S.ordem={col:"v",dir:-1};desenha();scrollTo({top:0,behavior:"smooth"})});
+    return tr},true);
+  mapa(rs,ref);
+  rankings(rs,ref);
+  esperadosDesenha();
+  salvaUrl();
+}
+const kpi=(r,v,s)=>el("div",{class:"kpi"},el("div",{class:"r"},r),el("div",{class:"v"},v),el("div",{class:"s"},s||""));
+const num=x=>el("td",{class:"n"},fmt.format(x));
+function tabela(sel,cols,dados,linha,ordenavel){
+  const t=$(sel);
+  t.tHead.replaceChildren(el("tr",{},...cols.map(([k,n])=>{const th=el("th",{scope:"col"},n);if(ordenavel){if(S.ordem.col===k)th.setAttribute("aria-sort",S.ordem.dir>0?"ascending":"descending");th.addEventListener("click",()=>{S.ordem={col:k,dir:S.ordem.col===k?-S.ordem.dir:(k==="nome"?1:-1)};desenha()})}return th})));
+  t.tBodies[0].replaceChildren(...(dados.length?dados.map(linha):[el("tr",{},el("td",{colspan:cols.length,class:"vazio"},"Nada para mostrar nesta área."))]));
+}
+
+/* ---------- rankings ---------- */
+function rankings(rs,ref){
+  const tipo=$("#rk-nivel").value, piso=+$("#rk-piso").value||0;
+  const gs=agrupa(rs,tipo).map(g=>calc(g,ref)).filter(g=>g.val>=piso);
+  const cols=[["nome","Área"],["v","Votos"],["p","% válidos"],["ind","Índice"],["falt","Faltaram"]];
+  const ln=g=>el("tr",{},el("td",{},g.nome,el("span",{class:"sub"},g.sub||"")),num(g.v),el("td",{class:"n"},pct(g.p)),el("td",{class:"n"},idx(g.ind)),num(g.falt));
+  tabela("#rk-f",cols,[...gs].filter(g=>g.ind>1).sort((a,b)=>b.ind-a.ind).slice(0,15),ln,false);
+  tabela("#rk-d",cols,[...gs].filter(g=>g.falt>0).sort((a,b)=>b.falt-a.falt).slice(0,15),ln,false);
+}
+
+/* ---------- mapa ---------- */
+let M=null,camada=null,ultimoEnq="";
+function cores(){const cs=getComputedStyle(document.documentElement);return{f:cs.getPropertyValue("--forte").trim(),d:cs.getPropertyValue("--fraco").trim(),m:cs.getPropertyValue("--neutro").trim()}}
+function mapa(rs,ref){
+  if(!window.L){$("#mapa").textContent="O mapa não carregou.";return}
+  if(!M){M=L.map("mapa",{preferCanvas:true,scrollWheelZoom:false});L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:18,attribution:"© OpenStreetMap"}).addTo(M);M.setView([-5.2,-39.5],7)}
+  if(camada)camada.remove();
+  camada=L.layerGroup().addTo(M);
+  const gs=agrupa(rs.filter(r=>r.lat!=null&&r.lon!=null),"local").map(g=>calc(g,ref));
+  const max=Math.max(1,...gs.map(g=>g.v)), c=cores(), pts=[];
+  for(const g of gs){
+    const r=g.rs[0], cor=g.ind>=1.1?c.f:g.ind<=0.9?c.d:c.m;
+    const raio=3+13*Math.sqrt(g.v/max);
+    const mk=L.circleMarker([r.lat,r.lon],{radius:raio,color:cor,weight:1,fillColor:cor,fillOpacity:.55});
+    const pop=el("div",{},el("b",{},g.nome),el("br"),`${r.bairro} · ${S.muns[r.mun]} · Zona ${r.zona}`,el("br"),`Votos: ${fmt.format(g.v)} (${pct(g.p)})`,el("br"),`Índice: ${idx(g.ind)} · Faltaram: ${fmt.format(g.falt)}`);
+    mk.bindPopup(pop);mk.addTo(camada);pts.push([r.lat,r.lon]);
+  }
+  const enq=S.caminho.map(p=>p.k).join("/");
+  if(pts.length&&enq!==ultimoEnq){M.fitBounds(pts,{padding:[20,20],maxZoom:15})}
+  ultimoEnq=enq;
+  setTimeout(()=>M.invalidateSize(),50);
+}
+
+/* ---------- votos esperados ---------- */
+function lerCSV(txt){
+  const linhas=txt.replace(/^﻿/,"").split(/\r?\n/).filter(l=>l.trim());
+  if(!linhas.length)return[];
+  const sep=(linhas[0].match(/;/g)||[]).length>=(linhas[0].match(/,/g)||[]).length?";":",";
+  const parse=l=>{const o=[];let c="",q=false;for(let i=0;i<l.length;i++){const ch=l[i];if(q){if(ch==='"'&&l[i+1]==='"'){c+='"';i++}else if(ch==='"')q=false;else c+=ch}else if(ch==='"')q=true;else if(ch===sep){o.push(c);c=""}else c+=ch}o.push(c);return o.map(s=>s.trim())};
+  const cab=parse(linhas[0]).map(h=>norm(h).toLowerCase());
+  return linhas.slice(1).map(l=>{const v=parse(l),o={};cab.forEach((h,i)=>o[h]=v[i]||"");return o});
+}
+$("#arq").addEventListener("change",async e=>{
+  const f=e.target.files[0];if(!f)return;
+  const buf=await f.arrayBuffer();
+  let txt=new TextDecoder("utf-8").decode(buf);
+  if(txt.includes("�"))txt=new TextDecoder("windows-1252").decode(buf);
+  S.esperados=lerCSV(txt);desenha();
+});
+function esperadosDesenha(){
+  const cols=[["nome","Área"],["e","Esperado"],["v","Obtido"],["d","Diferença"],["a","% atingido"]];
+  if(!S.esperados){tabela("#tab-esp",cols,[],()=>null,false);$("#tab-esp").tBodies[0].firstChild.firstChild.textContent="Nenhuma planilha carregada.";return}
+  const nomesMun={};for(const[k,n]of Object.entries(S.muns))nomesMun[norm(n)]=+k;
+  const out=S.esperados.map(o=>{
+    const esperado=+String(o.esperado||"").replace(/\./g,"").replace(",",".");
+    const mun=nomesMun[norm(o.municipio)];
+    let rs=S.linhas, nome=[];
+    if(o.municipio){rs=rs.filter(r=>r.mun===mun);nome.push(o.municipio)}
+    if(o.zona){rs=rs.filter(r=>r.zona===+o.zona);nome.push("Zona "+o.zona)}
+    if(o.bairro){rs=rs.filter(r=>norm(r.bairro)===norm(o.bairro));nome.push(o.bairro)}
+    if(o.local){rs=rs.filter(r=>norm(r.local)===norm(o.local));nome.push(o.local)}
+    if(o.secao){rs=rs.filter(r=>r.sec===+o.secao);nome.push("Seção "+o.secao)}
+    const s=soma(rs);
+    return{nome:nome.join(" · ")||"(linha sem área)",e:esperado,v:s.v,ok:rs.length>0,d:s.v-esperado,a:esperado?s.v/esperado:NaN};
+  });
+  tabela("#tab-esp",cols,out,g=>el("tr",{},el("td",{},g.nome,g.ok?"":el("span",{class:"sub",style:"color:var(--fraco)"},"Área não encontrada nos dados do TSE. Confira a grafia.")),num(g.e||0),num(g.v),el("td",{class:"n",style:`color:var(${g.d<0?"--fraco":"--forte"})`},(g.d>0?"+":"")+fmt.format(g.d)),el("td",{class:"n"},pct(g.a))),false);
+}
+$("#modelo").addEventListener("click",()=>{
+  const rs=linhasDoCaminho(), m=new Map();
+  for(const r of rs){const k=r.mun+"|"+r.bairro;if(!m.has(k))m.set(k,[S.muns[r.mun],r.bairro])}
+  const csv="municipio;bairro;local;zona;secao;esperado\r\n"+[...m.values()].sort().map(([mu,b])=>`${mu};${b};;;;`).join("\r\n");
+  const a=el("a",{href:URL.createObjectURL(new Blob(["﻿"+csv],{type:"text/csv;charset=utf-8"})),download:"votos-esperados-modelo.csv"});
+  document.body.append(a);a.click();a.remove();
+});
+
+/* ---------- eventos e URL ---------- */
+function salvaUrl(){
+  const q=new URLSearchParams({cargo:S.cand.cargo,n:S.cand.nr});
+  if(S.caminho.length)q.set("area",JSON.stringify(S.caminho));
+  history.replaceState(null,"","?"+q);
+}
+$("#cargo").addEventListener("change",()=>{trocaCargo().catch(falha)});
+$("#cand").addEventListener("change",()=>{const v=$("#cand").value;const c=S.cands.find(c=>c.cargo===+$("#cargo").value&&rotulo(c)===v)||S.cands.find(c=>c.cargo===+$("#cargo").value&&String(c.nr)===v.trim());if(c)trocaCand(c).catch(falha)});
+$("#ref").addEventListener("change",desenha);
+$("#agrup").addEventListener("change",desenha);
+$("#rk-nivel").addEventListener("change",()=>{const p={municipio:0,bairro:200,local:150,secao:50};$("#rk-piso").value=p[$("#rk-nivel").value];desenha()});
+$("#rk-piso").addEventListener("change",desenha);
+function falha(e){$("#resumo").replaceChildren(el("div",{class:"kpi",style:"grid-column:1/-1"},el("div",{class:"r"},"Não foi possível carregar"),el("div",{class:"s"},String(e.message||e)+". Recarregue a página; se continuar, avise.")))}
+inicio().catch(falha);
+</script>
+</body>
+</html>
