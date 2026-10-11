@@ -34,7 +34,7 @@ header{background:var(--marinho);color:#fff;padding:calc(10px + env(safe-area-in
 .topo h1 b{color:var(--limao)}
 .selo{font-size:11px;text-transform:uppercase;letter-spacing:.08em;background:var(--limao);color:var(--marinho);padding:3px 8px;border-radius:3px;font-weight:700}
 .topo .info{margin-left:auto;font-size:12px;opacity:.8}
-.filtros{position:sticky;top:0;z-index:500;background:var(--sup);border-bottom:1px solid var(--linha);padding:10px 16px}
+.filtros{position:sticky;top:0;z-index:1100;background:var(--sup);border-bottom:1px solid var(--linha);padding:10px 16px}
 .filtros .in{max-width:1280px;margin:0 auto;display:flex;flex-wrap:wrap;gap:10px 14px;align-items:end}
 label.cp{display:flex;flex-direction:column;gap:3px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);min-width:0}
 select,input{font:16px var(--f-ui);color:var(--tx);background:var(--sup2);border:1px solid var(--linha);border-radius:6px;padding:7px 9px;min-width:0}
@@ -80,11 +80,12 @@ tr.click td:first-child{color:var(--ac);cursor:pointer}
 button.bt{font:600 14px var(--f-ui);background:var(--marinho);color:#fff;border:0;border-radius:6px;padding:8px 12px;cursor:pointer}
 button.bt.sec{background:var(--sup2);color:var(--tx);border:1px solid var(--linha)}
 .linha-acoes{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:10px 12px}
-.carreg{position:fixed;inset:auto 16px calc(16px + env(safe-area-inset-bottom,0px)) auto;background:var(--marinho);color:#fff;padding:8px 12px;border-radius:6px;font-size:13px;z-index:900}
+.carreg{z-index:1200!important;position:fixed;inset:auto 16px calc(16px + env(safe-area-inset-bottom,0px)) auto;background:var(--marinho);color:#fff;padding:8px 12px;border-radius:6px;font-size:13px;z-index:900}
 footer{max-width:1280px;margin:0 auto;padding:0 16px 30px;font-size:12px;color:var(--tx2)}
 footer p{margin:4px 0;max-width:90ch}
 .leaflet-container{background:var(--sup2);font:13px var(--f-ui)}
 .leaflet-popup-content{margin:10px 12px;line-height:1.4}
+@media (max-width:700px){.filtros{position:static}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -164,6 +165,8 @@ const ANO=2026, TURNO=1, UF="CE";
 const $=s=>document.querySelector(s);
 const fmt=new Intl.NumberFormat("pt-BR");
 const pct=x=>isFinite(x)?(x*100).toLocaleString("pt-BR",{minimumFractionDigits:1,maximumFractionDigits:1})+"%":"–";
+const pctP=x=>isFinite(x)?(x*100).toLocaleString("pt-BR",{minimumFractionDigits:x<0.01?2:1,maximumFractionDigits:x<0.01?2:1})+"%":"–";
+const r2=x=>Math.round(x*100)/100;
 const idx=x=>isFinite(x)?x.toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2}):"–";
 const norm=s=>String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toUpperCase().replace(/\s+/g," ").trim();
 const el=(t,a={},...f)=>{const e=document.createElement(t);for(const[k,v]of Object.entries(a)){if(k==="class")e.className=v;else if(k.startsWith("on"))e.addEventListener(k.slice(2),v);else e.setAttribute(k,v)}for(const x of f)e.append(x instanceof Node?x:document.createTextNode(x??""));return e};
@@ -266,8 +269,8 @@ function referencia(pai){return $("#ref").value==="pai"?pai.p:S.ufTot.p}
 function calc(g,ref){g.ind=ref?g.p/ref:NaN;g.falt=Math.max(0,Math.round(ref*g.val-g.v));g.part=S.ufTot.v?g.v/S.ufTot.v:NaN;return g}
 function chip(g,piso=0){
   if(g.val<piso||!isFinite(g.ind))return el("span",{class:"chip m"},"poucos votos");
-  if(g.ind>=1.1)return el("span",{class:"chip f"},"reduto");
-  if(g.ind<=0.9)return el("span",{class:"chip d"},"deficiência");
+  if(r2(g.ind)>=1.1)return el("span",{class:"chip f"},"reduto");
+  if(r2(g.ind)<=0.9)return el("span",{class:"chip d"},"deficiência");
   return el("span",{class:"chip m"},"na média");
 }
 
@@ -287,8 +290,8 @@ function desenha(){
   $("#resumo").replaceChildren(
     kpi("Votos em "+area,fmt.format(pai.v),rotulo(S.cand)),
     kpi("% dos válidos",pct(pai.p),"Válidos: "+fmt.format(pai.val)),
-    kpi("Peso na votação total",pct(S.ufTot.v?pai.v/S.ufTot.v:NaN),"Total no estado: "+fmt.format(S.ufTot.v)),
-    kpi("Índice vs. estado",idx(indArea),indArea>=1.1?"reduto":indArea<=0.9?"deficiência":"na média"),
+    kpi("Peso na votação total",pctP(S.ufTot.v?pai.v/S.ufTot.v:NaN),"Total no estado: "+fmt.format(S.ufTot.v)),
+    kpi("Índice vs. estado",idx(indArea),r2(indArea)>=1.1?"reduto":r2(indArea)<=0.9?"deficiência":"na média"),
     kpi("Comparecimento",pct(pai.aptos?pai.tot/pai.aptos:NaN),fmt.format(pai.tot)+" de "+fmt.format(pai.aptos)+" aptos"));
   // tabela de áreas
   const titulos={regiao:"Regiões",municipio:"Municípios",bairro:"Bairros",zona:"Zonas",local:"Locais de votação",secao:"Seções"};
@@ -298,7 +301,7 @@ function desenha(){
   const podeAbrir=nivel<NIVEIS.length-1;
   tabela("#tab",[["nome","Área"],["v","Votos"],["p","% válidos"],["ind","Índice"],["falt","Faltaram"],["part","Peso"],["val","Válidos"]],gs,g=>{
     const nome=el("td",{},g.nome,el("span",{class:"sub"},g.sub||""));
-    const tr=el("tr",podeAbrir?{class:"click"}:{},nome,num(g.v),el("td",{class:"n"},pct(g.p)),el("td",{class:"n"},idx(g.ind)," ",chip(g)),num(g.falt),el("td",{class:"n"},pct(g.part)),num(g.val));
+    const tr=el("tr",podeAbrir?{class:"click"}:{},nome,num(g.v),el("td",{class:"n"},pct(g.p)),el("td",{class:"n"},idx(g.ind)," ",chip(g)),num(g.falt),el("td",{class:"n"},pctP(g.part)),num(g.val));
     if(podeAbrir)nome.addEventListener("click",()=>{S.caminho.push({tipo,k:g.k,nome:g.nome});S.ordem={col:"v",dir:-1};desenha();scrollTo({top:0,behavior:"smooth"})});
     return tr},true);
   mapa(rs,ref);
@@ -335,7 +338,7 @@ function mapa(rs,ref){
   const gs=agrupa(rs.filter(r=>r.lat!=null&&r.lon!=null),"local").map(g=>calc(g,ref));
   const max=Math.max(1,...gs.map(g=>g.v)), c=cores(), pts=[];
   for(const g of gs){
-    const r=g.rs[0], cor=g.ind>=1.1?c.f:g.ind<=0.9?c.d:c.m;
+    const r=g.rs[0], cor=r2(g.ind)>=1.1?c.f:r2(g.ind)<=0.9?c.d:c.m;
     const raio=3+13*Math.sqrt(g.v/max);
     const mk=L.circleMarker([r.lat,r.lon],{radius:raio,color:cor,weight:1,fillColor:cor,fillOpacity:.55});
     const pop=el("div",{},el("b",{},g.nome),el("br"),`${r.bairro} · ${S.muns[r.mun]} · Zona ${r.zona}`,el("br"),`Votos: ${fmt.format(g.v)} (${pct(g.p)})`,el("br"),`Índice: ${idx(g.ind)} · Faltaram: ${fmt.format(g.falt)}`);
