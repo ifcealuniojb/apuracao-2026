@@ -8,7 +8,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'unsafe-inline' https://cdnjs.cloudflare.com; img-src data: https://tile.openstreetmap.org https://cdnjs.cloudflare.com https://resultados.tse.jus.br https://apuracao2026.goatcounter.com; connect-src https://analise-eleitoral.joao-antonio-araujo62.workers.dev https://resultados.tse.jus.br; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="description" content="Onde estão os votos do seu candidato: desempenho por região, município, bairro, local e seção no Ceará, com dados oficiais do TSE.">
-<title>Mapa de Votos 2026</title>
+<title>Mapa de Votos 2026 - Ceará</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <style>
 /* Mesma identidade do site de apuração: azul-marinho + limão, cartões brancos arredondados, fonte arredondada do sistema. */
@@ -49,8 +49,10 @@ header.top{background:var(--navy);color:#fff;padding-top:env(safe-area-inset-top
 .top .wrap{display:flex;align-items:center;gap:14px;padding-block:16px}
 .logo{width:40px;height:40px;border-radius:11px;background:var(--lime);color:var(--navy);display:grid;place-items:center;flex:none}
 a.home{display:flex;align-items:center;gap:14px;color:inherit;text-decoration:none}
-.brand h1{font-weight:800;font-size:22px;letter-spacing:-.02em;margin:0;display:flex;align-items:baseline;gap:6px}
+.brand h1{font-weight:800;font-size:22px;letter-spacing:-.02em;margin:0;display:flex;align-items:baseline;gap:0 6px;flex-wrap:wrap}
+@media (max-width:520px){.brand h1{font-size:18px}}
 .brand h1 span{color:var(--lime);font-weight:700}
+.brand h1 .uf{font-style:normal;color:#fff;font-weight:800}
 .top .src{margin-left:auto;text-align:right;color:var(--navy-mute);font-size:11.5px;line-height:1.35}
 .top .src b{color:#fff;font-size:12.5px;display:block}
 
@@ -210,14 +212,14 @@ a.voltar:hover{background:rgba(255,255,255,.1)}
 <header class="top"><div class="wrap">
   <a class="voltar" href="../" aria-label="Voltar para a página inicial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 18l-6-6 6-6"/></svg><span>Início</span></a>
   <a class="home" href="../" title="Voltar ao início (Apuração e Mapa de Votos)"><div class="logo" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></div>
-  <div class="brand"><h1>Mapa de Votos <span>2026</span></h1></div></a>
+  <div class="brand"><h1>Mapa de Votos <span>2026</span> <em class="uf">- Ceará</em></h1></div></a>
   <div class="src"><b>Dados oficiais do TSE</b>Ceará · 1º turno</div>
 </div></header>
 
 <div class="wrap">
   <section class="hero">
     <div class="eyebrow">Análise eleitoral · Ceará</div>
-    <h2>Onde estão os votos do seu candidato<span class="q">?</span></h2>
+    <h2>Onde estão os votos do seu candidato no Ceará<span class="q">?</span></h2>
     <p>Escolha o cargo e busque o candidato. Veja onde ele é forte, onde ficou abaixo da média e explore do Ceará até a seção eleitoral.</p>
     <div class="panel">
       <label class="f">Cargo<select id="cargo"></select></label>
@@ -578,7 +580,7 @@ function falha(e){$("#vazio").hidden=false;$("#vazio").replaceChildren(el("b",{}
 function contar(extra){try{if(location.hostname!=="ifcealuniojb.github.io"||navigator.webdriver)return;
   const q=new URLSearchParams(Object.assign({s:[screen.width,screen.height,Math.round(devicePixelRatio||1)].join(","),rnd:Math.random().toString(36).slice(2)},extra));
   const img=new Image();img.referrerPolicy="no-referrer";img.src="https://apuracao2026.goatcounter.com/count?"+q.toString()}catch(e){}}
-contar({p:location.pathname,t:"Mapa de Votos 2026",r:document.referrer||""});
+contar({p:location.pathname,t:"Mapa de Votos 2026 - Ceará",r:document.referrer||""});
 inicio().catch(falha);
 </script>
 </body>
