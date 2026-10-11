@@ -453,7 +453,7 @@ function forteFraco(){
   const forte=gs.filter(g=>classe(g.ind)==="forte").sort((a,b)=>b.ind-a.ind).slice(0,8);
   const fraco=gs.filter(g=>g.falt>0).sort((a,b)=>b.falt-a.falt).slice(0,8);
   const area=prof?S.caminho.at(-1).nome:"Ceará";
-  $("#ff-sub").textContent=`${{regiao:"Regiões",municipio:"Municípios",bairro:"Bairros",local:"Locais de votação",secao:"Seções"}[tipo]} em ${area}, comparados com o desempenho do candidato ${nomeRef} (${pct(ref)} dos válidos).${piso?` Só áreas com ${fmt.format(piso)} ou mais votos válidos.`:""}${tipo!=="secao"?" Toque num lugar para abrir.":""}`;
+  $("#ff-sub").textContent=`${{regiao:"Regiões",municipio:"Municípios",bairro:"Bairros",local:"Locais de votação",secao:"Seções"}[tipo]} ${prof?prepos(S.caminho.at(-1)).replace(/^em /,"de ").replace(/^no /,"do ").replace(/^na /,"da "):"do Ceará"}, comparados com o desempenho do candidato ${nomeRef} (${pct(ref)} dos válidos).${piso?` Só áreas com ${fmt.format(piso)} ou mais votos válidos.`:""}${tipo!=="secao"?" Toque num lugar para abrir.":""}`;
   trilha("#ff-trilha",pai);
   const podeAbrir=tipo!=="secao";
   const item=(g,lado)=>{const li=el("li",podeAbrir?{class:"abre",tabindex:"0",role:"button"}:{},
