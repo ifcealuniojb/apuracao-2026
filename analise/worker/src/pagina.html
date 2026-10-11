@@ -221,20 +221,19 @@ footer b{color:#fff}
 
     <div class="sec-t">
       <div><h3>Onde é forte e onde precisa de atenção</h3><p id="ff-sub"></p></div>
-      <div class="dir"><div class="seg" id="ff-nivel" role="group" aria-label="Nível">
+      <div class="dir"><div class="seg" id="ref" role="group" aria-label="Comparar com" title="Análise: compara com o desempenho do candidato na área aberta. vs. Ceará: compara com o desempenho no estado inteiro."><button type="button" data-v="pai" aria-pressed="true">Análise</button><button type="button" data-v="uf">vs. Ceará</button></div><div class="seg" id="ff-nivel" role="group" aria-label="Nível">
         <button type="button" data-v="regiao" aria-pressed="true">Regiões</button><button type="button" data-v="municipio">Municípios</button><button type="button" data-v="bairro">Bairros</button><button type="button" data-v="local">Locais</button><button type="button" data-v="secao">Seções</button>
       </div></div>
     </div>
     <nav class="trilha" id="ff-trilha" aria-label="Área aberta"></nav>
     <div class="duas">
-      <div class="card lado"><h4 style="color:var(--accent)">Melhor desempenho</h4><p class="exp">Onde a fatia de votos ficou bem acima da média do estado. Toque para abrir.</p><ol id="ff-forte"></ol></div>
-      <div class="card lado"><h4 style="color:var(--red)">Onde mais faltaram votos</h4><p class="exp">Votos a mais se tivesse alcançado a média do estado nesses lugares. Toque para abrir.</p><ol id="ff-fraco"></ol></div>
+      <div class="card lado"><h4 style="color:var(--accent)">Melhor desempenho</h4><p class="exp">Onde a fatia de votos ficou bem acima da média de comparação. Toque para abrir.</p><ol id="ff-forte"></ol></div>
+      <div class="card lado"><h4 style="color:var(--red)">Onde mais faltaram votos</h4><p class="exp">Votos a mais se tivesse alcançado a média de comparação nesses lugares. Toque para abrir.</p><ol id="ff-fraco"></ol></div>
     </div>
 
     <div class="sec-t">
       <div><h3>Explorar por área</h3><p>Toque numa área para abrir. A barra mostra a fatia de votos; o traço é a média de comparação.</p></div>
       <div class="dir">
-        <div class="seg" id="ref" role="group" aria-label="Comparar com"><button type="button" data-v="uf" aria-pressed="true">vs. Ceará</button><button type="button" data-v="pai">vs. área aberta</button></div>
         <div class="seg" id="agrup" role="group" aria-label="Agrupar" hidden><button type="button" data-v="bairro" aria-pressed="true">Bairros</button><button type="button" data-v="zona">Zonas</button></div>
       </div>
     </div>
@@ -254,7 +253,7 @@ footer b{color:#fff}
       <summary>Como ler: melhor desempenho, média e "faltaram"</summary>
       <div class="corpo">
         <p><b>Fatia de votos</b> é a porcentagem dos votos válidos daquela área que foram para o candidato.</p>
-        <p><b>Comparação com a média</b> mostra quanto essa fatia ficou acima ou abaixo da fatia do candidato no Ceará inteiro (ou na área aberta, se você escolher "vs. área aberta").</p>
+        <p><b>Comparação com a média</b> mostra quanto essa fatia ficou acima ou abaixo da fatia do candidato na área que está aberta (botão <b>Análise</b>, o padrão; ex.: ao abrir o Vale do Jaguaribe, cada município é comparado com o resultado dele no Vale) ou no Ceará inteiro (botão <b>vs. Ceará</b>).</p>
         <p class="ex" id="exemplo"></p>
         <p><span class="badge forte">Acima da média</span> (entra em "Melhor desempenho"): 10% ou mais acima da média. <span class="badge fraco">Abaixo da média</span> 10% ou mais abaixo. <span class="badge media">Na média</span> entre os dois.</p>
         <p><b>Faltaram</b> são os votos que o candidato teria a mais se tivesse feito a sua média naquela área. Serve para ver onde há mais votos a buscar, e não só onde a porcentagem é baixa.</p>
@@ -295,7 +294,7 @@ const el=(t,a={},...f)=>{const e=document.createElement(t);for(const[k,v]of Obje
 const titulo=s=>String(s||"").toLowerCase().replace(/(^|[\s\-/(])([a-zà-ú])/g,(m,a,b)=>a+b.toUpperCase()).replace(/\b(De|Da|Do|Das|Dos|E)\b/g,w=>w.toLowerCase());
 
 const CARGOS={1:"Presidente",3:"Governador",5:"Senador",6:"Deputado Federal",7:"Deputado Estadual"};
-const S={muns:{},reg:{},cands:[],tse:{},G:null,T:{},C:null,linhas:[],caminho:[],ordem:{col:"v",dir:-1},ref:"uf",agrup:"bairro",ffNivel:"municipio",esperados:null};
+const S={muns:{},reg:{},cands:[],tse:{},G:null,T:{},C:null,linhas:[],caminho:[],ordem:{col:"v",dir:-1},ref:"pai",agrup:"bairro",ffNivel:"municipio",esperados:null};
 
 let nCarreg=0;
 function busy(d){nCarreg+=d;$("#carreg").hidden=nCarreg<=0}
@@ -443,24 +442,25 @@ function forteFraco(){
   // a aba acompanha a área aberta: abriu uma região, mostra municípios; abriu um município, bairros...
   const chaveCam=S.caminho.map(p=>p.k).join("/");
   if(S.ffCam!==chaveCam){S.ffCam=chaveCam;S.ffNivel=FF[Math.min(prof,FF.length-1)]}
-  const tipo=S.ffNivel, ref=S.ufTot.p;
+  const tipo=S.ffNivel, ref=S.ref==="pai"?pai.p:S.ufTot.p, nomeRef=S.ref==="pai"&&prof?`em ${S.caminho.at(-1).nome}`:"no Ceará";
+  document.querySelectorAll("#ref button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===S.ref));
   document.querySelectorAll("#ff-nivel button").forEach(b=>{const k=FF.indexOf(b.dataset.v);b.setAttribute("aria-pressed",b.dataset.v===tipo)});
   const piso=Math.min(PISO[tipo],Math.max(30,Math.round(pai.val*0.02)));
   const gs=agrupa(rs,tipo).map(g=>calc(g,ref)).filter(g=>g.val>=piso);
   const forte=gs.filter(g=>classe(g.ind)==="forte").sort((a,b)=>b.ind-a.ind).slice(0,8);
   const fraco=gs.filter(g=>g.falt>0).sort((a,b)=>b.falt-a.falt).slice(0,8);
   const area=prof?S.caminho.at(-1).nome:"Ceará";
-  $("#ff-sub").textContent=`${{regiao:"Regiões",municipio:"Municípios",bairro:"Bairros",local:"Locais de votação",secao:"Seções"}[tipo]} em ${area}, comparados com a média do candidato no estado (${pct(ref)} dos válidos).${piso?` Só áreas com ${fmt.format(piso)} ou mais votos válidos.`:""}`;
+  $("#ff-sub").textContent=`${{regiao:"Regiões",municipio:"Municípios",bairro:"Bairros",local:"Locais de votação",secao:"Seções"}[tipo]} em ${area}, comparados com o desempenho do candidato ${nomeRef} (${pct(ref)} dos válidos).${piso?` Só áreas com ${fmt.format(piso)} ou mais votos válidos.`:""}`;
   trilha("#ff-trilha",pai);
   const podeAbrir=tipo!=="secao";
   const item=(g,lado)=>{const li=el("li",podeAbrir?{class:"abre",tabindex:"0",role:"button"}:{},
       el("span",{class:"nome"},el("b",{},g.nome),el("small",{},g.sub||"")),
-      lado==="f"?el("span",{class:"val"},el("b",{},pct(g.p)),el("small",{style:"display:block"},`Média estado ${pct(ref)}`))
-               :el("span",{class:"val"},el("b",{},"+"+fmt.format(g.falt)+" votos"),el("small",{style:"display:block"},`fez ${pct(g.p)} · média estado ${pct(ref)}`)));
+      lado==="f"?el("span",{class:"val"},el("b",{},pct(g.p)),el("small",{style:"display:block"},`${fmt.format(g.v)} votos de ${fmt.format(g.val)}`))
+               :el("span",{class:"val"},el("b",{},"+"+fmt.format(g.falt)+" votos"),el("small",{style:"display:block"},`fez ${fmt.format(g.v)} de ${fmt.format(g.val)} (${pct(g.p)})`)));
     if(podeAbrir){const ir=()=>navega($("#ff-nivel"),()=>{S.caminho=caminhoAte(g)});li.addEventListener("click",ir);li.addEventListener("keydown",e=>{if(e.key==="Enter")ir()})}
     return li};
-  $("#ff-forte").replaceChildren(...(forte.length?forte.map(g=>item(g,"f")):[el("li",{class:"vazio"},"Nenhuma área ficou 10% acima da média do estado neste nível.")]));
-  $("#ff-fraco").replaceChildren(...(fraco.length?fraco.map(g=>item(g,"d")):[el("li",{class:"vazio"},"Nenhuma área ficou abaixo da média do estado neste nível.")]));
+  $("#ff-forte").replaceChildren(...(forte.length?forte.map(g=>item(g,"f")):[el("li",{class:"vazio"},`Nenhuma área ficou 10% acima da média ${nomeRef} neste nível.`)]));
+  $("#ff-fraco").replaceChildren(...(fraco.length?fraco.map(g=>item(g,"d")):[el("li",{class:"vazio"},`Nenhuma área ficou abaixo da média ${nomeRef} neste nível.`)]));
 }
 
 function explorar(){
@@ -472,7 +472,7 @@ function explorar(){
   trilha("#trilha",pai);
   // exemplo do "como ler"
   const exG=agrupa(rs,tipo).map(g=>calc(g,ref)).filter(g=>g.val>=PISO[tipo]).sort((a,b)=>b.v-a.v)[0];
-  if(exG){const cl=classe(exG.ind);$("#exemplo").textContent=`Exemplo: ${info(S.cand).nome} teve ${pct(ref)} dos votos válidos ${S.ref==="pai"?"na área aberta":"no Ceará"}. Em ${exG.nome}, teve ${pct(exG.p)}. ${cl==="forte"?`Como ${pct(exG.p)} está 10% ou mais acima de ${pct(ref)}, ${exG.nome} fica acima da média e entra em "Melhor desempenho".`:cl==="fraco"?`Como ${pct(exG.p)} está 10% ou mais abaixo de ${pct(ref)}, ${exG.nome} fica abaixo da média; ali faltaram ${fmt.format(exG.falt)} votos para chegar à média.`:`Como ${pct(exG.p)} está a menos de 10% de distância de ${pct(ref)}, ${exG.nome} fica na média.`}`}
+  if(exG){const cl=classe(exG.ind);$("#exemplo").textContent=`Exemplo: ${info(S.cand).nome} teve ${pct(ref)} dos votos válidos ${S.ref==="pai"&&S.caminho.length?"em "+S.caminho.at(-1).nome:"no Ceará"}. Em ${exG.nome}, teve ${pct(exG.p)}. ${cl==="forte"?`Como ${pct(exG.p)} está 10% ou mais acima de ${pct(ref)}, ${exG.nome} fica acima da média e entra em "Melhor desempenho".`:cl==="fraco"?`Como ${pct(exG.p)} está 10% ou mais abaixo de ${pct(ref)}, ${exG.nome} fica abaixo da média; ali faltaram ${fmt.format(exG.falt)} votos para chegar à média.`:`Como ${pct(exG.p)} está a menos de 10% de distância de ${pct(ref)}, ${exG.nome} fica na média.`}`}
   // lista
   const gs=agrupa(rs,tipo).map(g=>calc(g,ref));
   const {col,dir}=S.ordem; gs.sort((a,b)=>col==="nome"?dir*a.nome.localeCompare(b.nome,"pt-BR"):dir*((a[col]||0)-(b[col]||0)));
@@ -546,7 +546,7 @@ function salvaUrl(){const q=new URLSearchParams({cargo:S.cand.cargo,n:S.cand.nr}
 $("#cargo").addEventListener("change",()=>trocaCargo().catch(falha));
 $("#ff-nivel").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;const k=FF.indexOf(b.dataset.v);
   if(k<S.caminho.length)navega($("#ff-nivel"),()=>{S.caminho=S.caminho.slice(0,k)});else navega($("#ff-nivel"),()=>{S.ffNivel=b.dataset.v})});
-$("#ref").addEventListener("click",e=>{const b=e.target.closest("button");if(b){S.ref=b.dataset.v;explorar()}});
+$("#ref").addEventListener("click",e=>{const b=e.target.closest("button");if(b)navega($("#ff-nivel"),()=>{S.ref=b.dataset.v})});
 $("#agrup").addEventListener("click",e=>{const b=e.target.closest("button");if(b){S.agrup=b.dataset.v;explorar()}});
 document.querySelector(".lista .cab").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;const k=b.dataset.o;S.ordem={col:k,dir:S.ordem.col===k?-S.ordem.dir:(k==="nome"?1:-1)};explorar()});
 function falha(e){$("#vazio").hidden=false;$("#vazio").replaceChildren(el("b",{},"Não foi possível carregar"),String(e.message||e).replace(/\.$/,"")+". Recarregue a página; se continuar, avise.")}
