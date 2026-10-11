@@ -48,6 +48,7 @@ jobs:
         run: |
           python3 analise/carga/carga.py --ano "$ANO" --turno "$TURNO" --uf "$UF" --dir dl --saida carga.sql | tee resumo.json
           ls -lh carga.sql
+          echo "::notice title=carga::$(python3 -c "import json;d=json.load(open('resumo.json'));d.pop('fontes');print(json.dumps(d,ensure_ascii=False))") | SQL $(du -h carga.sql | cut -f1)"
           echo '### Carga' >> "$GITHUB_STEP_SUMMARY"; echo '```' >> "$GITHUB_STEP_SUMMARY"; cat resumo.json >> "$GITHUB_STEP_SUMMARY"; echo '```' >> "$GITHUB_STEP_SUMMARY"
 
       - name: Garantir banco D1
@@ -69,7 +70,15 @@ jobs:
       - name: Publicar API (Worker)
         run: |
           cd analise/worker
-          npx -y wrangler@4 deploy | tee deploy.log
+          set +e
+          npx -y wrangler@4 deploy > deploy.log 2>&1; RC=$?
+          set -e
+          cat deploy.log
+          if [ $RC -ne 0 ]; then
+            echo "::error title=deploy::$(grep -vE '^\s*$' deploy.log | tail -25 | sed 's/\x1b\[[0-9;]*m//g' | sed ':a;N;$!ba;s/\n/%0A/g')"
+            exit $RC
+          fi
           URL=$(grep -oE 'https://[a-zA-Z0-9.-]+\.workers\.dev' deploy.log | head -1)
           echo "API: $URL" >> "$GITHUB_STEP_SUMMARY"
-          [ -n "$URL" ] && curl -fsS "$URL/api/status" | tee -a "$GITHUB_STEP_SUMMARY"
+          echo "::notice title=api::$URL"
+          [ -n "$URL" ] && curl -fsS --retry 5 --retry-delay 5 "$URL/api/status" | tee -a "$GITHUB_STEP_SUMMARY"
