@@ -10,6 +10,7 @@ on:
       uf: { description: "UF", default: "CE" }
       ano: { description: "Ano", default: "2026" }
       turno: { description: "Turno", default: "1" }
+      carga: { description: "Recarregar os dados do TSE no banco? (sim/nao)", default: "sim" }
 
 concurrency: { group: analise-carga, cancel-in-progress: false }
 
@@ -31,8 +32,24 @@ jobs:
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      # Os dados só são regravados quando o script de carga muda ou quando a execução é manual com carga=sim.
+      # Ajustes da página/API só republicam o Worker (o plano grátis do D1 tem limite de linhas gravadas por dia).
+      - name: Decidir se recarrega os dados
+        id: d
+        run: |
+          C=0
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            [ "${{ inputs.carga }}" = "sim" ] && C=1
+          else
+            git diff --name-only "${{ github.event.before }}" "${{ github.sha }}" 2>/dev/null | grep -q '^analise/carga/' && C=1
+          fi
+          echo "carga=$C" >> "$GITHUB_OUTPUT"
+          [ $C = 1 ] && echo "::notice title=dados::Recarregando os dados do TSE" || echo "::notice title=dados::Dados mantidos (só a página/API foi publicada)"
 
       - name: Baixar arquivos oficiais do TSE
+        if: steps.d.outputs.carga == '1'
         run: |
           mkdir -p dl && cd dl
           B=https://cdn.tse.jus.br/estatistica/sead/odsele
@@ -46,6 +63,7 @@ jobs:
           ls -lh
 
       - name: Gerar SQL
+        if: steps.d.outputs.carga == '1'
         run: |
           python3 analise/carga/carga.py --ano "$ANO" --turno "$TURNO" --uf "$UF" --dir dl --saida carga.sql | tee resumo.json
           ls -lh carga.sql
@@ -64,6 +82,7 @@ jobs:
           sed "s/__DB_ID__/$ID/" wrangler.template.toml > wrangler.toml
 
       - name: Importar no D1
+        if: steps.d.outputs.carga == '1'
         run: |
           cd analise/worker
           npx -y wrangler@4 d1 execute "$BANCO" --remote --file ../../carga.sql --yes
