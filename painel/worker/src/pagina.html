@@ -102,7 +102,7 @@ main{padding:18px 0 40px}
 .seg button[aria-pressed="true"]{background:var(--navy);color:#fff}
 .mapbox{position:relative}
 svg.br{display:block;width:100%;height:auto;max-height:68vh}
-svg.br path.uf{stroke:var(--map-line);stroke-width:1.2;transition:fill .6s ease;cursor:pointer}
+svg.br path.uf{fill:var(--map-empty);stroke:var(--map-line);stroke-width:1.2;transition:fill .6s ease;cursor:pointer}
 svg.br path.uf:hover{stroke:var(--ink);stroke-width:2}
 svg.br path.uf.gov{stroke:var(--ink);stroke-width:2.6}
 svg.br path.uf.sel{stroke:var(--gold);stroke-width:3.4}
@@ -336,7 +336,7 @@ function renderPres(){
     <div class="split"><i style="width:${A.v/tot*100}%;background:${cor[A.sq]}"></i><i style="width:${Bc.v/tot*100}%;background:${cor[Bc.sq]}"></i></div>
     <div class="info">
       <span>Diferença: <b>${fmt(Math.abs(A.v - Bc.v))}</b> votos</span>
-      <span>Ainda por apurar: <b>${mi(r.esnt)}</b> eleitores</span>
+      ${r.tf ? "<span>Totalização concluída</span>" : `<span>Ainda por apurar: <b>${mi(r.esnt)}</b> eleitores</span>`}
     </div>`;
 }
 
@@ -436,7 +436,7 @@ function cardGov(uf){
         <div class="pc" style="color:${cor[c.sq]}">${pct(c.pv)}<small>${fmt(c.v)} votos</small></div>
       </div>`).join("")}
     <div class="split">${cands.map(c => `<i style="width:${c.v/tot*100}%;background:${cor[c.sq]}"></i>`).join("")}</div>
-    <div class="rod">${CHIP[s.k](s)}${r && r.est ? `<span>Faltam ${mi(r.esnt)} eleitores</span>` : ""}</div>
+    <div class="rod">${CHIP[s.k](s)}${r && r.est && !r.tf ? `<span>Faltam ${mi(r.esnt)} eleitores</span>` : ""}</div>
     ${r ? "" : `<div class="aviso">O TSE ainda não publicou o arquivo do 2º turno deste estado.</div>`}
     ${pres}`;
 }
@@ -483,7 +483,8 @@ function avisar(chave, titulo, texto, img){
   const t = document.createElement("div"); t.className = "toast";
   t.innerHTML = `${img ? `<div class="foto" style="background-image:url('${img}')"></div>` : ""}<div><b>${esc(titulo)}</b><span>${esc(texto)}</span></div><button type="button" aria-label="Fechar">×</button>`;
   t.querySelector("button").onclick = () => t.remove();
-  $("#toasts").prepend(t);
+  const box = $("#toasts"); box.prepend(t);
+  while (box.children.length > 5) box.lastElementChild.remove();
   tocar();
   try {
     if ("Notification" in window && Notification.permission === "granted")
