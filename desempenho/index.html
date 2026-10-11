@@ -3,6 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<!-- Política do projeto: dados SOMENTE do TSE (via resultados.tse.jus.br e o banco próprio no Cloudflare, carregado com os arquivos oficiais do TSE).
+     Exceções autorizadas: Leaflet (cdnjs) + mapa do OpenStreetMap, e o contador de acessos silencioso (GoatCounter). -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'unsafe-inline' https://cdnjs.cloudflare.com; img-src data: https://tile.openstreetmap.org https://cdnjs.cloudflare.com https://resultados.tse.jus.br https://apuracao2026.goatcounter.com; connect-src https://analise-eleitoral.joao-antonio-araujo62.workers.dev https://resultados.tse.jus.br; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="description" content="Onde estão os votos do seu candidato: desempenho por região, município, bairro, local e seção no Ceará, com dados oficiais do TSE.">
 <title>Mapa de Votos 2026</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
@@ -201,7 +205,7 @@ footer b{color:#fff}
 </head>
 <body>
 <header class="top"><div class="wrap">
-  <a class="home" href="https://ifcealuniojb.github.io/apuracao-2026/" title="Voltar ao início (Apuração e Mapa de Votos)"><div class="logo" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></div>
+  <a class="home" href="../" title="Voltar ao início (Apuração e Mapa de Votos)"><div class="logo" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></div>
   <div class="brand"><h1>Mapa de Votos <span>2026</span></h1></div></a>
   <div class="src"><b>Dados oficiais do TSE</b>Ceará · 1º turno</div>
 </div></header>
@@ -283,7 +287,7 @@ footer b{color:#fff}
 
 <footer><div class="wrap">
   <p id="fonte"><b>Fonte:</b> Tribunal Superior Eleitoral (TSE): votação por seção eleitoral e eleitorado por local de votação (Portal de Dados Abertos); nomes, partidos, situação e fotos do ambiente oficial de resultados.</p>
-  <p><a href="https://ifcealuniojb.github.io/apuracao-2026/" style="color:#fff">Início</a> · <a href="https://ifcealuniojb.github.io/apuracao-2026/apuracao/" style="color:#fff">Apuração 2026</a></p>
+  <p><a href="../" style="color:#fff">Início</a> · <a href="../apuracao/" style="color:#fff">Apuração 2026</a></p>
   <p>Regiões de planejamento: IPECE (Governo do Ceará). Mapa: © colaboradores do OpenStreetMap. O bairro é o do local de votação informado ao TSE, não o endereço do eleitor.</p>
 </div></footer>
 <div class="carreg" id="carreg" hidden>Carregando…</div>
@@ -305,7 +309,8 @@ const S={muns:{},reg:{},cands:[],tse:{},G:null,T:{},C:null,linhas:[],caminho:[],
 
 let nCarreg=0;
 function busy(d){nCarreg+=d;$("#carreg").hidden=nCarreg<=0}
-async function api(path){busy(1);try{let ult;for(let t=0;t<4;t++){if(t)await new Promise(r=>setTimeout(r,600*t*t));try{const r=await fetch(path,{credentials:"same-origin"});if(r.ok)return await r.json();ult=new Error(((await r.json().catch(()=>({}))).erro||("erro "+r.status)).replace(/\.$/,""));if(r.status<500)break}catch(e){ult=e}}throw ult}finally{busy(-1)}}
+const API_BASE="https://analise-eleitoral.joao-antonio-araujo62.workers.dev"; // banco próprio (Cloudflare), só leitura
+async function api(path){busy(1);try{let ult;for(let t=0;t<4;t++){if(t)await new Promise(r=>setTimeout(r,600*t*t));try{const r=await fetch(API_BASE+path);if(r.ok)return await r.json();ult=new Error(((await r.json().catch(()=>({}))).erro||("erro "+r.status)).replace(/\.$/,""));if(r.status<500)break}catch(e){ult=e}}throw ult}finally{busy(-1)}}
 const bloco=k=>api("/api/bloco?k2="+encodeURIComponent(`${ANO}/${TURNO}/${UF}/${k}`));
 
 /* nomes de urna, partidos, situação e fotos: ambiente oficial de resultados do TSE */
@@ -566,10 +571,10 @@ $("#agrup").addEventListener("click",e=>{const b=e.target.closest("button");if(b
 document.querySelector(".lista .cab").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;const k=b.dataset.o;S.ordem={col:k,dir:S.ordem.col===k?-S.ordem.dir:(k==="nome"?1:-1)};explorar()});
 function falha(e){$("#vazio").hidden=false;$("#vazio").replaceChildren(el("b",{},"Não foi possível carregar"),String(e.message||e).replace(/\.$/,"")+". Recarregue a página; se continuar, avise.")}
 /* Contador de acessos silencioso (GoatCounter): só no endereço publicado, sem cookies, sem dados pessoais e sem dizer qual candidato. */
-function contar(extra){try{if(location.hostname!=="analise-eleitoral.joao-antonio-araujo62.workers.dev"||navigator.webdriver)return;
+function contar(extra){try{if(location.hostname!=="ifcealuniojb.github.io"||navigator.webdriver)return;
   const q=new URLSearchParams(Object.assign({s:[screen.width,screen.height,Math.round(devicePixelRatio||1)].join(","),rnd:Math.random().toString(36).slice(2)},extra));
   const img=new Image();img.referrerPolicy="no-referrer";img.src="https://apuracao2026.goatcounter.com/count?"+q.toString()}catch(e){}}
-contar({p:"/mapa-de-votos/",t:"Mapa de Votos 2026",r:document.referrer||""});
+contar({p:location.pathname,t:"Mapa de Votos 2026",r:document.referrer||""});
 inicio().catch(falha);
 </script>
 </body>

@@ -10,9 +10,10 @@ Endereço: <https://ifcealuniojb.github.io/apuracao-2026/> (página inicial para
 |---|---|---|
 | `index.html` | Página inicial: escolha entre Apuração e Mapa de Votos | GitHub Pages |
 | `apuracao/` | **Apuração 2026**: busca de candidatos, votos, situação, ranking por município e cadeiras | GitHub Pages (`/apuracao/`) |
-| `analise/` | **Mapa de Votos 2026**: desempenho por região, município, bairro, local e seção (Ceará) | Cloudflare (Worker + banco D1) |
+| `desempenho/` | **Mapa de Votos 2026**: desempenho por região, município, bairro, local e seção (Ceará) | GitHub Pages (`/desempenho/`), lendo a API no Cloudflare |
+| `analise/` | Dados e API do Mapa de Votos | Cloudflare (Worker + banco D1) |
 | `analise/carga/` | Script que lê os arquivos oficiais do TSE e prepara o banco | GitHub Actions |
-| `analise/worker/` | Página e API (só leitura) do Mapa de Votos | Cloudflare Workers |
+| `analise/worker/` | API só de leitura do Mapa de Votos (aceita chamadas só do site do projeto); o endereço antigo da página redireciona para `/desempenho/` | Cloudflare Workers |
 | `analise/regioes/` | Municípios por Região de Planejamento do Ceará (IPECE) | embutido no Worker |
 | `.github/workflows/analise-carga.yml` | Publica o Mapa de Votos; recarrega os dados só quando pedido | GitHub Actions |
 | `_config.yml` | Tira a pasta `analise/` do GitHub Pages | GitHub Pages |
@@ -25,9 +26,10 @@ Links antigos da apuração com parâmetros (`?uf=…`) são levados automaticam
 - Contador de acessos silencioso (GoatCounter), sem cookies e sem dados pessoais.
 
 ## Mapa de Votos: publicação e carga
-- Um push no `main` que mexa em `analise/**` republica a página/API do Mapa de Votos no Cloudflare. **Os dados não são regravados.**
+- A página do Mapa de Votos (`desempenho/`) é publicada pelo GitHub Pages como o resto do site.
+- Um push no `main` que mexa em `analise/**` republica a API no Cloudflare. **Os dados não são regravados.**
 - Para recarregar os dados (ex.: 2º turno), rode o workflow manualmente em Actions → "Run workflow", com `carga=sim` e escolhendo UF, ano e turno. Um push nunca regrava os dados.
 - O plano grátis do banco permite 100 mil linhas gravadas por dia; uma carga do Ceará usa cerca de 10%.
-- Segredos do repositório: `CLOUDFLARE_API_TOKEN` (obrigatório) e `ANALISE_CHAVE` (opcional, fecha o Mapa de Votos com link secreto).
+- Segredo do repositório: `CLOUDFLARE_API_TOKEN`.
 
 > Projeto independente, sem vínculo com a Justiça Eleitoral. Resultados e projeções podem mudar até o fim da totalização; a situação oficial é a divulgada pelo TSE.

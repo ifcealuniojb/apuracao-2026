@@ -20,7 +20,6 @@ permissions:
 env:
   CLOUDFLARE_ACCOUNT_ID: 68a169c1926f5004bf8c7a975a4244ce
   CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-  ANALISE_CHAVE: ${{ secrets.ANALISE_CHAVE }}
   BANCO: analise-eleitoral
   UF: ${{ inputs.uf || 'CE' }}
   ANO: ${{ inputs.ano || '2026' }}
@@ -100,10 +99,4 @@ jobs:
           URL=$(grep -oE 'https://[a-zA-Z0-9.-]+\.workers\.dev' deploy.log | head -1)
           echo "API: $URL" >> "$GITHUB_STEP_SUMMARY"
           echo "::notice title=api::$URL"
-          # Link secreto (opcional): se o segredo ANALISE_CHAVE existir no GitHub, página e API só abrem com ?k=<chave>
-          if [ -n "$ANALISE_CHAVE" ]; then
-            printf '%s' "$ANALISE_CHAVE" | npx -y wrangler@4 secret put CHAVE >/dev/null && echo "::notice title=acesso::Link secreto ativo"
-          else
-            echo "::notice title=acesso::Sem link secreto (ANALISE_CHAVE não definido)"
-          fi
-          [ -n "$URL" ] && [ -z "$ANALISE_CHAVE" ] && { curl -fsS --retry 5 --retry-delay 5 "$URL/api/status" | tee -a "$GITHUB_STEP_SUMMARY"; } || true
+          [ -n "$URL" ] && { curl -fsS --retry 5 --retry-delay 5 "$URL/api/status" | tee -a "$GITHUB_STEP_SUMMARY"; } || true
