@@ -1,0 +1,60 @@
+name: Painel 2º turno (pessoal)
+
+# Publica o painel pessoal do 2º turno no Cloudflare (Worker "painel-2turno").
+# O GitHub Pages ignora a pasta painel/ (_config.yml). O painel só abre com o link secreto.
+on:
+  push:
+    branches: [main]
+    paths: ["painel/**", ".github/workflows/painel.yml"]
+  workflow_dispatch:
+    inputs:
+      mapa: { description: "Baixar de novo os contornos das UFs do IBGE? (sim/nao)", default: "nao" }
+
+concurrency: { group: painel, cancel-in-progress: false }
+
+permissions:
+  contents: write
+
+env:
+  CLOUDFLARE_ACCOUNT_ID: 68a169c1926f5004bf8c7a975a4244ce
+  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+jobs:
+  painel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      # Malha oficial do IBGE (API de malhas v3), uma vez só; o arquivo fica gravado no repositório.
+      - name: Baixar contornos das UFs (IBGE)
+        if: github.event_name == 'workflow_dispatch' && inputs.mapa == 'sim'
+        run: |
+          mkdir -p painel/mapa
+          for q in minima intermediaria; do
+            curl -fSL --retry 5 --retry-delay 5 -H "Accept: application/vnd.geo+json" \
+              -o "painel/mapa/ibge-uf-$q.geojson" \
+              "https://servicodados.ibge.gov.br/api/v3/malhas/paises/BR?formato=application/vnd.geo%2Bjson&qualidade=$q&intrarregiao=UF"
+          done
+          ls -l painel/mapa
+          echo "::notice title=mapa::$(ls -l painel/mapa | tail -n +2 | awk '{print $9" "$5}' | paste -sd ' | ')"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add painel/mapa
+          git diff --cached --quiet || { git commit -m "Painel: contornos das UFs (IBGE)"; git push; }
+
+      - name: Publicar painel (Worker)
+        if: hashFiles('painel/worker/wrangler.toml') != ''
+        run: |
+          cd painel/worker
+          set +e
+          npx -y wrangler@4 deploy > deploy.log 2>&1; RC=$?
+          set -e
+          cat deploy.log
+          if [ $RC -ne 0 ]; then
+            echo "::error title=deploy::$(grep -vE '^\s*$' deploy.log | tail -25 | sed 's/\x1b\[[0-9;]*m//g' | sed ':a;N;$!ba;s/\n/%0A/g')"
+            exit $RC
+          fi
+          URL=$(grep -oE 'https://[a-zA-Z0-9.-]+\.workers\.dev' deploy.log | head -1)
+          echo "::notice title=painel::$URL"
+          [ -n "$URL" ] && echo "::notice title=sem-chave::$(curl -s -o /dev/null -w '%{http_code}' "$URL/")" || true
