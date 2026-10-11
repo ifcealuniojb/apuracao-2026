@@ -410,7 +410,7 @@ function prepos(p){if(p.tipo!=="regiao")return"em "+p.nome;return(/^(Grande|Serr
 function navega(ancora,muda){const a=ancora.getBoundingClientRect().top;muda();desenha();const b=ancora.getBoundingClientRect().top;if(Math.abs(b-a)>1)window.scrollBy({top:b-a,left:0,behavior:"instant"})}
 function trilha(sel,pai){const tr=[],itens=[{nome:"Ceará"},...S.caminho];
   itens.forEach((p,i)=>{if(i)tr.push(el("span",{class:"sep"},"›"));const ult=i===itens.length-1;
-    tr.push(ult?el("span",{class:"at"},`${p.nome}: ${fmt.format(pai.v)} votos (${pct(pai.p)})`):el("button",{type:"button",onclick:()=>navega($(sel),()=>{S.caminho=S.caminho.slice(0,i)})},p.nome))});
+    tr.push(ult?el("span",{class:"at"},`${p.nome}: ${fmt.format(pai.v)} votos (média de ${pct(pai.p)} dos votos válidos)`):el("button",{type:"button",onclick:()=>navega($(sel),()=>{S.caminho=S.caminho.slice(0,i)})},p.nome))});
   $(sel).replaceChildren(...tr)}
 const tipoNivel=i=>NIVEIS[i]==="grupo"?S.agrup:NIVEIS[i];
 function linhasDoCaminho(){let rs=S.linhas;for(const p of S.caminho){const f=chaveDe[p.tipo];rs=rs.filter(r=>f(r)===p.k)}return rs}
