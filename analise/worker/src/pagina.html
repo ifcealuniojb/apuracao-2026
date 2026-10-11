@@ -227,8 +227,8 @@ footer b{color:#fff}
     </div>
     <nav class="trilha" id="ff-trilha" aria-label="Área aberta"></nav>
     <div class="duas">
-      <div class="card lado"><h4 style="color:var(--accent)">Melhor desempenho</h4><p class="exp">Onde a fatia de votos ficou bem acima da média de comparação. Toque para abrir.</p><ol id="ff-forte"></ol></div>
-      <div class="card lado"><h4 style="color:var(--red)">Onde mais faltaram votos</h4><p class="exp">Votos a mais se tivesse alcançado a média de comparação nesses lugares. Toque para abrir.</p><ol id="ff-fraco"></ol></div>
+      <div class="card lado"><h4 style="color:var(--accent)">Melhor desempenho</h4><p class="exp" id="exp-forte"></p><ol id="ff-forte"></ol></div>
+      <div class="card lado"><h4 style="color:var(--red)">Onde mais faltaram votos</h4><p class="exp" id="exp-fraco"></p><ol id="ff-fraco"></ol></div>
     </div>
 
     <div class="sec-t">
@@ -398,6 +398,7 @@ function caminhoAte(g){const r=g.rs[0],c=[{tipo:"regiao",k:r.reg,nome:r.reg}],i=
   if(i>=3)c.push({tipo:"local",k:chaveDe.local(r),nome:r.local});
   if(i>=4)c.push({tipo:"secao",k:chaveDe.secao(r),nome:"Seção "+r.sec});
   return c}
+function prepos(p){if(p.tipo!=="regiao")return"em "+p.nome;return(/^(Grande|Serra)\b/.test(p.nome)?"na ":"no ")+p.nome}
 function navega(ancora,muda){const a=ancora.getBoundingClientRect().top;muda();desenha();const b=ancora.getBoundingClientRect().top;if(Math.abs(b-a)>1)window.scrollBy({top:b-a,left:0,behavior:"instant"})}
 function trilha(sel,pai){const tr=[],itens=[{nome:"Ceará"},...S.caminho];
   itens.forEach((p,i)=>{if(i)tr.push(el("span",{class:"sep"},"›"));const ult=i===itens.length-1;
@@ -442,7 +443,9 @@ function forteFraco(){
   // a aba acompanha a área aberta: abriu uma região, mostra municípios; abriu um município, bairros...
   const chaveCam=S.caminho.map(p=>p.k).join("/");
   if(S.ffCam!==chaveCam){S.ffCam=chaveCam;S.ffNivel=FF[Math.min(prof,FF.length-1)]}
-  const tipo=S.ffNivel, ref=S.ref==="pai"?pai.p:S.ufTot.p, nomeRef=S.ref==="pai"&&prof?`em ${S.caminho.at(-1).nome}`:"no Ceará";
+  const tipo=S.ffNivel, ref=S.ref==="pai"?pai.p:S.ufTot.p, nomeRef=S.ref==="pai"&&prof?prepos(S.caminho.at(-1)):"no Ceará";
+  $("#exp-forte").textContent=`Lugares onde a fatia de votos ficou 10% ou mais acima da média dele ${nomeRef} (${pct(ref)}).`;
+  $("#exp-fraco").textContent=`Quantos votos faltaram, em cada lugar, para o candidato chegar à média dele ${nomeRef} (${pct(ref)}).`;
   document.querySelectorAll("#ref button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===S.ref));
   document.querySelectorAll("#ff-nivel button").forEach(b=>{const k=FF.indexOf(b.dataset.v);b.setAttribute("aria-pressed",b.dataset.v===tipo)});
   const piso=Math.min(PISO[tipo],Math.max(30,Math.round(pai.val*0.02)));
@@ -450,13 +453,14 @@ function forteFraco(){
   const forte=gs.filter(g=>classe(g.ind)==="forte").sort((a,b)=>b.ind-a.ind).slice(0,8);
   const fraco=gs.filter(g=>g.falt>0).sort((a,b)=>b.falt-a.falt).slice(0,8);
   const area=prof?S.caminho.at(-1).nome:"Ceará";
-  $("#ff-sub").textContent=`${{regiao:"Regiões",municipio:"Municípios",bairro:"Bairros",local:"Locais de votação",secao:"Seções"}[tipo]} em ${area}, comparados com o desempenho do candidato ${nomeRef} (${pct(ref)} dos válidos).${piso?` Só áreas com ${fmt.format(piso)} ou mais votos válidos.`:""}`;
+  $("#ff-sub").textContent=`${{regiao:"Regiões",municipio:"Municípios",bairro:"Bairros",local:"Locais de votação",secao:"Seções"}[tipo]} em ${area}, comparados com o desempenho do candidato ${nomeRef} (${pct(ref)} dos válidos).${piso?` Só áreas com ${fmt.format(piso)} ou mais votos válidos.`:""}${tipo!=="secao"?" Toque num lugar para abrir.":""}`;
   trilha("#ff-trilha",pai);
   const podeAbrir=tipo!=="secao";
   const item=(g,lado)=>{const li=el("li",podeAbrir?{class:"abre",tabindex:"0",role:"button"}:{},
-      el("span",{class:"nome"},el("b",{},g.nome),el("small",{},g.sub||"")),
+      lado==="f"?el("span",{class:"nome"},el("b",{},g.nome),el("small",{},g.sub||""))
+               :el("span",{class:"nome"},el("b",{},g.nome),el("small",{},`fez ${fmt.format(g.v)} de ${fmt.format(g.val)} (${pct(g.p)})`)),
       lado==="f"?el("span",{class:"val"},el("b",{},pct(g.p)),el("small",{style:"display:block"},`${fmt.format(g.v)} votos de ${fmt.format(g.val)}`))
-               :el("span",{class:"val"},el("b",{},"+"+fmt.format(g.falt)+" votos"),el("small",{style:"display:block"},`fez ${fmt.format(g.v)} de ${fmt.format(g.val)} (${pct(g.p)})`)));
+               :el("span",{class:"val"},el("b",{},`faltaram ${fmt.format(g.falt)} votos`),el("small",{style:"display:block"},`para chegar a ${pct(ref)}`)));
     if(podeAbrir){const ir=()=>navega($("#ff-nivel"),()=>{S.caminho=caminhoAte(g)});li.addEventListener("click",ir);li.addEventListener("keydown",e=>{if(e.key==="Enter")ir()})}
     return li};
   $("#ff-forte").replaceChildren(...(forte.length?forte.map(g=>item(g,"f")):[el("li",{class:"vazio"},`Nenhuma área ficou 10% acima da média ${nomeRef} neste nível.`)]));
