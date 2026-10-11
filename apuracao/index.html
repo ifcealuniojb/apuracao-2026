@@ -338,6 +338,18 @@ a.home:hover .logo{filter:brightness(1.05)}
 a.voltar{display:inline-flex;align-items:center;gap:6px;flex:none;color:#fff;text-decoration:none;font-weight:700;font-size:13px;line-height:1;border:1px solid rgba(255,255,255,.28);border-radius:10px;padding:8px 11px}
 a.voltar:hover{background:rgba(255,255,255,.1)}
 @media (max-width:460px){a.voltar span{display:none}a.voltar{padding:8px}}
+/* Visão Brasil */
+.nacbox{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px;margin-bottom:16px}
+.nacbox .kpis{margin:0}
+.nac-sub{margin:14px 0 8px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.pchips{display:flex;flex-wrap:wrap;gap:6px}
+.pchip{border:1px solid var(--line);background:var(--surface-2);border-radius:999px;padding:4px 10px;font-size:13px;color:var(--ink-2);cursor:pointer;font-family:var(--sans)}
+.pchip b{color:var(--ink);font-weight:800;margin-right:2px}
+.pchip:hover{background:var(--accent-soft)}
+.ufh{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;margin:18px 2px 8px}
+.ufh b{font-size:16px;font-weight:800;color:var(--ink)}
+.ufh .meta{font-size:12.5px;color:var(--ink-3)}
+.ufh .link{margin-left:auto}
 </style>
 </head>
 <body>
@@ -357,10 +369,10 @@ a.voltar:hover{background:rgba(255,255,255,.1)}
   <section class="hero">
     <div class="eyebrow">Consulta eleitoral</div>
     <h2>Quantos votos teve o seu candidato<span class="qmark">?</span></h2>
-    <p>Escolha o estado e o cargo e busque por nome, número, partido ou coligação. Abra um candidato para ver o total, a situação no TSE e o ranking de votos por município.</p>
+    <p>Escolha o local e o cargo e busque por nome, número, partido ou coligação. Abra um candidato para ver o total, a situação no TSE e o ranking de votos por município.</p>
     <div class="panel">
       <div class="controls">
-        <label class="f c-uf">Estado
+        <label class="f c-uf">Local
           <select id="uf"></select>
         </label>
         <label class="f c-cargo">Cargo (função)
@@ -405,7 +417,7 @@ a.voltar:hover{background:rgba(255,255,255,.1)}
     Fonte única: arquivos públicos de divulgação de resultados do Tribunal Superior Eleitoral (<code>https://resultados.tse.jus.br/oficial</code>), conforme as
     “Informações técnicas sobre a divulgação de resultados 2026”. Este site bloqueia, via Content-Security-Policy, qualquer conexão a outro endereço.
     Resultados parciais podem mudar até o fim da totalização.
-    <div class="ver">Versão 2026-10-11 · <a href="../" style="color:inherit">início</a> · <a href="../desempenho/" style="color:inherit">mapa de votos (Ceará)</a></div>
+    <div class="ver">Versão 2026-10-11 · 20h · <a href="../" style="color:inherit">início</a> · <a href="../desempenho/" style="color:inherit">mapa de votos (Ceará)</a></div>
   </div>
 </footer>
 
@@ -428,7 +440,7 @@ const UFS = [
   ["PA","Pará"],["PB","Paraíba"],["PR","Paraná"],["PE","Pernambuco"],["PI","Piauí"],["RJ","Rio de Janeiro"],["RN","Rio Grande do Norte"],
   ["RS","Rio Grande do Sul"],["RO","Rondônia"],["RR","Roraima"],["SC","Santa Catarina"],["SP","São Paulo"],["SE","Sergipe"],["TO","Tocantins"]
 ];
-const UF_NOME = Object.fromEntries(UFS.concat([["BR","Brasil (só Presidente)"],["ZZ","Exterior"]]));
+const UF_NOME = Object.fromEntries(UFS.concat([["BR","Brasil"],["ZZ","Exterior"]]));
 
 /* Códigos de eleição do 1º turno (pleito 3220), conforme página técnica do TSE.
    São usados apenas se o arquivo oficial de configuração (ele-c.json) não puder ser lido. */
@@ -547,7 +559,8 @@ function eleFor(uf, cargo, turno){
   return turno === "2" ? (T2[base] || base) : base;
 }
 function cargosFor(uf){
-  if (uf === "BR" || uf === "ZZ") return ["1"];
+  if (uf === "ZZ") return ["1"];
+  if (uf === "BR") return state.turno === "2" ? ["1","3"] : ["1","3","5","6"];   // Brasil: visão nacional (sem deputado estadual/distrital)
   if (state.turno === "2") return ["1","3"];                              // 2º turno: só Presidente e Governador
   if (eleMap && eleMap[uf]) return Object.keys(eleMap[uf]).filter(c => CARGOS[c]).sort((a,b)=>a-b);
   return uf === "DF" ? ["1","3","5","6","8"] : ["1","3","5","6","7"];
@@ -743,7 +756,13 @@ async function loadUF(fresh=false){
   state.loading = true; state.data = {}; state.errors = {}; state.info = {};
   render();
   const cargos = state.cargo === "all" ? cargosFor(state.uf) : [state.cargo].filter(c => cargosFor(state.uf).includes(c));
+  state.progresso = null;
   await Promise.all(cargos.map(async c => {
+    if (state.uf === "BR" && NAC_CARGOS.has(c)){
+      try { const N = await loadNacional(c, token, fresh); if (token === loadToken) state.data[c] = N; }
+      catch(e){ if (token === loadToken) state.errors[c] = e.message; }
+      return;
+    }
     const ele = eleFor(state.uf, c);
     try {
       const raw = await tse(URLS.resAbr(ele, state.uf, c), {fresh});
@@ -814,6 +833,126 @@ function renderInfo2T(info){
     corpo = `<p>O 2º turno ainda não foi divulgado pelo TSE e o resultado do 1º turno (${esc(onde)}) ainda não define a disputa.</p>`;
   }
   return `<section class="group"><h3>${esc(nomeCargo)} <span class="meta">2º turno · ${esc(onde)}</span></h3><div class="t2box">${corpo}</div></section>`;
+}
+
+/* =====================================================================
+   VISÃO BRASIL (Local = Brasil): Governador, Senador e Deputado Federal
+   Junta os arquivos oficiais dos 27 estados (um por estado, mesmo padrão EA20).
+   ===================================================================== */
+const NAC_CARGOS = new Set(["3","5","6"]);
+const NAC_TITULO = {"3":"Governadores", "5":"Senadores eleitos", "6":"Deputados federais eleitos"};
+async function loadNacional(c, token, fresh){
+  const ufs = UFS.map(u => u[0]), porUF = {}, falhas = [];
+  state.progresso = {d:0, t:ufs.length};
+  await pool(ufs, 6, async uf => {
+    try {
+      let r;
+      try {
+        const ele = eleFor(uf, c), raw = await tse(URLS.resAbr(ele, uf, c), {fresh});
+        r = parseResultado(raw, c); r.ele = ele; r.uf = uf; r.turno = state.turno;
+        // 2º turno publicado mas ainda sem votos: mostra a disputa com os números do 1º turno
+        if (state.turno === "2" && !r.cands.some(x => x.votos > 0)) throw new NotAvailable("2º turno ainda sem votos");
+      } catch(e){
+        // 2º turno de governador: estado sem 2º turno (ou arquivo ainda não publicado) mostra o resultado do 1º turno
+        if (!(e instanceof NotAvailable && state.turno === "2")) throw e;
+        const ele1 = eleFor(uf, c, "1"), raw = await tse(URLS.resAbr(ele1, uf, c), {fresh});
+        r = parseResultado(raw, c); r.ele = ele1; r.uf = uf; r.turno = "1"; r.doPrimeiro = true;
+      }
+      projetar(r);
+      porUF[uf] = r;
+    } catch(e){ falhas.push(uf); }
+  }, (d, t) => { if (token !== loadToken) return; state.progresso = {d, t}; render(); });
+  const rs = Object.values(porUF);
+  if (!rs.length) throw new Error("Não foi possível ler os estados no TSE.");
+  const ult = rs.slice().sort((a,b) => (b.data + b.hora).localeCompare(a.data + a.hora))[0];
+  return {nacional:true, cargo:c, cargoNome: NAC_TITULO[c], porUF, falhas: falhas.sort(),
+          final: rs.every(r => r.final), pst: Math.min(...rs.map(r => r.pst)), data: ult.data, hora: ult.hora, uf:"BR"};
+}
+// quem aparece na visão Brasil de cada estado
+function selecionados(c, r){
+  const sit = x => situacao(x, r).cls;
+  if (c === "3"){
+    if (r.turno === "2") return r.cands.filter(elegivel).slice(0, 2);               // 2º turno: os dois que disputam
+    const e = r.cands.filter(x => sit(x) === "yes");
+    return e.length ? e : r.cands.filter(x => sit(x) === "run");                      // eleito no 1º turno ou os dois do 2º turno
+  }
+  return r.cands.filter(x => sit(x) === "yes");                                      // senadores e deputados eleitos
+}
+function ufCombina(uf, q){
+  if (!q) return false;
+  const qn = norm(q);
+  return norm(uf) === qn || norm(UF_NOME[uf]).startsWith(qn);
+}
+function renderNacional(c, N){
+  const ufs = Object.keys(N.porUF).sort((a,b) => UF_NOME[a].localeCompare(UF_NOME[b], "pt-BR"));
+  // resumo: situação dos estados e bancadas por partido
+  const partidos = new Map();
+  let eleitos = 0, emDisputa = 0, aguardando = 0, totalVagas = 0;
+  for (const uf of ufs){
+    const r = N.porUF[uf], sel = selecionados(c, r);
+    totalVagas += r.vagas || 0;
+    for (const x of sel){
+      const s = situacao(x, r).cls;
+      if (s === "yes"){ eleitos++; partidos.set(x.sg, (partidos.get(x.sg) || 0) + 1); }
+    }
+    if (c === "3"){
+      const ganhou = sel.some(x => situacao(x, r).cls === "yes");
+      if (!ganhou && r.turno === "1" && !r.doPrimeiro) emDisputa++;
+      if (!ganhou && (r.turno === "2" || r.doPrimeiro)) aguardando++;
+    }
+  }
+  const ranking = [...partidos.entries()].sort((a,b) => b[1] - a[1] || a[0].localeCompare(b[0], "pt-BR"));
+  const chips = ranking.map(([sg, n]) => `<button class="pchip" data-q="${esc(sg)}" title="Mostrar só ${esc(sg)}"><b>${n}</b> ${esc(sg)}</button>`).join("");
+  let kpis;
+  if (c === "3" && state.turno === "1"){
+    kpis = `<div class="kpi big"><span>Eleitos no 1º turno</span><b>${eleitos}</b><small>de ${ufs.length} estados</small></div>
+      <div class="kpi"><span>Vão ao 2º turno</span><b>${emDisputa}</b><small>votação em 25 de outubro</small></div>
+      <div class="kpi"><span>Partidos com governador eleito</span><b>${partidos.size}</b><small>até agora</small></div>`;
+  } else if (c === "3"){
+    kpis = `<div class="kpi big"><span>Governadores eleitos</span><b>${eleitos}</b><small>de ${ufs.length} estados (1º e 2º turnos)</small></div>
+      <div class="kpi"><span>2º turno sem resultado</span><b>${aguardando}</b><small>votação em 25 de outubro</small></div>
+      <div class="kpi"><span>Partidos com governador eleito</span><b>${partidos.size}</b><small>até agora</small></div>`;
+  } else {
+    kpis = `<div class="kpi big"><span>${c === "5" ? "Senadores eleitos" : "Deputados federais eleitos"}</span><b>${fmt(eleitos)}</b><small>de ${fmt(totalVagas)} vagas em ${ufs.length} estados</small></div>
+      <div class="kpi"><span>Partidos com ${c === "5" ? "senador eleito" : "deputado eleito"}</span><b>${partidos.size}</b><small>${ranking[0] ? "maior bancada: " + esc(ranking[0][0]) + " (" + ranking[0][1] + ")" : ""}</small></div>
+      <div class="kpi"><span>Totalização</span><b style="font-size:16px">${N.final ? "Final" : pctFmt(N.pst)}</b><small>${esc(N.data)} ${esc(N.hora)}</small></div>`;
+  }
+  const tituloBanc = c === "6" ? "Bancadas na Câmara (eleitos por partido)" : c === "5" ? "Senadores eleitos por partido" : "Governadores eleitos por partido";
+  let html = `<section class="group"><h3>${esc(N.cargoNome)} <span class="meta">Brasil · ${ufs.length} estados${N.falhas.length ? " · sem resposta do TSE: " + esc(N.falhas.join(", ")) : ""}</span></h3>
+    <div class="nacbox"><div class="kpis">${kpis}</div>
+      ${chips ? `<div class="nac-sub">${tituloBanc} · toque para filtrar</div><div class="pchips">${chips}</div>` : ""}</div>`;
+  // busca igual à sigla de um partido com eleitos (ex.: "PT", "PL"): filtra só esse partido, sem pegar a federação inteira
+  const qPartido = state.q && partidos.has(state.q.trim().toUpperCase()) ? state.q.trim().toUpperCase() : null;
+  // lista por estado, em ordem alfabética
+  let mostrados = 0;
+  for (const uf of ufs){
+    const r = N.porUF[uf];
+    const porUfInteiro = ufCombina(uf, state.q);
+    let lista = selecionados(c, r).filter(x => qPartido ? x.sg.toUpperCase() === qPartido : (porUfInteiro || matches(x, state.q)));
+    if (state.soEleitos) lista = lista.filter(x => situacao(x, r).cls === "yes");
+    if (!lista.length) continue;
+    if (c === "6") lista = ordenar(lista, r);
+    mostrados += lista.length;
+    const chave = c + "-" + uf, lim = state.expanded[chave] || state.q || c !== "6" ? lista.length : 8;
+    const sitUF = c === "3" ? (r.turno === "2" ? "2º turno" + (r.final ? " · apurado" : " · " + pctFmt(r.pst) + " apurado") : lista.some(x => situacao(x, r).cls === "yes") ? "eleito no 1º turno" : state.turno === "2" ? "2º turno em 25 de outubro (votos do 1º turno)" : "vai ao 2º turno")
+                : `${lista.length}${lista.length !== selecionados(c, r).length ? " de " + selecionados(c, r).length : ""} eleito${lista.length > 1 ? "s" : ""} · ${r.vagas} vaga${r.vagas > 1 ? "s" : ""}`;
+    html += `<div class="ufh"><b>${esc(UF_NOME[uf])}</b><span class="meta">${uf} · ${sitUF}</span>${c === "6" && r.proj && r.proj.tipo === "proporcional" ? `<button class="link" data-vagas="${c}" data-uf="${uf}">Cadeiras por partido →</button>` : ""}</div>
+      <div class="list">`;
+    for (const x of lista.slice(0, lim)){
+      const s = situacao(x, r), pos = r.cands.indexOf(x) + 1;
+      html += `<button class="row" data-c="${c}" data-sq="${esc(x.sq)}" data-uf="${uf}">
+        <span class="rk">${pos}º</span>
+        ${fotoHTML(x, r)}
+        <span class="nm"><b>${esc(x.nmu)} <span class="pt">- ${esc(x.sg)}</span></b>
+          <small><span class="num">${esc(x.n)}</span> · ${(() => { const vi = cadeiraInfo(x, r); return vi.kind === "party" ? esc(x.sg) + (x.agr ? " · " + esc(x.agr) : "") : `<span class="seatline ${vi.cls}">${esc(vi.txt)}</span>`; })()}</small></span>
+        <span class="vt"><b>${fmt(x.votos)}</b><small>${pctFmt(x.pct)} · <span class="badge ${s.cls}${s.proj ? " proj" : ""}">${esc(s.label)}</span></small></span>
+      </button>`;
+    }
+    html += `</div>`;
+    if (lista.length > lim) html += `<button class="more" data-more="${chave}">Mostrar todos os ${fmt(lista.length)} eleitos ${uf === "DF" ? "do" : "de"} ${esc(UF_NOME[uf])}</button>`;
+  }
+  if (!mostrados) html += `<div class="empty"><b>Nada encontrado</b>Tente outro nome, partido ou estado.</div>`;
+  return {html: html + `</section>`, total: mostrados};
 }
 
 function setConn(kind, txt){ $("#conn").innerHTML = `<span class="dot ${kind}"></span>${esc(txt)}`; }
@@ -920,7 +1059,8 @@ function render(){
     return;
   }
   if (state.loading){
-    main.innerHTML = `<div class="status-line">Carregando ${esc(UF_NOME[state.uf])} no TSE…</div><div class="list">${'<div class="skel"></div>'.repeat(6)}</div>`;
+    const pg = state.progresso;
+    main.innerHTML = `<div class="status-line">Carregando ${esc(UF_NOME[state.uf])} no TSE…${pg ? ` ${pg.d} de ${pg.t} estados` : ""}</div>${pg ? `<div class="prog" style="margin:-6px 0 14px"><i style="width:${pg.d/pg.t*100}%"></i></div>` : ""}<div class="list">${'<div class="skel"></div>'.repeat(6)}</div>`;
     return;
   }
   let html = "", total = 0;
@@ -931,6 +1071,7 @@ function render(){
       if (state.errors[c]) html += `<div class="group"><h3>${esc(CARGOS[c])} <span class="meta">— ${esc(state.errors[c])}</span></h3></div>`;
       continue;
     }
+    if (r.nacional){ const o = renderNacional(c, r); html += o.html; total += o.total; continue; }
     const list = ordenar(r.cands.map((x,i)=>({...x, pos:i+1})).filter(x => matches(x, state.q) && (!state.soEleitos || situacao(x, r).cls === "yes")), r);
     total += list.length;
     if (!list.length) continue;
@@ -957,7 +1098,7 @@ function render(){
   if (!html || (!total && state.q)){
     html = `<div class="empty"><b>${state.q ? "Nenhum candidato encontrado" : "Sem dados ainda"}</b>${state.q ? "Tente outro nome, número, partido ou coligação — ou mude o cargo e o estado." : "O TSE ainda não publicou resultados para esta seleção."}</div>` + (state.q ? "" : html);
   }
-  const anyProj = Object.values(state.data).some(r => r.proj && !(r.nacional ? r.nacional.final : r.final));
+  const anyProj = Object.values(state.data).some(r => r.nacional === true ? Object.values(r.porUF).some(u => u.proj && !u.final) : r.proj && !(r.nacional ? r.nacional.final : r.final));
   main.innerHTML = `<div class="status-line">${esc(UF_NOME[state.uf])}${state.q ? ` · busca: “${esc(state.q)}”` : ""}</div>`
     + (anyProj ? `<div class="legend"><span class="badge yes">Eleito</span> situação oficial do TSE <span class="badge yes proj">Provável eleito</span> projeção pelos votos atuais (tracejado)</div>` : "")
     + html;
@@ -971,11 +1112,13 @@ $("#main").addEventListener("click", e => {
     save(); render(); return;
   }
   const vg = e.target.closest("[data-vagas]");
-  if (vg){ openVagas(vg.dataset.vagas); return; }
+  if (vg){ openVagas(vg.dataset.vagas, vg.dataset.uf); return; }
+  const pc = e.target.closest(".pchip");
+  if (pc){ qIn.value = pc.dataset.q; state.q = pc.dataset.q; state.expanded = {}; render(); return; }
   const more = e.target.closest("[data-more]");
   if (more){ state.expanded[more.dataset.more] = true; render(); return; }
   const row = e.target.closest(".row");
-  if (row) openDetail(row.dataset.c, row.dataset.sq);
+  if (row) openDetail(row.dataset.c, row.dataset.sq, row.dataset.uf);
 });
 
 /* ---------- Detalhe do candidato ---------- */
@@ -1002,8 +1145,9 @@ function closeDetail(){
 scrim.addEventListener("click", closeDetail);
 document.addEventListener("keydown", e => { if (e.key === "Escape") closeDetail(); });
 
-function openDetail(cargo, sq){
-  const r = state.data[cargo]; if (!r) return;
+const resDe = (cargo, uf) => { const d = state.data[cargo]; return d && d.nacional === true ? (uf ? d.porUF[uf] : null) : d; };
+function openDetail(cargo, sq, uf){
+  const r = resDe(cargo, uf); if (!r) return;
   const c = r.cands.find(x => x.sq === sq); if (!c) return;
   contarConsulta();
   const pos = r.cands.indexOf(c) + 1;
@@ -1136,8 +1280,8 @@ function projBox(c, r){
   </div>`;
 }
 
-function openVagas(cargo){
-  const r = state.data[cargo]; if (!r || !r.proj) return;
+function openVagas(cargo, uf){
+  const r = resDe(cargo, uf); if (!r || !r.proj) return;
   const P = r.proj;
   const rows = P.A.filter(a => a.votos > 0).map(a => `<tr>
       <td>${esc(a.tp === "f" || a.tp === "c" ? a.nm : a.sgs)}${a.tp === "f" ? `<div class="note" style="margin:0">${esc(a.sgs)}</div>` : ""}
@@ -1163,7 +1307,7 @@ function openVagas(cargo){
       <table class="mun"><thead><tr><th>Agremiação</th><th class="r">Votos</th><th class="r">%</th><th class="r">QP</th><th class="r">Cadeiras</th></tr></thead><tbody>${rows}</tbody></table>
       <div class="sec-h"><h4>Prováveis eleitos (${eleitos.length})</h4></div>
       <table class="mun"><thead><tr><th>#</th><th>Candidato</th><th class="r">Votos</th><th class="r">Via</th></tr></thead><tbody>
-      ${eleitos.map((x,i) => `<tr class="clk" data-c="${cargo}" data-sq="${esc(x.c.sq)}" style="cursor:pointer"><td class="pos">${i+1}º</td>
+      ${eleitos.map((x,i) => `<tr class="clk" data-c="${cargo}" data-sq="${esc(x.c.sq)}" data-uf="${esc(uf || "")}" style="cursor:pointer"><td class="pos">${i+1}º</td>
         <td><b>${esc(x.c.nmu)}</b><div class="note" style="margin:0">${esc(x.c.n)} · ${esc(x.c.sg)}</div></td><td class="r">${fmt(x.c.votos)}</td>
         <td class="r" style="font-family:var(--sans);font-size:12px;color:var(--ink-3)">${{qp:"QP",media:"média",media3:"média (3ª fase)",tse:"TSE"}[x.a.fase[x.c.sq]] || ""}</td></tr>`).join("")}
       </tbody></table>
@@ -1171,7 +1315,7 @@ function openVagas(cargo){
     </div>`;
   drawer.classList.add("on"); scrim.classList.add("on");
   $(".x", drawer).addEventListener("click", closeDetail);
-  drawer.querySelectorAll("tr.clk").forEach(tr => tr.addEventListener("click", () => openDetail(tr.dataset.c, tr.dataset.sq)));
+  drawer.querySelectorAll("tr.clk").forEach(tr => tr.addEventListener("click", () => openDetail(tr.dataset.c, tr.dataset.sq, tr.dataset.uf || undefined)));
   fichaNaPagina();
   detailToken++;
 }
@@ -1298,15 +1442,25 @@ const ufSel = $("#uf");
 ufSel.innerHTML = `<optgroup label="Destaques"><option value="BR">Brasil (Presidente)</option><option value="CE">Ceará</option></optgroup>`
   + `<optgroup label="Outros estados">` + UFS.filter(([u]) => u !== "CE").map(([u,n]) => `<option value="${u}">${n}</option>`).join("") + `</optgroup>`
   + `<optgroup label="Fora do Brasil"><option value="ZZ">Exterior (Presidente)</option></optgroup>`;
-ufSel.value = state.uf; $("#cargo").value = state.cargo;
+/* Cargo: só mostra os cargos que existem no local escolhido (Brasil: sem deputado estadual/distrital e sem "Todos") */
+function syncCargos(){
+  const ok = cargosFor(state.uf), sel = $("#cargo");
+  for (const o of sel.options){
+    const vale = o.value === "all" ? !(state.uf === "BR" || state.uf === "ZZ") : ok.includes(o.value);
+    o.hidden = !vale; o.disabled = !vale;
+  }
+  if (!(state.cargo === "all" ? !(state.uf === "BR" || state.uf === "ZZ") : ok.includes(state.cargo))) state.cargo = "1";
+  sel.value = state.cargo;
+}
+ufSel.value = state.uf; syncCargos();
 
-ufSel.addEventListener("change", () => { state.uf = ufSel.value; state.expanded = {}; if (state.uf==="BR"||state.uf==="ZZ"){ state.cargo = "1"; $("#cargo").value = "1"; } save(); loadUF(); });
+ufSel.addEventListener("change", () => { state.uf = ufSel.value; state.expanded = {}; syncCargos(); save(); loadUF(); });
 const turnoSel = $("#turno");
 turnoSel.value = state.turno; $("#turnoTop").textContent = TURNO_TXT[state.turno];
 turnoSel.addEventListener("change", () => {
   state.turno = turnoSel.value; $("#turnoTop").textContent = TURNO_TXT[state.turno];
-  if (state.turno === "2" && !["all","1","3"].includes(state.cargo)){ state.cargo = "all"; $("#cargo").value = "all"; }
-  state.expanded = {}; save(); loadUF();
+  if (state.turno === "2" && !["all","1","3"].includes(state.cargo)){ state.cargo = state.uf === "BR" ? "1" : "all"; }
+  syncCargos(); state.expanded = {}; save(); loadUF();
 });
 $("#cargo").addEventListener("change", e => { state.cargo = e.target.value; state.expanded = {}; save(); loadUF(); });
 let qt; $("#q").addEventListener("input", e => { clearTimeout(qt); acUpdate(); qt = setTimeout(() => { state.q = e.target.value.trim(); state.expanded = {}; render(); }, 120); });
@@ -1327,9 +1481,10 @@ function acUpdate(){
   const q = qIn.value.trim(), qn = norm(q);
   if (qn.length < 2 && !/^\d+$/.test(qn)) return acClose();
   const cands = [], grupos = new Map();
-  for (const c of Object.keys(state.data)){
-    const r = state.data[c];
-    r.cands.forEach((x, i) => {
+  const fontes = Object.keys(state.data).flatMap(c => { const d = state.data[c];
+    return d.nacional === true ? Object.values(d.porUF).map(r => ({c, r, lista: selecionados(c, r)})) : [{c, r: d, lista: d.cands}]; });
+  for (const {c, r, lista} of fontes){
+    lista.forEach((x, i) => {
       let score = -1;
       if (/^\d+$/.test(qn)) { if (x.n.startsWith(qn)) score = x.n === qn ? 0 : 1; }
       else {
@@ -1364,9 +1519,9 @@ function acUpdate(){
     html += `<div class="ac-sec">Candidatos${cands.length > 8 ? ` · ${fmt(cands.length)} encontrados` : ""}</div>`;
     for (const {x, r, c} of top){
       const s = situacao(x, r);
-      acItems.push({tipo:"cand", c, sq:x.sq, valor:x.nmu});
+      acItems.push({tipo:"cand", c, sq:x.sq, valor:x.nmu});   // (visão Brasil: busca pelo nome na lista nacional)
       html += `<div class="ac-it" role="option" data-i="${acItems.length-1}">${fotoHTML(x, r, false)}<span class="t"><b>${hl(x.nmu, q)} <span class="pt">- ${esc(x.sg)}</span></b>
-        <small>${esc(r.cargoNome)} · ${esc(x.n)} · <span class="badge ${s.cls}${s.proj ? " proj" : ""}" style="font-size:10.5px;padding:0 7px">${esc(s.label)}</span></small></span><span class="v">${fmt(x.votos)}</span></div>`;
+        <small>${esc(r.cargoNome)}${state.uf === "BR" && r.uf !== "BR" ? " · " + esc(r.uf) : ""} · ${esc(x.n)} · <span class="badge ${s.cls}${s.proj ? " proj" : ""}" style="font-size:10.5px;padding:0 7px">${esc(s.label)}</span></small></span><span class="v">${fmt(x.votos)}</span></div>`;
     }
   }
   if (!acItems.length) html = Object.keys(state.data).length ? `<div class="ac-empty">Nenhum candidato com “${esc(q)}” em ${esc(UF_NOME[state.uf])}${state.cargo !== "all" ? " para " + esc(CARGOS[state.cargo]) : ""}.</div>` : `<div class="ac-empty">Carregando dados do TSE…</div>`;
