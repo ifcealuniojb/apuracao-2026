@@ -8,3 +8,11 @@ preview_urls = false
 type = "Text"
 globs = ["**/*.html"]
 fallthrough = true
+
+[[durable_objects.bindings]]
+name = "COLETOR"
+class_name = "Coletor"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["Coletor"]

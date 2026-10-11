@@ -1,8 +1,10 @@
 // Painel pessoal do 2º turno. Só abre com o link secreto (?k=...), que vira um cookie.
-// Os dados são lidos pelo navegador direto do TSE (resultados.tse.jus.br); este Worker só entrega a página.
+// Os dados do TSE são coletados aqui no servidor (Durable Object "Coletor", uma só instância) e entregues
+// em /dados: o TSE é consultado no máximo a cada 10 s durante a apuração, não importa quantos navegadores abertos.
 // Aqui fica apenas o SHA-256 da chave: a chave em si não está no código.
 import PAGINA from "./pagina.html";
 import MAPA from "./mapa.json";
+export { Coletor } from "./coletor.js";
 
 const HASH = "6759745aa38067f8de78fe83e1a89a39335050957617aae481c56c6e090b09e3";
 const COOKIE = "p2t";
@@ -12,7 +14,7 @@ const CSP = [
   "default-src 'none'",
   "script-src 'unsafe-inline'",
   "style-src 'unsafe-inline'",
-  "connect-src https://resultados.tse.jus.br",
+  "connect-src 'self'",
   "img-src https://resultados.tse.jus.br data:",
   "base-uri 'none'",
   "form-action 'none'",
@@ -39,14 +41,14 @@ function cookie(req) {
 const nada = () => new Response("Não encontrado.", { status: 404, headers: { ...BASE, "content-type": "text/plain; charset=utf-8" } });
 
 export default {
-  async fetch(req) {
+  async fetch(req, env) {
     if (req.method !== "GET" && req.method !== "HEAD") return nada();
     const url = new URL(req.url);
     if (url.pathname === "/robots.txt") return new Response("User-agent: *\nDisallow: /\n", { headers: { ...BASE, "content-type": "text/plain" } });
-    if (url.pathname !== "/") return nada();
+    if (url.pathname !== "/" && url.pathname !== "/dados") return nada();
 
     const k = url.searchParams.get("k");
-    if (k) {
+    if (k && url.pathname === "/") {
       if (!/^[A-Za-z0-9_-]{16,64}$/.test(k) || (await sha256(k)) !== HASH) return nada();
       // guarda a chave num cookie e tira ela do endereço
       url.searchParams.delete("k");
@@ -57,6 +59,16 @@ export default {
     }
     const c = cookie(req);
     if (!c || (await sha256(c)) !== HASH) return nada();
+
+    if (url.pathname === "/dados") {
+      try {
+        const obj = env.COLETOR.get(env.COLETOR.idFromName("unico"));
+        const r = await obj.fetch("https://coletor/dados" + (url.searchParams.has("sim") ? "?sim=1" : ""));
+        return new Response(r.body, { status: r.status, headers: { ...BASE, "content-type": "application/json; charset=utf-8" } });
+      } catch (e) {
+        return new Response('{"erro":"coletor indisponível"}', { status: 502, headers: { ...BASE, "content-type": "application/json; charset=utf-8" } });
+      }
+    }
 
     return new Response(HTML, {
       headers: { ...BASE, "content-type": "text/html; charset=utf-8", "content-security-policy": CSP, "x-frame-options": "DENY" },
