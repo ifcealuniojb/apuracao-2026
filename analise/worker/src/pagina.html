@@ -267,28 +267,16 @@ footer b{color:#fff}
     </div>
 
     <details class="card" id="como">
-      <summary>Como ler: melhor desempenho, média e "faltaram"</summary>
+      <summary>Como ler: melhor desempenho e média</summary>
       <div class="corpo">
         <p><b>Fatia de votos</b> é a porcentagem dos votos válidos daquela área que foram para o candidato.</p>
         <p><b>Comparação com a média</b> mostra quanto essa fatia ficou acima ou abaixo da fatia do candidato na área que está aberta (botão <b>Análise</b>, o padrão; ex.: ao abrir o Vale do Jaguaribe, cada município é comparado com o resultado dele no Vale) ou no Ceará inteiro (botão <b>vs. Ceará</b>).</p>
         <p class="ex" id="exemplo"></p>
         <p><span class="badge forte">Acima da média</span> (entra em "Melhor desempenho"): 10% ou mais acima da média. <span class="badge fraco">Abaixo da média</span> 10% ou mais abaixo. <span class="badge media">Na média</span> entre os dois.</p>
-        <p><b>Faltaram</b> são os votos que o candidato teria a mais se tivesse feito a sua média naquela área. Serve para ver onde há mais votos a buscar, e não só onde a porcentagem é baixa.</p>
         <p>Nas listas de melhor desempenho e de faltas, áreas com poucos votos válidos ficam de fora para não distorcer.</p>
       </div>
     </details>
 
-    <details class="card" id="esp-box">
-      <summary>Comparar com os votos esperados</summary>
-      <div class="corpo">
-        <p>Carregue a planilha do candidato em CSV. Ela é lida só neste aparelho e não é enviada a lugar nenhum. Colunas aceitas: <b>municipio</b>, <b>bairro</b>, <b>local</b>, <b>zona</b>, <b>secao</b> e <b>esperado</b>. Preencha só as do nível que quiser comparar.</p>
-        <div class="acoes">
-          <input type="file" id="arq" accept=".csv,text/csv" style="height:auto;padding:8px;width:auto;max-width:100%">
-          <button class="btn" id="modelo" type="button">Baixar modelo com os bairros da área aberta</button>
-        </div>
-        <div class="rolar"><table class="esp" id="tab-esp"><thead><tr><th>Área</th><th>Esperado</th><th>Obtido</th><th>Diferença</th><th>Atingido</th></tr></thead><tbody><tr><td colspan="5" style="text-align:left;color:var(--ink-3)">Nenhuma planilha carregada.</td></tr></tbody></table></div>
-      </div>
-    </details>
   </div>
 </div>
 
@@ -311,7 +299,7 @@ const el=(t,a={},...f)=>{const e=document.createElement(t);for(const[k,v]of Obje
 const titulo=s=>String(s||"").toLowerCase().replace(/(^|[\s\-/(])([a-zà-ú])/g,(m,a,b)=>a+b.toUpperCase()).replace(/\b(De|Da|Do|Das|Dos|E)\b/g,w=>w.toLowerCase());
 
 const CARGOS={1:"Presidente",3:"Governador",5:"Senador",6:"Deputado Federal",7:"Deputado Estadual"};
-const S={muns:{},reg:{},cands:[],tse:{},G:null,T:{},C:null,linhas:[],caminho:[],ordem:{col:"v",dir:-1},ref:"pai",agrup:"bairro",ffNivel:"municipio",esperados:null};
+const S={muns:{},reg:{},cands:[],tse:{},G:null,T:{},C:null,linhas:[],caminho:[],ordem:{col:"v",dir:-1},ref:"pai",agrup:"bairro",ffNivel:"municipio"};
 
 let nCarreg=0;
 function busy(d){nCarreg+=d;$("#carreg").hidden=nCarreg<=0}
@@ -460,7 +448,6 @@ function desenha(){
   cadeiras();
   forteFraco();
   explorar();
-  esperadosDesenha();
   salvaUrl();
 }
 const kpi=(r,v,s,big)=>el("div",{class:"kpi"+(big?" big":"")},el("span",{},r),el("b",{},v),el("small",{},s||""));
@@ -497,7 +484,7 @@ function forteFraco(){
   if(S.ffCam!==chaveCam){S.ffCam=chaveCam;S.ffNivel=FF[Math.min(prof,FF.length-1)]}
   const tipo=S.ffNivel, ref=S.ref==="pai"?pai.p:S.ufTot.p, nomeRef=S.ref==="pai"&&prof?prepos(S.caminho.at(-1)):"no Ceará";
   $("#exp-forte").textContent=`Lugares onde a fatia de votos ficou 10% ou mais acima da média dele ${nomeRef} (${pct(ref)}).`;
-  $("#exp-fraco").textContent=`Quantos votos faltaram, em cada lugar, para o candidato chegar à média dele ${nomeRef} (${pct(ref)}).`;
+  $("#exp-fraco").textContent=`Lugares abaixo da média dele ${nomeRef} (${pct(ref)}), começando pelos que mais votos deixaram de render.`;
   document.querySelectorAll("#ref button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===S.ref));
   document.querySelectorAll("#ff-nivel button").forEach(b=>{const k=FF.indexOf(b.dataset.v);b.setAttribute("aria-pressed",b.dataset.v===tipo)});
   const piso=Math.min(PISO[tipo],Math.max(30,Math.round(pai.val*0.02)));
@@ -511,7 +498,7 @@ function forteFraco(){
   const item=(g,lado)=>{const li=el("li",{class:"bloco"+(podeAbrir?" abre":""),...(podeAbrir?{tabindex:"0",role:"button"}:{})},
       el("div",{class:"l1"},el("b",{class:"nm"},g.nome),el("b",{class:"fez"},pct(g.p))),
       el("div",{class:"l2"},`teve ${fmt.format(g.v)} de ${fmt.format(g.val)}`),
-      lado==="d"?el("div",{class:"l3"},"Precisa de ",el("b",{},`${fmt.format(g.falt)} votos`)," para atingir a média"):null);
+      null);
     if(podeAbrir){const ir=()=>navega($("#ff-nivel"),()=>{S.caminho=caminhoAte(g)});li.addEventListener("click",ir);li.addEventListener("keydown",e=>{if(e.key==="Enter")ir()})}
     return li};
   $("#ff-forte").replaceChildren(...(forte.length?forte.map(g=>item(g,"f")):[el("li",{class:"vazio"},`Nenhuma área ficou 10% acima da média ${nomeRef} neste nível.`)]));
@@ -527,7 +514,7 @@ function explorar(){
   trilha("#trilha",pai);
   // exemplo do "como ler"
   const exG=agrupa(rs,tipo).map(g=>calc(g,ref)).filter(g=>g.val>=PISO[tipo]).sort((a,b)=>b.v-a.v)[0];
-  if(exG){const cl=classe(exG.ind);$("#exemplo").textContent=`Exemplo: ${info(S.cand).nome} teve ${pct(ref)} dos votos válidos ${S.ref==="pai"&&S.caminho.length?"em "+S.caminho.at(-1).nome:"no Ceará"}. Em ${exG.nome}, teve ${pct(exG.p)}. ${cl==="forte"?`Como ${pct(exG.p)} está 10% ou mais acima de ${pct(ref)}, ${exG.nome} fica acima da média e entra em "Melhor desempenho".`:cl==="fraco"?`Como ${pct(exG.p)} está 10% ou mais abaixo de ${pct(ref)}, ${exG.nome} fica abaixo da média; ali faltaram ${fmt.format(exG.falt)} votos para chegar à média.`:`Como ${pct(exG.p)} está a menos de 10% de distância de ${pct(ref)}, ${exG.nome} fica na média.`}`}
+  if(exG){const cl=classe(exG.ind);$("#exemplo").textContent=`Exemplo: ${info(S.cand).nome} teve ${pct(ref)} dos votos válidos ${S.ref==="pai"&&S.caminho.length?"em "+S.caminho.at(-1).nome:"no Ceará"}. Em ${exG.nome}, teve ${pct(exG.p)}. ${cl==="forte"?`Como ${pct(exG.p)} está 10% ou mais acima de ${pct(ref)}, ${exG.nome} fica acima da média e entra em "Melhor desempenho".`:cl==="fraco"?`Como ${pct(exG.p)} está 10% ou mais abaixo de ${pct(ref)}, ${exG.nome} fica abaixo da média.`:`Como ${pct(exG.p)} está a menos de 10% de distância de ${pct(ref)}, ${exG.nome} fica na média.`}`}
   // lista
   const gs=agrupa(rs,tipo).map(g=>calc(g,ref));
   const {col,dir}=S.ordem; gs.sort((a,b)=>col==="nome"?dir*a.nome.localeCompare(b.nome,"pt-BR"):dir*((a[col]||0)-(b[col]||0)));
@@ -538,7 +525,7 @@ function explorar(){
       el("div",{class:"n"},el("b",{},g.nome),el("small",{},[g.sub,`${fmt.format(g.val)} válidos`].filter(Boolean).join(" · ")),
         el("div",{class:"barra",title:`Fatia ${pct(g.p)} · média ${pct(ref)}`},el("i",{style:`width:${Math.min(100,100*(g.p||0)/maxP)}%;background:var(${classe(g.ind)==="fraco"?"--red":classe(g.ind)==="forte"?"--accent":"--ink-3"})`}),el("em",{style:`left:${100*ref/maxP}%`}))),
       el("div",{class:"r"},el("b",{},fmt.format(g.v)),el("small",{},pct(g.p))),
-      el("div",{class:"r"},badge(g.ind),g.falt?el("small",{style:"display:block;margin-top:3px"},`faltaram ${fmt.format(g.falt)}`):""));
+      el("div",{class:"r"},badge(g.ind)));
     if(abre){const ir=()=>navega($(".lista"),()=>{S.caminho.push({tipo,k:g.k,nome:g.nome});S.ordem={col:"v",dir:-1}});ln.addEventListener("click",ir);ln.addEventListener("keydown",e=>{if(e.key==="Enter")ir()})}
     return ln}):[el("div",{class:"vazio-g"},"Nada para mostrar nesta área.")]));
   mapa(rs,ref);
@@ -564,37 +551,6 @@ function mapa(rs,ref){
   $("#leg-nivel").textContent=(porMun?"Um círculo por município":"Um círculo por local de votação")+" · maior = mais votos";
   ultimoEnq=enq;setTimeout(()=>M.invalidateSize(),60);
 }
-
-/* ---------- votos esperados ---------- */
-function lerCSV(txt){
-  const ls=txt.replace(/^﻿/,"").split(/\r?\n/).filter(l=>l.trim());if(!ls.length)return[];
-  const sep=(ls[0].match(/;/g)||[]).length>=(ls[0].match(/,/g)||[]).length?";":",";
-  const parse=l=>{const o=[];let c="",q=false;for(let i=0;i<l.length;i++){const ch=l[i];if(q){if(ch==='"'&&l[i+1]==='"'){c+='"';i++}else if(ch==='"')q=false;else c+=ch}else if(ch==='"')q=true;else if(ch===sep){o.push(c);c=""}else c+=ch}o.push(c);return o.map(s=>s.trim())};
-  const cab=parse(ls[0]).map(h=>norm(h).toLowerCase());
-  return ls.slice(1).map(l=>{const v=parse(l),o={};cab.forEach((h,i)=>o[h]=v[i]||"");return o});
-}
-$("#arq").addEventListener("change",async e=>{const f=e.target.files[0];if(!f)return;const b=await f.arrayBuffer();let t=new TextDecoder("utf-8").decode(b);if(t.includes("�"))t=new TextDecoder("windows-1252").decode(b);S.esperados=lerCSV(t);esperadosDesenha()});
-function esperadosDesenha(){
-  if(!S.esperados)return;
-  const nm={};for(const[k,n]of Object.entries(S.muns))nm[norm(n)]=+k;
-  const linhas=S.esperados.map(o=>{
-    const e=+String(o.esperado||"").replace(/\./g,"").replace(",",".")||0;let rs=S.linhas;const nome=[];
-    if(o.municipio){rs=rs.filter(r=>r.mun===nm[norm(o.municipio)]);nome.push(o.municipio)}
-    if(o.zona){rs=rs.filter(r=>r.zona===+o.zona);nome.push("Zona "+o.zona)}
-    if(o.bairro){rs=rs.filter(r=>norm(r.bairro)===norm(o.bairro));nome.push(o.bairro)}
-    if(o.local){rs=rs.filter(r=>norm(r.local)===norm(o.local));nome.push(o.local)}
-    if(o.secao){rs=rs.filter(r=>r.sec===+o.secao);nome.push("Seção "+o.secao)}
-    const s=soma(rs),d=s.v-e;
-    return el("tr",{},el("td",{},nome.join(" · ")||"(linha sem área)",rs.length?"":el("small",{style:"display:block;color:var(--red)"},"Área não encontrada nos dados do TSE. Confira a grafia.")),
-      el("td",{},fmt.format(e)),el("td",{},fmt.format(s.v)),el("td",{style:`color:var(${d<0?"--red":"--accent"});font-weight:700`},(d>0?"+":d<0?"−":"")+fmt.format(Math.abs(d))),el("td",{},e?pct(s.v/e):"–"));
-  });
-  $("#tab-esp").tBodies[0].replaceChildren(...linhas);
-}
-$("#modelo").addEventListener("click",()=>{
-  const m=new Map();for(const r of linhasDoCaminho()){const k=r.mun+"|"+r.bairro;if(!m.has(k))m.set(k,[S.muns[r.mun],r.bairro])}
-  const csv="municipio;bairro;local;zona;secao;esperado\r\n"+[...m.values()].sort((a,b)=>(a[0]+a[1]).localeCompare(b[0]+b[1],"pt-BR")).map(([mu,b])=>`${mu};${b};;;;`).join("\r\n");
-  const a=el("a",{href:URL.createObjectURL(new Blob(["﻿"+csv],{type:"text/csv;charset=utf-8"})),download:"votos-esperados-modelo.csv"});document.body.append(a);a.click();a.remove();
-});
 
 /* ---------- eventos ---------- */
 function salvaUrl(){const q=new URLSearchParams({cargo:S.cand.cargo,n:S.cand.nr});if(S.caminho.length)q.set("area",JSON.stringify(S.caminho));history.replaceState(null,"","?"+q)}
