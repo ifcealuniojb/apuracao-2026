@@ -114,6 +114,14 @@ select,input{font:16px var(--sans);color:var(--ink);background:var(--surface);bo
 .lado li.abre{cursor:pointer;border-radius:8px}
 .lado li.abre:hover{background:var(--accent-soft)}
 .lado li.abre .nome b::after{content:" ›";color:var(--ink-3)}
+.lado li.bloco{display:block;padding:10px 4px}
+.lado li.bloco .l1{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.lado li.bloco .nm{font-size:15px}
+.lado li.abre .nm::after{content:" ›";color:var(--ink-3)}
+.lado li.bloco .fez{font-size:15px;white-space:nowrap}
+.lado li.bloco .l2{font-size:12.5px;color:var(--ink-3);margin-top:2px}
+.lado li.bloco .l3{font-size:13px;color:var(--ink-2);margin-top:3px}
+.lado li.bloco .l3 b{color:var(--red)}
 .seg{display:inline-flex;background:var(--gray-soft);border-radius:10px;padding:3px;gap:2px;flex-wrap:wrap}
 .seg button{border:0;background:transparent;color:var(--ink-2);font-weight:700;font-size:12.5px;padding:6px 10px;border-radius:8px;cursor:pointer}
 .seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
@@ -456,11 +464,10 @@ function forteFraco(){
   $("#ff-sub").textContent=`${{regiao:"Regiões",municipio:"Municípios",bairro:"Bairros",local:"Locais de votação",secao:"Seções"}[tipo]} ${prof?prepos(S.caminho.at(-1)).replace(/^em /,"de ").replace(/^no /,"do ").replace(/^na /,"da "):"do Ceará"}, comparados com o desempenho do candidato ${nomeRef} (${pct(ref)} dos válidos).${piso?` Só áreas com ${fmt.format(piso)} ou mais votos válidos.`:""}${tipo!=="secao"?" Toque num lugar para abrir.":""}`;
   trilha("#ff-trilha",pai);
   const podeAbrir=tipo!=="secao";
-  const item=(g,lado)=>{const li=el("li",podeAbrir?{class:"abre",tabindex:"0",role:"button"}:{},
-      lado==="f"?el("span",{class:"nome"},el("b",{},g.nome),el("small",{},g.sub||""))
-               :el("span",{class:"nome"},el("b",{},g.nome),el("small",{},`fez ${fmt.format(g.v)} de ${fmt.format(g.val)} (${pct(g.p)})`)),
-      lado==="f"?el("span",{class:"val"},el("b",{},pct(g.p)),el("small",{style:"display:block"},`${fmt.format(g.v)} votos de ${fmt.format(g.val)}`))
-               :el("span",{class:"val"},el("b",{},`faltaram ${fmt.format(g.falt)} votos`),el("small",{style:"display:block"},`para chegar a ${pct(ref)}`)));
+  const item=(g,lado)=>{const li=el("li",{class:"bloco"+(podeAbrir?" abre":""),...(podeAbrir?{tabindex:"0",role:"button"}:{})},
+      el("div",{class:"l1"},el("b",{class:"nm"},g.nome),el("b",{class:"fez"},`Fez ${pct(g.p)}`)),
+      el("div",{class:"l2"},`teve ${fmt.format(g.v)} de ${fmt.format(g.val)}`),
+      lado==="d"?el("div",{class:"l3"},"Precisa de ",el("b",{},`${fmt.format(g.falt)} votos`)," para atingir a média"):null);
     if(podeAbrir){const ir=()=>navega($("#ff-nivel"),()=>{S.caminho=caminhoAte(g)});li.addEventListener("click",ir);li.addEventListener("keydown",e=>{if(e.key==="Enter")ir()})}
     return li};
   $("#ff-forte").replaceChildren(...(forte.length?forte.map(g=>item(g,"f")):[el("li",{class:"vazio"},`Nenhuma área ficou 10% acima da média ${nomeRef} neste nível.`)]));
