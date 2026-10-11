@@ -481,8 +481,7 @@ function mapa(rs,ref){
       .bindPopup(el("div",{},el("b",{},g.nome),el("br"),porMun?r.reg:`${r.bairro} · ${S.muns[r.mun]}`,el("br"),`${fmt.format(g.v)} votos (${pct(g.p)}) · ${difTexto(g.ind)}`)).addTo(camada);
     pts.push([lat,lon])}
   const enq=S.caminho.map(p=>p.k).join("/");
-  if(pts.length&&enq!==ultimoEnq&&S.caminho.length)M.fitBounds(pts,{padding:[24,24],maxZoom:15});
-  if(!S.caminho.length&&enq!==ultimoEnq)M.setView([-5.2,-39.4],7);
+  if(pts.length&&enq!==ultimoEnq){M.invalidateSize();M.fitBounds(pts,{padding:[24,24],maxZoom:15})}
   $("#leg-nivel").textContent=(porMun?"Um círculo por município":"Um círculo por local de votação")+" · maior = mais votos";
   ultimoEnq=enq;setTimeout(()=>M.invalidateSize(),60);
 }
