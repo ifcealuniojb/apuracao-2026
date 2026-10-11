@@ -193,6 +193,7 @@ footer p{margin:4px 0}
     <div class="acoes">
       <button class="btn" id="bSom" type="button" aria-pressed="false">🔇 Som desligado</button>
       <button class="btn" id="bNotif" type="button">🔔 Ativar notificações</button>
+      <button class="btn" id="bPausa" type="button" aria-pressed="false">⏸ Pausar</button>
       <button class="btn" id="bAtu" type="button">↻ Atualizar</button>
       <button class="btn" id="bSim" type="button">▶ Simular</button>
     </div>
@@ -270,7 +271,7 @@ const st = {
   pres: null, presUF: {}, gov: {}, govUFs: [], fin1: {},     // dados atuais
   modoMapa: "lider", ordem: guarda.get("p2t-ordem", "desc"),
   som: false, avisados: SIM ? {} : guarda.get("p2t-avisos", {}),
-  prox: 0, timer: null, sel: null, carregou: false,
+  prox: 0, timer: null, pausado: false, sel: null, carregou: false,
 };
 
 /* ---------- leitura dos arquivos do TSE ---------- */
@@ -649,18 +650,19 @@ async function ciclo(){
   catch (e) { $("#erro").textContent = "Não foi possível ler os dados do TSE agora. Nova tentativa em instantes."; $("#erro").hidden = false; }
   renderPres(); renderMapa(); renderEstados(); renderGovs(); verificaAvisos();
   const r = st.pres, andando = r && r.est > 0 && !r.tf;
-  $("#vivo").classList.toggle("off", !andando);
-  $("#vivoTxt").textContent = SIM ? "simulação" : r?.tf ? "totalizado" : andando ? "ao vivo" : "aguardando";
+  $("#vivo").classList.toggle("off", !andando || st.pausado);
+  $("#vivoTxt").textContent = st.pausado ? "pausado" : SIM ? "simulação" : r?.tf ? "totalizado" : andando ? "ao vivo" : "aguardando";
   const agora = new Date().toLocaleTimeString("pt-BR");
   const ms = intervalo(); st.prox = Date.now() + ms;
   $("#hora").dataset.base = SIM ? `Simulação · passo ${sim.t}` : `Atualizado às ${agora}` + (r?.hora?.trim() ? ` · TSE ${r.hora.trim().split(" ")[1] || ""}` : "") + (falhas ? ` · ${falhas} arquivo(s) sem resposta` : "");
   relogio();
   if (SIM && r && r.tf && st.govUFs.every(u => st.gov[u]?.tf)) return; // simulação terminou
+  if (st.pausado) return; // pausado: só atualiza ao tocar em "Atualizar"
   st.timer = setTimeout(ciclo, ms);
 }
 function relogio(){
   const h = $("#hora"), s = Math.max(0, Math.round((st.prox - Date.now()) / 1000));
-  h.textContent = (h.dataset.base || "") + (SIM ? "" : ` · próxima em ${s}s`);
+  h.textContent = (h.dataset.base || "") + (st.pausado ? " · atualização automática pausada" : SIM ? "" : ` · próxima em ${s}s`);
 }
 setInterval(relogio, 1000);
 
@@ -697,6 +699,14 @@ function botoes(){
     if (card){ card.scrollIntoView({behavior:"smooth", block:"center"}); card.classList.add("realce"); setTimeout(() => card.classList.remove("realce"), 2500); }
   });
   $("#bAtu").onclick = () => ciclo();
+  const bP = $("#bPausa");
+  bP.onclick = () => {
+    st.pausado = !st.pausado;
+    bP.textContent = st.pausado ? "▶ Retomar" : "⏸ Pausar";
+    bP.classList.toggle("on", st.pausado); bP.setAttribute("aria-pressed", st.pausado);
+    if (st.pausado){ clearTimeout(st.timer); $("#vivo").classList.add("off"); $("#vivoTxt").textContent = "pausado"; relogio(); }
+    else ciclo();
+  };
   bSim.textContent = SIM ? "■ Sair da simulação" : "▶ Simular";
   bSim.classList.toggle("on", SIM);
   bSim.onclick = () => { location.search = SIM ? "" : "?sim=1"; };
