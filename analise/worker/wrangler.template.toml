@@ -1,0 +1,9 @@
+name = "analise-eleitoral"
+main = "src/index.js"
+compatibility_date = "2026-10-01"
+workers_dev = true
+
+[[d1_databases]]
+binding = "DB"
+database_name = "analise-eleitoral"
+database_id = "__DB_ID__"
