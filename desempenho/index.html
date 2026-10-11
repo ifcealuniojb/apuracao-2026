@@ -457,7 +457,7 @@ function desenha(){
   const munsCom=new Set(S.linhas.filter(r=>r.v>0).map(r=>r.mun)).size;
   $("#kpis").replaceChildren(
     kpi("Votos no Ceará",fmt.format(S.ufTot.v),"dos votos válidos: "+pct(S.ufTot.p),true),
-    kpi("Posição no cargo",rank>0?rank+"º":"–","entre "+S.cands.filter(x=>x.cargo===c.cargo&&!(String(x.nr).length===2&&x.cargo>=6)).length+" candidatos"),
+    kpi("Posição no Ceará",rank>0?rank+"º no Ceará":"–","entre "+S.cands.filter(x=>x.cargo===c.cargo&&!(String(x.nr).length===2&&x.cargo>=6)).length+" candidatos, pelos votos no estado"),
     kpi("Teve voto em",munsCom+" de "+Object.keys(S.muns).length,"municípios"),
     kpi("Região mais forte",reg?reg.nome:"–",reg?pct(reg.p)+" dos válidos · média estado "+pct(S.ufTot.p):""));
   cadeiras();
