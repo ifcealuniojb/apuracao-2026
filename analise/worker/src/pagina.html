@@ -4,407 +4,525 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
-<title>Mapa de Votos Ceará</title>
+<title>Mapa de Votos 2026</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <style>
-/* Layout: barra de filtros fixa no topo; resumo; tabela de áreas + mapa lado a lado (empilha no celular); rankings; votos esperados. */
+/* Mesma identidade do site de apuração: azul-marinho + limão, cartões brancos arredondados, fonte arredondada do sistema. */
 :root{
-  --marinho:#13233f; --limao:#c8f03c;
-  --bg:#f3f5f8; --sup:#ffffff; --sup2:#eef1f6; --linha:#d9dee8;
-  --tx:#17202e; --tx2:#566174; --ac:#1d4ed8;
-  --forte:#0f8a5f; --forte-bg:#dff3ea; --fraco:#c2410c; --fraco-bg:#fde9dd; --neutro:#7b8597;
-  --f-ui: system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
-  --f-num: ui-monospace,"SF Mono",Menlo,Consolas,monospace;
-  color-scheme: light;
+  --navy:#1b2a38; --navy-2:#24384a; --navy-mute:#9fb0bf; --lime:#d6f08f;
+  --bg:#f3f4f1; --surface:#ffffff; --surface-2:#f7f8f5; --ink:#17222e; --ink-2:#465363; --ink-3:#7b8692;
+  --line:#e2e5df; --accent:#4c7a1c; --accent-soft:#e8f3d2; --gold:#a67c00; --gold-soft:#fbf1cf;
+  --red:#b0412e; --red-soft:#f7e4df; --gray-soft:#eceee9; --on-accent:#ffffff;
+  --shadow:0 1px 2px rgba(23,34,46,.05),0 10px 28px -14px rgba(23,34,46,.18);
+  --radius:16px;
+  --sans: ui-rounded,"SF Pro Rounded",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  color-scheme:light;
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#0e1420; --sup:#161e2d; --sup2:#1d2738; --linha:#2b3649;
-  --tx:#e6ebf3; --tx2:#9aa6ba; --ac:#7aa2ff;
-  --forte:#3ccf95; --forte-bg:#123528; --fraco:#ff8a50; --fraco-bg:#3a2216; --neutro:#8792a6; color-scheme:dark}}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --navy:#0d1620; --navy-2:#172532; --lime:#cdea7e;
+  --bg:#0f151b; --surface:#16202a; --surface-2:#1b2631; --ink:#eaf0f4; --ink-2:#b2bdc8; --ink-3:#83909c;
+  --line:#26333f; --accent:#a9d45a; --accent-soft:#22331a; --gold:#f2c230; --gold-soft:#3a2f0c;
+  --red:#ef8a78; --red-soft:#3b1d18; --gray-soft:#22303c; --on-accent:#14240a;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px -14px rgba(0,0,0,.6); color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#0e1420; --sup:#161e2d; --sup2:#1d2738; --linha:#2b3649;
-  --tx:#e6ebf3; --tx2:#9aa6ba; --ac:#7aa2ff;
-  --forte:#3ccf95; --forte-bg:#123528; --fraco:#ff8a50; --fraco-bg:#3a2216; --neutro:#8792a6; color-scheme:dark}
+  --navy:#0d1620; --navy-2:#172532; --lime:#cdea7e;
+  --bg:#0f151b; --surface:#16202a; --surface-2:#1b2631; --ink:#eaf0f4; --ink-2:#b2bdc8; --ink-3:#83909c;
+  --line:#26333f; --accent:#a9d45a; --accent-soft:#22331a; --gold:#f2c230; --gold-soft:#3a2f0c;
+  --red:#ef8a78; --red-soft:#3b1d18; --gray-soft:#22303c; --on-accent:#14240a;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px -14px rgba(0,0,0,.6); color-scheme:dark}
 *{box-sizing:border-box}
-html,body{margin:0}
-body{background:var(--bg);color:var(--tx);font:15px/1.45 var(--f-ui);padding-bottom:env(safe-area-inset-bottom,0px)}
-header{background:var(--marinho);color:#fff;padding:calc(10px + env(safe-area-inset-top,0px)) 16px 10px}
-.topo{max-width:1280px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px}
-.topo h1{font-size:18px;margin:0;letter-spacing:.2px}
-.topo h1 b{color:var(--limao)}
-.selo{font-size:11px;text-transform:uppercase;letter-spacing:.08em;background:var(--limao);color:var(--marinho);padding:3px 8px;border-radius:3px;font-weight:700}
-.topo .info{margin-left:auto;font-size:12px;opacity:.8}
-.filtros{position:sticky;top:0;z-index:1100;background:var(--sup);border-bottom:1px solid var(--linha);padding:10px 16px}
-.filtros .in{max-width:1280px;margin:0 auto;display:flex;flex-wrap:wrap;gap:10px 14px;align-items:end}
-label.cp{display:flex;flex-direction:column;gap:3px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);min-width:0}
-select,input{font:16px var(--f-ui);color:var(--tx);background:var(--sup2);border:1px solid var(--linha);border-radius:6px;padding:7px 9px;min-width:0}
-input:focus,select:focus,button:focus-visible,a:focus-visible{outline:2px solid var(--ac);outline-offset:1px}
-#cand{width:min(420px,88vw)}
-main{max-width:1280px;margin:0 auto;padding:14px 16px 40px;display:flex;flex-direction:column;gap:16px}
-.migalha{display:flex;flex-wrap:wrap;gap:4px;align-items:center;font-size:14px}
-.migalha button{all:unset;cursor:pointer;color:var(--ac);padding:2px 4px;border-radius:4px}
-.migalha button:hover{background:var(--sup2)}
-.migalha span.sep{color:var(--tx2)}
-.migalha .atual{font-weight:700;padding:2px 4px}
-.resumo{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
-.kpi{background:var(--sup);border:1px solid var(--linha);border-radius:8px;padding:10px 12px;min-width:0}
-.kpi .r{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2)}
-.kpi .v{font:600 22px var(--f-num);font-variant-numeric:tabular-nums;margin-top:2px}
-.kpi .s{font-size:12px;color:var(--tx2)}
-.grade{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:16px;align-items:start}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+html,body{margin:0;max-width:100%;overflow-x:hidden}
+@supports (overflow:clip){html,body{overflow-x:clip}}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+.wrap{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right))}
+[hidden]{display:none!important}
+button{font-family:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* topo */
+header.top{background:var(--navy);color:#fff;padding-top:env(safe-area-inset-top)}
+.top .wrap{display:flex;align-items:center;gap:14px;padding-block:16px}
+.logo{width:40px;height:40px;border-radius:11px;background:var(--lime);color:var(--navy);display:grid;place-items:center;flex:none}
+.brand h1{font-weight:800;font-size:22px;letter-spacing:-.02em;margin:0;display:flex;align-items:baseline;gap:6px}
+.brand h1 span{color:var(--lime);font-weight:700}
+.top .src{margin-left:auto;text-align:right;color:var(--navy-mute);font-size:11.5px;line-height:1.35}
+.top .src b{color:#fff;font-size:12.5px;display:block}
+
+/* abertura */
+.hero{padding:30px 0 12px}
+.eyebrow{font-size:11.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-2);margin-bottom:6px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.eyebrow .val{background:var(--gold-soft);color:var(--gold);border-radius:999px;padding:2px 9px;letter-spacing:.08em}
+.hero h2{font-weight:800;letter-spacing:-.03em;font-size:clamp(28px,4.4vw,42px);line-height:1.08;margin:0 0 8px;text-wrap:balance}
+.hero h2 .q{color:var(--accent)}
+.hero p{margin:0;color:var(--ink-2);max-width:68ch}
+
+.panel,.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.panel{padding:16px;margin-top:16px;display:grid;grid-template-columns:minmax(0,220px) minmax(0,1fr);gap:12px 14px}
+@media (max-width:640px){.panel{grid-template-columns:minmax(0,1fr)}}
+label.f{display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:600;color:var(--ink-2);min-width:0}
+select,input{font:16px var(--sans);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:11px;height:46px;padding:0 12px;min-width:0;width:100%}
+.busca{position:relative}
+.busca input{padding-left:38px}
+.busca svg{position:absolute;left:12px;bottom:14px;color:var(--ink-3)}
+.ac{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:1200;background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);max-height:min(380px,55vh);overflow:auto}
+.ac button{all:unset;box-sizing:border-box;display:flex;gap:10px;align-items:center;width:100%;padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--line)}
+.ac button:hover,.ac button[aria-selected="true"]{background:var(--accent-soft)}
+.ac .nm{flex:1;min-width:0}
+.ac .nm b{display:block;font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ac .nm small{color:var(--ink-3)}
+.ac .v{font-size:12.5px;color:var(--ink-2);white-space:nowrap}
+.ph{width:38px;height:50px;border-radius:9px;background:var(--gray-soft) center/cover no-repeat;flex:none}
+.num{background:var(--gray-soft);border-radius:5px;padding:0 5px;color:var(--ink-2);font-size:12px;font-weight:600}
+
+/* ficha */
+.ficha{margin-top:22px;overflow:hidden}
+.fhead{background:var(--navy);color:#fff;padding:18px 20px;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.fhead .ph{width:72px;height:96px;border-radius:12px;box-shadow:0 0 0 2px rgba(255,255,255,.12)}
+.fhead h3{margin:0;font-size:25px;font-weight:800;letter-spacing:-.01em;line-height:1.15}
+.fhead h3 .pt{color:var(--lime)}
+.fhead .sub{color:var(--navy-mute);font-size:13.5px;margin-top:3px}
+.fhead .num{background:rgba(255,255,255,.12);color:#fff}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;padding:16px}
+.kpi{border:1px solid var(--line);border-radius:14px;padding:12px 14px;background:var(--surface)}
+.kpi span{font-size:12px;color:var(--ink-2);font-weight:600}
+.kpi b{display:block;font-size:22px;font-weight:800;margin-top:4px;letter-spacing:-.01em}
+.kpi small{color:var(--ink-3);font-size:12px}
+.kpi.big{background:var(--navy);border-color:var(--navy);color:#fff}
+.kpi.big span,.kpi.big small{color:var(--navy-mute)}
+.kpi.big b{color:var(--lime);font-size:34px;letter-spacing:-.03em}
+
+.badge{display:inline-block;font-size:12px;font-weight:700;border-radius:999px;padding:3px 10px;white-space:nowrap}
+.badge.forte{background:var(--accent-soft);color:var(--accent)}
+.badge.fraco{background:var(--red-soft);color:var(--red)}
+.badge.media{background:var(--gray-soft);color:var(--ink-2)}
+.badge.ouro{background:var(--gold-soft);color:var(--gold)}
+
+/* forte × atenção */
+.duas{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:14px;margin-top:14px}
+.lado{padding:14px 16px}
+.lado h4{margin:0 0 2px;font-size:16px;font-weight:800}
+.lado .exp{margin:0 0 10px;color:var(--ink-3);font-size:12.5px}
+.lado ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.lado li{display:flex;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+.lado li .nome{flex:1;min-width:0}
+.lado li .nome b{display:block;font-size:14.5px}
+.lado li .nome small{color:var(--ink-3)}
+.lado li .val{text-align:right;font-size:13px;color:var(--ink-2)}
+.lado li .val b{display:block;font-size:15px;color:var(--ink)}
+.lado .vazio{color:var(--ink-3);font-size:13.5px;padding:8px 0}
+.seg{display:inline-flex;background:var(--gray-soft);border-radius:10px;padding:3px;gap:2px;flex-wrap:wrap}
+.seg button{border:0;background:transparent;color:var(--ink-2);font-weight:700;font-size:12.5px;padding:6px 10px;border-radius:8px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+
+/* explorar */
+.sec-t{display:flex;flex-wrap:wrap;align-items:end;gap:10px 16px;margin:30px 0 10px}
+.sec-t h3{margin:0;font-size:20px;font-weight:800;letter-spacing:-.01em}
+.sec-t p{margin:2px 0 0;color:var(--ink-3);font-size:13px}
+.sec-t .dir{margin-left:auto;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.trilha{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:10px}
+.trilha button{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:5px 12px;font-weight:700;font-size:13px;cursor:pointer}
+.trilha button:hover{background:var(--accent-soft)}
+.trilha .at{background:var(--navy);color:#fff;border-radius:999px;padding:5px 12px;font-weight:700;font-size:13px}
+.trilha .sep{color:var(--ink-3)}
+.grade{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:14px;align-items:start}
 @media (max-width:900px){.grade{grid-template-columns:minmax(0,1fr)}}
-.caixa{background:var(--sup);border:1px solid var(--linha);border-radius:8px;min-width:0}
-.caixa h2{font-size:15px;margin:0;padding:10px 12px;border-bottom:1px solid var(--linha);display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;text-wrap:balance}
-.caixa h2 .dir{margin-left:auto;display:flex;gap:8px;align-items:center;font-weight:400}
-.caixa .nota{font-size:12px;color:var(--tx2);padding:8px 12px}
-.rolagem{overflow-x:auto;max-height:560px;overflow-y:auto}
-table{width:100%;border-collapse:collapse;font-size:13.5px}
-th,td{padding:7px 10px;border-bottom:1px solid var(--linha);text-align:right;white-space:nowrap}
-th:first-child,td:first-child{text-align:left;white-space:normal;min-width:160px}
-thead th{position:sticky;top:0;background:var(--sup2);font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);cursor:pointer;user-select:none}
-thead th[aria-sort] {color:var(--tx)}
-td.n{font-family:var(--f-num);font-variant-numeric:tabular-nums}
-tbody tr:hover{background:var(--sup2)}
-tr.click td:first-child{color:var(--ac);cursor:pointer}
-.sub{display:block;font-size:11.5px;color:var(--tx2)}
-.chip{display:inline-block;font:600 11px var(--f-ui);padding:2px 7px;border-radius:10px;letter-spacing:.02em}
-.chip.f{background:var(--forte-bg);color:var(--forte)}
-.chip.d{background:var(--fraco-bg);color:var(--fraco)}
-.chip.m{background:var(--sup2);color:var(--neutro)}
-#mapa{height:560px;border-radius:0 0 8px 8px}
+.lista{overflow:hidden}
+.lista .cab,.lista .ln{display:grid;grid-template-columns:minmax(0,1fr) 92px 128px;gap:10px;align-items:center;padding:10px 14px}
+.lista .cab{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);border-bottom:1px solid var(--line)}
+.lista .cab button{all:unset;cursor:pointer}
+.lista .cab .r,.lista .ln .r{text-align:right}
+.lista .corpo{max-height:600px;overflow:auto}
+.lista .ln{border-bottom:1px solid var(--line)}
+.lista .ln.abre{cursor:pointer}
+.lista .ln.abre:hover{background:var(--accent-soft)}
+.lista .ln .n b{display:block;font-size:14.5px;font-weight:700}
+.lista .ln.abre .n b::after{content:" ›";color:var(--ink-3)}
+.lista .ln .n small{color:var(--ink-3);font-size:12px}
+.lista .ln .r b{display:block;font-size:15px;font-weight:800}
+.lista .ln .r small{color:var(--ink-3);font-size:12px}
+.barra{height:6px;background:var(--gray-soft);border-radius:4px;margin-top:6px;position:relative;overflow:visible}
+.barra i{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:var(--accent)}
+.barra em{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink-2);border-radius:1px}
+@media (max-width:520px){.lista .cab,.lista .ln{grid-template-columns:minmax(0,1fr) 84px 108px;padding:10px 12px}}
+#mapa{height:600px}
 @media (max-width:900px){#mapa{height:380px}}
-.leg{display:flex;flex-wrap:wrap;gap:6px 14px;padding:8px 12px;font-size:12px;color:var(--tx2);border-top:1px solid var(--linha)}
+.leg{display:flex;flex-wrap:wrap;gap:6px 14px;padding:10px 14px;font-size:12px;color:var(--ink-2);border-top:1px solid var(--line)}
 .leg i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
-.duas{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:16px}
-.vazio{padding:28px 16px;text-align:center;color:var(--tx2)}
-button.bt{font:600 14px var(--f-ui);background:var(--marinho);color:#fff;border:0;border-radius:6px;padding:8px 12px;cursor:pointer}
-button.bt.sec{background:var(--sup2);color:var(--tx);border:1px solid var(--linha)}
-.linha-acoes{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:10px 12px}
-.carreg{z-index:1200!important;position:fixed;inset:auto 16px calc(16px + env(safe-area-inset-bottom,0px)) auto;background:var(--marinho);color:#fff;padding:8px 12px;border-radius:6px;font-size:13px;z-index:900}
-footer{max-width:1280px;margin:0 auto;padding:0 16px 30px;font-size:12px;color:var(--tx2)}
-footer p{margin:4px 0;max-width:90ch}
-.leaflet-container{background:var(--sup2);font:13px var(--f-ui)}
+.mapa-card{overflow:hidden}
+
+details.card{margin-top:14px}
+details.card summary{cursor:pointer;padding:14px 16px;font-weight:800;font-size:16px;list-style:none;display:flex;gap:8px;align-items:center}
+details.card summary::-webkit-details-marker{display:none}
+details.card summary::before{content:"+";display:grid;place-items:center;width:22px;height:22px;border-radius:7px;background:var(--gray-soft);color:var(--ink-2);font-weight:800}
+details.card[open] summary::before{content:"−"}
+details.card .corpo{padding:0 16px 16px;color:var(--ink-2)}
+details.card .corpo p{margin:0 0 10px;max-width:75ch}
+.ex{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:14px}
+.btn{font:700 14px var(--sans);border-radius:10px;padding:9px 14px;cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.btn.esc{background:var(--navy);border-color:var(--navy);color:#fff}
+.acoes{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:10px 0}
+table.esp{width:100%;border-collapse:collapse;font-size:14px}
+table.esp th,table.esp td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+table.esp th:first-child,table.esp td:first-child{text-align:left;white-space:normal}
+table.esp th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.rolar{overflow-x:auto}
+
+.vazio-g{padding:40px 16px;text-align:center;color:var(--ink-2)}
+.vazio-g b{display:block;color:var(--ink);font-size:20px;margin-bottom:4px}
+.carreg{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));background:var(--navy);color:#fff;padding:9px 14px;border-radius:10px;font-size:13px;font-weight:700;z-index:1300}
+footer{background:var(--navy);color:var(--navy-mute);margin-top:36px;padding:22px 0 calc(34px + env(safe-area-inset-bottom));font-size:12.5px}
+footer p{margin:4px 0;max-width:95ch}
+footer b{color:#fff}
+.leaflet-container{background:var(--surface-2);font:13px var(--sans)}
 .leaflet-popup-content{margin:10px 12px;line-height:1.4}
-@media (max-width:700px){.filtros{position:static}}
-@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
 <body>
-<header><div class="topo">
-  <h1>Mapa de Votos <b>Ceará</b></h1>
-  <span class="selo">Em validação · não publicado</span>
-  <span class="info" id="info">Eleições 2026 · 1º turno</span>
+<header class="top"><div class="wrap">
+  <div class="logo" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></div>
+  <div class="brand"><h1>Mapa de Votos <span>2026</span></h1></div>
+  <div class="src"><b>Dados oficiais do TSE</b>Ceará · 1º turno</div>
 </div></header>
 
-<div class="filtros"><div class="in">
-  <label class="cp">Cargo <select id="cargo"></select></label>
-  <label class="cp">Candidato ou legenda <input id="cand" list="lista" placeholder="Nome ou número" autocomplete="off"></label>
-  <datalist id="lista"></datalist>
-  <label class="cp">Índice comparado com
-    <select id="ref"><option value="uf">Média no estado</option><option value="pai">Média na área aberta</option></select>
-  </label>
-</div></div>
+<div class="wrap">
+  <section class="hero">
+    <div class="eyebrow">Análise eleitoral <span class="val">Em validação · não publicado</span></div>
+    <h2>Onde estão os votos do seu candidato<span class="q">?</span></h2>
+    <p>Escolha o cargo e busque o candidato. Veja onde ele é forte, onde ficou abaixo da média e explore do Ceará até a seção eleitoral.</p>
+    <div class="panel">
+      <label class="f">Cargo<select id="cargo"></select></label>
+      <label class="f busca">Buscar candidato
+        <input id="q" type="search" placeholder="Nome, número ou partido" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="ac">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <div class="ac" id="ac" role="listbox" hidden></div>
+      </label>
+    </div>
+  </section>
 
-<main>
-  <nav class="migalha" id="migalha" aria-label="Área"></nav>
-  <section class="resumo" id="resumo"></section>
+  <div id="vazio" class="card vazio-g" style="margin-top:22px"><b>Carregando os dados do TSE…</b>Isso leva alguns segundos na primeira vez.</div>
 
-  <div class="grade">
-    <section class="caixa">
-      <h2><span id="t-areas">Áreas</span>
-        <span class="dir" id="agrup-box" hidden><label class="cp" style="flex-direction:row;align-items:center;gap:6px">Ver por
-          <select id="agrup"><option value="bairro">Bairro</option><option value="zona">Zona eleitoral</option></select></label></span>
-      </h2>
-      <div class="rolagem"><table id="tab"><thead></thead><tbody></tbody></table></div>
-      <div class="nota">Clique no nome para abrir a área. Índice = % do candidato na área ÷ média de referência. Acima de 1,10 = reduto; abaixo de 0,90 = deficiência.</div>
+  <div id="conteudo" hidden>
+    <section class="card ficha">
+      <div class="fhead">
+        <div class="ph" id="f-foto"></div>
+        <div style="min-width:0;flex:1">
+          <h3 id="f-nome"></h3>
+          <div class="sub" id="f-sub"></div>
+        </div>
+        <span class="badge ouro" id="f-situ" hidden></span>
+      </div>
+      <div class="kpis" id="kpis"></div>
     </section>
-    <section class="caixa">
-      <h2>Locais de votação no mapa</h2>
-      <div id="mapa" role="region" aria-label="Mapa dos locais de votação"></div>
-      <div class="leg"><span><i style="background:var(--forte)"></i>Reduto</span><span><i style="background:var(--neutro)"></i>Na média</span><span><i style="background:var(--fraco)"></i>Deficiência</span><span>Tamanho do círculo = votos</span></div>
-    </section>
+
+    <div class="sec-t">
+      <div><h3>Onde é forte e onde precisa de atenção</h3><p id="ff-sub"></p></div>
+      <div class="dir"><div class="seg" id="ff-nivel" role="group" aria-label="Nível">
+        <button type="button" data-v="regiao">Regiões</button><button type="button" data-v="municipio" aria-pressed="true">Municípios</button><button type="button" data-v="bairro">Bairros</button><button type="button" data-v="local">Locais</button>
+      </div></div>
+    </div>
+    <div class="duas">
+      <div class="card lado"><h4 style="color:var(--accent)">Redutos</h4><p class="exp">Onde a fatia de votos ficou bem acima da média.</p><ol id="ff-forte"></ol></div>
+      <div class="card lado"><h4 style="color:var(--red)">Onde mais faltaram votos</h4><p class="exp">Votos a mais se tivesse alcançado a média nesses lugares.</p><ol id="ff-fraco"></ol></div>
+    </div>
+
+    <div class="sec-t">
+      <div><h3>Explorar por área</h3><p>Toque numa área para abrir. A barra mostra a fatia de votos; o traço é a média de comparação.</p></div>
+      <div class="dir">
+        <div class="seg" id="ref" role="group" aria-label="Comparar com"><button type="button" data-v="uf" aria-pressed="true">vs. Ceará</button><button type="button" data-v="pai">vs. área aberta</button></div>
+        <div class="seg" id="agrup" role="group" aria-label="Agrupar" hidden><button type="button" data-v="bairro" aria-pressed="true">Bairros</button><button type="button" data-v="zona">Zonas</button></div>
+      </div>
+    </div>
+    <nav class="trilha" id="trilha" aria-label="Área aberta"></nav>
+    <div class="grade">
+      <section class="card lista" aria-label="Áreas">
+        <div class="cab"><button type="button" data-o="nome">Área</button><button type="button" class="r" data-o="v">Votos</button><button type="button" class="r" data-o="ind">vs. média</button></div>
+        <div class="corpo" id="lista"></div>
+      </section>
+      <section class="card mapa-card">
+        <div id="mapa" role="region" aria-label="Mapa dos locais de votação"></div>
+        <div class="leg"><span><i style="background:var(--accent)"></i>Reduto</span><span><i style="background:var(--ink-3)"></i>Na média</span><span><i style="background:var(--red)"></i>Abaixo da média</span><span>Círculo maior = mais votos</span></div>
+      </section>
+    </div>
+
+    <details class="card" id="como">
+      <summary>Como ler: reduto, média e "faltaram"</summary>
+      <div class="corpo">
+        <p><b>Fatia de votos</b> é a porcentagem dos votos válidos daquela área que foram para o candidato.</p>
+        <p><b>Comparação com a média</b> mostra quanto essa fatia ficou acima ou abaixo da fatia do candidato no Ceará inteiro (ou na área aberta, se você escolher "vs. área aberta").</p>
+        <p class="ex" id="exemplo"></p>
+        <p><span class="badge forte">Reduto</span> 10% ou mais acima da média. <span class="badge fraco">Abaixo da média</span> 10% ou mais abaixo. <span class="badge media">Na média</span> entre os dois.</p>
+        <p><b>Faltaram</b> são os votos que o candidato teria a mais se tivesse feito a sua média naquela área. Serve para ver onde há mais votos a buscar, e não só onde a porcentagem é baixa.</p>
+        <p>Nas listas de redutos e de faltas, áreas com poucos votos válidos ficam de fora para não distorcer.</p>
+      </div>
+    </details>
+
+    <details class="card" id="esp-box">
+      <summary>Comparar com os votos esperados</summary>
+      <div class="corpo">
+        <p>Carregue a planilha do candidato em CSV. Ela é lida só neste aparelho e não é enviada a lugar nenhum. Colunas aceitas: <b>municipio</b>, <b>bairro</b>, <b>local</b>, <b>zona</b>, <b>secao</b> e <b>esperado</b>. Preencha só as do nível que quiser comparar.</p>
+        <div class="acoes">
+          <input type="file" id="arq" accept=".csv,text/csv" style="height:auto;padding:8px;width:auto;max-width:100%">
+          <button class="btn" id="modelo" type="button">Baixar modelo com os bairros da área aberta</button>
+        </div>
+        <div class="rolar"><table class="esp" id="tab-esp"><thead><tr><th>Área</th><th>Esperado</th><th>Obtido</th><th>Diferença</th><th>Atingido</th></tr></thead><tbody><tr><td colspan="5" style="text-align:left;color:var(--ink-3)">Nenhuma planilha carregada.</td></tr></tbody></table></div>
+      </div>
+    </details>
   </div>
+</div>
 
-  <section class="caixa">
-    <h2>Redutos e deficiências
-      <span class="dir">
-        <label class="cp" style="flex-direction:row;align-items:center;gap:6px">Nível
-          <select id="rk-nivel"><option value="municipio">Município</option><option value="bairro" selected>Bairro</option><option value="local">Local de votação</option><option value="secao">Seção</option></select></label>
-        <label class="cp" style="flex-direction:row;align-items:center;gap:6px">Mínimo de votos válidos
-          <input id="rk-piso" type="number" min="0" step="50" value="200" style="width:90px"></label>
-      </span>
-    </h2>
-    <div class="duas" style="padding:12px">
-      <div><h3 style="margin:0 0 6px;font-size:14px;color:var(--forte)">Maiores redutos</h3><div class="rolagem" style="max-height:420px"><table id="rk-f"><thead></thead><tbody></tbody></table></div></div>
-      <div><h3 style="margin:0 0 6px;font-size:14px;color:var(--fraco)">Onde mais faltaram votos</h3><div class="rolagem" style="max-height:420px"><table id="rk-d"><thead></thead><tbody></tbody></table></div></div>
-    </div>
-    <div class="nota">"Faltaram" = votos que o candidato teria a mais se tivesse alcançado a média de referência naquela área. Áreas com poucos votos válidos ficam de fora para não distorcer.</div>
-  </section>
-
-  <section class="caixa">
-    <h2>Votos esperados × obtidos</h2>
-    <div class="nota">Carregue a planilha do candidato (CSV). Ela é lida só neste navegador e não é enviada a lugar nenhum. Colunas aceitas: <code>municipio</code>, <code>bairro</code>, <code>local</code>, <code>zona</code>, <code>secao</code> e <code>esperado</code>. Preencha só as colunas do nível desejado.</div>
-    <div class="linha-acoes">
-      <input type="file" id="arq" accept=".csv,text/csv">
-      <button class="bt sec" id="modelo" type="button">Baixar modelo da área aberta</button>
-    </div>
-    <div class="rolagem" style="max-height:480px"><table id="tab-esp"><thead></thead><tbody></tbody></table></div>
-  </section>
-</main>
-
-<footer>
-  <p id="fonte">Dados: Tribunal Superior Eleitoral (TSE), Portal de Dados Abertos: votação por seção eleitoral e eleitorado por local de votação.</p>
-  <p>Regiões de planejamento: IPECE (Governo do Ceará). Mapa: © colaboradores do OpenStreetMap. Bairro = bairro do local de votação informado ao TSE, não o endereço do eleitor.</p>
-</footer>
+<footer><div class="wrap">
+  <p id="fonte"><b>Fonte:</b> Tribunal Superior Eleitoral (TSE): votação por seção eleitoral e eleitorado por local de votação (Portal de Dados Abertos); nomes, partidos, situação e fotos do ambiente oficial de resultados.</p>
+  <p>Regiões de planejamento: IPECE (Governo do Ceará). Mapa: © colaboradores do OpenStreetMap. O bairro é o do local de votação informado ao TSE, não o endereço do eleitor.</p>
+</div></footer>
 <div class="carreg" id="carreg" hidden>Carregando…</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
 "use strict";
-const ANO=2026, TURNO=1, UF="CE";
+const ANO=2026, TURNO=1, UF="CE", TSE="https://resultados.tse.jus.br/oficial/ele2026";
 const $=s=>document.querySelector(s);
 const fmt=new Intl.NumberFormat("pt-BR");
-const pct=x=>isFinite(x)?(x*100).toLocaleString("pt-BR",{minimumFractionDigits:1,maximumFractionDigits:1})+"%":"–";
-const pctP=x=>isFinite(x)?(x*100).toLocaleString("pt-BR",{minimumFractionDigits:x<0.01?2:1,maximumFractionDigits:x<0.01?2:1})+"%":"–";
+const pct=x=>isFinite(x)?(x*100).toLocaleString("pt-BR",{minimumFractionDigits:x<0.01&&x>0?2:1,maximumFractionDigits:x<0.01&&x>0?2:1})+"%":"–";
 const r2=x=>Math.round(x*100)/100;
-const idx=x=>isFinite(x)?x.toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2}):"–";
 const norm=s=>String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toUpperCase().replace(/\s+/g," ").trim();
-const el=(t,a={},...f)=>{const e=document.createElement(t);for(const[k,v]of Object.entries(a)){if(k==="class")e.className=v;else if(k.startsWith("on"))e.addEventListener(k.slice(2),v);else e.setAttribute(k,v)}for(const x of f)e.append(x instanceof Node?x:document.createTextNode(x??""));return e};
+const el=(t,a={},...f)=>{const e=document.createElement(t);for(const[k,v]of Object.entries(a)){if(k==="class")e.className=v;else if(k==="style")e.style.cssText=v;else if(k.startsWith("on"))e.addEventListener(k.slice(2),v);else e.setAttribute(k,v)}for(const x of f)if(x!=null&&x!==false)e.append(x instanceof Node?x:document.createTextNode(x));return e};
+const titulo=s=>String(s||"").toLowerCase().replace(/(^|[\s\-/(])([a-zà-ú])/g,(m,a,b)=>a+b.toUpperCase()).replace(/\b(De|Da|Do|Das|Dos|E)\b/g,w=>w.toLowerCase());
 
-const S={muns:{},reg:{},regioes:[],cands:[],G:null,T:{},C:null,linhas:[],caminho:[],ordem:{col:"v",dir:-1},esperados:null};
-let carregando=0;
-function busy(d){carregando+=d;$("#carreg").hidden=carregando<=0}
-async function api(path){busy(1);try{const r=await fetch(path,{credentials:"same-origin"});if(!r.ok)throw new Error((await r.json().catch(()=>({}))).erro||("HTTP "+r.status));return await r.json()}finally{busy(-1)}}
-const bloco=k=>api("/api/bloco?k2="+encodeURIComponent(`${ANO}/${TURNO}/${UF}/${k}`));
 const CARGOS={1:"Presidente",3:"Governador",5:"Senador",6:"Deputado Federal",7:"Deputado Estadual"};
+const S={muns:{},reg:{},cands:[],tse:{},G:null,T:{},C:null,linhas:[],caminho:[],ordem:{col:"v",dir:-1},ref:"uf",agrup:"bairro",ffNivel:"municipio",esperados:null};
 
-/* ---------- carga inicial ---------- */
+let nCarreg=0;
+function busy(d){nCarreg+=d;$("#carreg").hidden=nCarreg<=0}
+async function api(path){busy(1);try{const r=await fetch(path,{credentials:"same-origin"});if(!r.ok)throw new Error((await r.json().catch(()=>({}))).erro||("erro "+r.status));return await r.json()}finally{busy(-1)}}
+const bloco=k=>api("/api/bloco?k2="+encodeURIComponent(`${ANO}/${TURNO}/${UF}/${k}`));
+
+/* nomes de urna, partidos, situação e fotos: ambiente oficial de resultados do TSE */
+async function dadosTSE(cargo){
+  if(S.tse[cargo])return S.tse[cargo];
+  const ele=cargo===1?"6257":"6259", ab=cargo===1?"br":"ce", c=String(cargo).padStart(4,"0");
+  const out={};
+  try{
+    const r=await fetch(`${TSE}/${ele}/dados/${ab}/${ab}-c${c}-e00${ele}-u.json`).then(r=>r.json());
+    for(const a of r.carg?.[0]?.agr||[])for(const p of a.par||[]){
+      out[p.n]=out[p.n]||{nmu:p.nm,sg:p.sg,legenda:true};
+      for(const k of p.cand||[])out[k.n]={nmu:k.nmu,sg:p.sg,st:k.st,sq:k.sqcand,foto:`${TSE}/${ele}/fotos/${ab}/${k.sqcand}.jpeg`};
+    }
+  }catch(e){/* sem enriquecimento: usa os nomes do arquivo de seções */}
+  return S.tse[cargo]=out;
+}
+function info(c){const t=(S.tse[c.cargo]||{})[c.nr]||{};const leg=String(c.nr).length===2&&c.cargo>=6;
+  return{nome:leg?`Legenda ${t.sg||c.nome}`:(t.nmu||c.nome),sg:t.sg||"",st:t.st||"",foto:leg?null:(t.foto||null),completo:c.nome,leg}}
+
+/* ---------- carga ---------- */
 async function inicio(){
-  const [muns,reg,status]=await Promise.all([api(`/api/municipios?ano=${ANO}&turno=${TURNO}&uf=${UF}`),api(`/api/regioes?uf=${UF}`),api("/api/status")]);
-  for(const m of muns)S.muns[m.cd_mun]=m.nome;
-  S.reg=reg.municipio_regiao||{}; S.regioes=reg.regioes||[];
+  const [muns,reg,status,cs]=await Promise.all([api(`/api/municipios?ano=${ANO}&turno=${TURNO}&uf=${UF}`),api(`/api/regioes?uf=${UF}`),api("/api/status"),api(`/api/candidatos?ano=${ANO}&turno=${TURNO}&uf=${UF}`)]);
+  for(const m of muns)S.muns[m.cd_mun]=titulo(m.nome);
+  S.reg=reg.municipio_regiao||{};
+  S.cands=cs.filter(c=>c.nr!==95&&c.nr!==96);
   const st=status.find(s=>s.chave===`carga/${ANO}/${TURNO}/${UF}`);
-  if(st)$("#fonte").textContent=`Dados: Tribunal Superior Eleitoral (TSE), Portal de Dados Abertos: votação por seção eleitoral (gerado em ${st.geracao_tse}) e eleitorado por local de votação. Carregado em ${st.carregado_em}.`;
+  if(st)$("#fonte").replaceChildren(el("b",{},"Fonte: "),`Tribunal Superior Eleitoral (TSE). Votação por seção eleitoral (arquivo gerado em ${st.geracao_tse}) e eleitorado por local de votação, do Portal de Dados Abertos; nomes, partidos, situação e fotos do ambiente oficial de resultados.`);
+  const cargos=[...new Set(S.cands.map(c=>c.cargo))].sort((a,b)=>a-b);
+  $("#cargo").replaceChildren(...cargos.map(c=>el("option",{value:c},CARGOS[c]||c)));
   S.G=await bloco("g");
-  const cs=await api(`/api/candidatos?ano=${ANO}&turno=${TURNO}&uf=${UF}`);
-  S.cands=cs;
-  const cargos=[...new Set(cs.map(c=>c.cargo))].sort((a,b)=>a-b);
-  $("#cargo").replaceChildren(...cargos.map(c=>el("option",{value:c},CARGOS[c]||cs.find(x=>x.cargo===c).ds_cargo)));
   const q=new URLSearchParams(location.search);
   $("#cargo").value=q.get("cargo")||"3";
-  await trocaCargo(q.get("n"));
   if(q.get("area"))try{S.caminho=JSON.parse(q.get("area"))}catch{}
+  await trocaCargo(q.get("n"));
+}
+async function trocaCargo(nr){
+  const cargo=+$("#cargo").value;
+  await Promise.all([dadosTSE(cargo),S.T[cargo]?null:bloco("t/"+cargo).then(t=>S.T[cargo]=t)]);
+  const lista=S.cands.filter(c=>c.cargo===cargo);
+  const c=lista.find(c=>String(c.nr)===String(nr))||lista[0];
+  await escolhe(c);
+}
+async function escolhe(c){
+  if(!c)return;
+  S.cand=c;$("#q").value="";fechaAc();
+  S.C=await bloco(`c/${c.cargo}/${c.nr}`);
+  montaLinhas();
+  $("#vazio").hidden=true;$("#conteudo").hidden=false;
   desenha();
 }
 
-function rotulo(c){return c.nr===95?"Voto branco":c.nr===96?"Voto nulo":`${c.nr} - ${c.nome}${String(c.nr).length===2&&c.cargo>=6?" (legenda)":""}`}
-async function trocaCargo(nrInicial){
-  const cargo=+$("#cargo").value;
-  const lista=S.cands.filter(c=>c.cargo===cargo&&c.nr!==95&&c.nr!==96);
-  $("#lista").replaceChildren(...lista.map(c=>el("option",{value:rotulo(c)})));
-  if(!S.T[cargo])S.T[cargo]=await bloco("t/"+cargo);
-  const esc=lista.find(c=>String(c.nr)===String(nrInicial))||lista[0];
-  $("#cand").value=esc?rotulo(esc):"";
-  await trocaCand(esc);
+/* ---------- busca ---------- */
+let acSel=-1;
+function abreAc(){
+  const cargo=+$("#cargo").value, t=norm($("#q").value);
+  const lista=S.cands.filter(c=>c.cargo===cargo).map(c=>({c,i:info(c)}))
+    .filter(({c,i})=>!t||String(c.nr).startsWith(t)||norm(i.nome).split(" ").some(w=>w.startsWith(t))||norm(c.nome).includes(t)||norm(i.sg).startsWith(t))
+    .slice(0,40);
+  acSel=-1;
+  $("#ac").replaceChildren(...lista.map(({c,i})=>el("button",{type:"button",role:"option",onclick:()=>escolhe(c)},
+    el("span",{class:"ph",style:i.foto?`background-image:url("${i.foto}")`:""}),
+    el("span",{class:"nm"},el("b",{},i.nome+(i.sg&&!i.leg?" - "+i.sg:"")),el("small",{},el("span",{class:"num"},String(c.nr))," ",i.leg?"voto na legenda":titulo(i.completo))),
+    el("span",{class:"v"},fmt.format(c.total)+" votos"))));
+  if(!lista.length)$("#ac").replaceChildren(el("div",{style:"padding:12px;color:var(--ink-3)"},"Nenhum candidato encontrado neste cargo."));
+  $("#ac").hidden=false;$("#q").setAttribute("aria-expanded","true");
 }
-async function trocaCand(c){
-  if(!c)return;
-  S.cand=c;
-  S.C=await bloco(`c/${c.cargo}/${c.nr}`);
-  montaLinhas();
-  desenha();
-}
+function fechaAc(){$("#ac").hidden=true;$("#q").setAttribute("aria-expanded","false")}
+$("#q").addEventListener("input",abreAc);
+$("#q").addEventListener("focus",abreAc);
+$("#q").addEventListener("keydown",e=>{const bs=[...$("#ac").querySelectorAll("button")];if(!bs.length)return;
+  if(e.key==="ArrowDown"||e.key==="ArrowUp"){e.preventDefault();acSel=(acSel+(e.key==="ArrowDown"?1:-1)+bs.length)%bs.length;bs.forEach((b,i)=>b.setAttribute("aria-selected",i===acSel));bs[acSel].scrollIntoView({block:"nearest"})}
+  else if(e.key==="Enter"){e.preventDefault();(bs[acSel]||bs[0]).click()}else if(e.key==="Escape")fechaAc()});
+document.addEventListener("click",e=>{if(!e.target.closest(".busca"))fechaAc()});
 
 /* ---------- base por seção ---------- */
 function montaLinhas(){
   const T=S.T[S.cand.cargo], G=S.G, C=S.C, out=[];
-  for(const [mun,zs] of Object.entries(T)){
-    for(const [zona,secs] of Object.entries(zs)){
-      for(const [sec,[val,tot]] of Object.entries(secs)){
-        const gs=G.sec[mun]?.[zona]?.[sec]; const nrl=gs?gs[0]:null;
-        const lc=nrl!=null?G.loc[mun]?.[zona]?.[nrl]:null;
-        out.push({mun:+mun,zona:+zona,sec:+sec,nrl,local:lc?lc[0]:"(local não informado)",bairro:lc?lc[1]:"(SEM BAIRRO)",lat:lc?lc[2]:null,lon:lc?lc[3]:null,
-          reg:S.reg[mun]||"(sem região)",val,tot,aptos:gs?gs[1]:0,v:C[mun]?.[zona]?.[sec]||0});
-      }
-    }
+  for(const [mun,zs] of Object.entries(T))for(const [zona,secs] of Object.entries(zs))for(const [sec,[val,tot]] of Object.entries(secs)){
+    const gs=G.sec[mun]?.[zona]?.[sec]; const nrl=gs?gs[0]:null; const lc=nrl!=null?G.loc[mun]?.[zona]?.[nrl]:null;
+    out.push({mun:+mun,zona:+zona,sec:+sec,nrl,local:lc?titulo(lc[0]):"Local não informado",bairro:lc?titulo(lc[1]):"Sem bairro",lat:lc?lc[2]:null,lon:lc?lc[3]:null,
+      reg:S.reg[mun]||"Sem região",val,tot,aptos:gs?gs[1]:0,v:C[mun]?.[zona]?.[sec]||0});
   }
-  S.linhas=out;
-  S.ufTot=soma(out);
+  S.linhas=out;S.ufTot=soma(out);
 }
-function soma(rs){let v=0,val=0,tot=0,aptos=0;for(const r of rs){v+=r.v;val+=r.val;tot+=r.tot;aptos+=r.aptos}return{v,val,tot,aptos,n:rs.length,p:val?v/val:NaN}}
+function soma(rs){let v=0,val=0,tot=0,aptos=0;for(const r of rs){v+=r.v;val+=r.val;tot+=r.tot;aptos+=r.aptos}return{v,val,tot,aptos,p:val?v/val:NaN}}
 
 /* ---------- níveis ---------- */
 const NIVEIS=["regiao","municipio","grupo","local","secao"];
-const chaveDe={
-  regiao:r=>r.reg, municipio:r=>String(r.mun),
-  bairro:r=>r.mun+"|"+r.bairro, zona:r=>r.mun+"|Z"+r.zona,
-  local:r=>r.mun+"|"+r.zona+"|"+r.nrl, secao:r=>r.mun+"|"+r.zona+"|"+r.sec};
-function nomeDe(tipo,k,r){
-  if(tipo==="regiao")return k;
-  if(tipo==="municipio")return S.muns[k]||k;
-  if(tipo==="bairro")return r.bairro;
-  if(tipo==="zona")return "Zona "+r.zona;
-  if(tipo==="local")return r.local;
-  if(tipo==="secao")return "Seção "+r.sec;
-}
-function subDe(tipo,r){
-  if(tipo==="bairro"||tipo==="zona")return S.muns[r.mun];
-  if(tipo==="local")return `${r.bairro} · Zona ${r.zona} · ${S.muns[r.mun]}`;
-  if(tipo==="secao")return `${r.local} · Zona ${r.zona}`;
-  if(tipo==="municipio")return r.reg;
-  return "";
-}
-function tipoNivel(i){const n=NIVEIS[i];return n==="grupo"?$("#agrup").value:n}
-function linhasDoCaminho(){
-  let rs=S.linhas;
-  S.caminho.forEach((p,i)=>{const f=chaveDe[p.tipo];rs=rs.filter(r=>f(r)===p.k)});
-  return rs;
-}
-function agrupa(rs,tipo){
-  const f=chaveDe[tipo],m=new Map();
-  for(const r of rs){const k=f(r);let g=m.get(k);if(!g){g={k,tipo,nome:nomeDe(tipo,k,r),sub:subDe(tipo,r),rs:[]};m.set(k,g)}g.rs.push(r)}
-  return [...m.values()].map(g=>Object.assign(g,soma(g.rs)));
-}
-function referencia(pai){return $("#ref").value==="pai"?pai.p:S.ufTot.p}
-function calc(g,ref){g.ind=ref?g.p/ref:NaN;g.falt=Math.max(0,Math.round(ref*g.val-g.v));g.part=S.ufTot.v?g.v/S.ufTot.v:NaN;return g}
-function chip(g,piso=0){
-  if(g.val<piso||!isFinite(g.ind))return el("span",{class:"chip m"},"poucos votos");
-  if(r2(g.ind)>=1.1)return el("span",{class:"chip f"},"reduto");
-  if(r2(g.ind)<=0.9)return el("span",{class:"chip d"},"deficiência");
-  return el("span",{class:"chip m"},"na média");
-}
+const chaveDe={regiao:r=>r.reg,municipio:r=>String(r.mun),bairro:r=>r.mun+"|"+r.bairro,zona:r=>r.mun+"|Z"+r.zona,local:r=>r.mun+"|"+r.zona+"|"+r.nrl,secao:r=>r.mun+"|"+r.zona+"|"+r.sec};
+const nomeDe={regiao:r=>r.reg,municipio:r=>S.muns[r.mun],bairro:r=>r.bairro,zona:r=>"Zona "+r.zona,local:r=>r.local,secao:r=>"Seção "+r.sec};
+const subDe={regiao:()=>"",municipio:r=>r.reg,bairro:r=>S.muns[r.mun],zona:r=>S.muns[r.mun],local:r=>`${r.bairro} · ${S.muns[r.mun]}`,secao:r=>`${r.local} · Zona ${r.zona}`};
+const PISO={regiao:0,municipio:300,bairro:300,local:200,secao:80};
+const tipoNivel=i=>NIVEIS[i]==="grupo"?S.agrup:NIVEIS[i];
+function linhasDoCaminho(){let rs=S.linhas;for(const p of S.caminho){const f=chaveDe[p.tipo];rs=rs.filter(r=>f(r)===p.k)}return rs}
+function agrupa(rs,tipo){const f=chaveDe[tipo],m=new Map();for(const r of rs){const k=f(r);let g=m.get(k);if(!g){g={k,tipo,nome:nomeDe[tipo](r),sub:subDe[tipo](r),rs:[]};m.set(k,g)}g.rs.push(r)}return[...m.values()].map(g=>Object.assign(g,soma(g.rs)))}
+function calc(g,ref){g.ref=ref;g.ind=ref?g.p/ref:NaN;g.falt=Math.max(0,Math.round(ref*g.val-g.v));return g}
+function classe(ind){if(!isFinite(ind))return"media";const x=r2(ind);return x>=1.1?"forte":x<=0.9?"fraco":"media"}
+function difTexto(ind){if(!isFinite(ind))return"–";const d=Math.round((ind-1)*100);return d===0?"na média":(d>0?"+":"−")+Math.abs(d)+"% "+(d>0?"acima":"abaixo")}
+const badge=ind=>el("span",{class:"badge "+classe(ind)},difTexto(ind));
 
 /* ---------- desenho ---------- */
 function desenha(){
-  if(!S.cand||!S.linhas.length)return;
-  const rs=linhasDoCaminho(), pai=soma(rs), ref=referencia(pai);
-  const nivel=Math.min(S.caminho.length,NIVEIS.length-1), tipo=tipoNivel(nivel);
-  $("#agrup-box").hidden=NIVEIS[nivel]!=="grupo";
-  // migalha
-  const mg=[el("button",{type:"button",onclick:()=>{S.caminho=[];desenha()}},"Ceará")];
-  S.caminho.forEach((p,i)=>{mg.push(el("span",{class:"sep"},"›"));const ult=i===S.caminho.length-1;mg.push(ult?el("span",{class:"atual"},p.nome):el("button",{type:"button",onclick:()=>{S.caminho=S.caminho.slice(0,i+1);desenha()}},p.nome))});
-  $("#migalha").replaceChildren(...mg);
-  // resumo
-  const area=S.caminho.length?S.caminho.at(-1).nome:"Ceará";
-  const indArea=S.ufTot.p?pai.p/S.ufTot.p:NaN;
-  $("#resumo").replaceChildren(
-    kpi("Votos em "+area,fmt.format(pai.v),rotulo(S.cand)),
-    kpi("% dos válidos",pct(pai.p),"Válidos: "+fmt.format(pai.val)),
-    kpi("Peso na votação total",pctP(S.ufTot.v?pai.v/S.ufTot.v:NaN),"Total no estado: "+fmt.format(S.ufTot.v)),
-    kpi("Índice vs. estado",idx(indArea),r2(indArea)>=1.1?"reduto":r2(indArea)<=0.9?"deficiência":"na média"),
-    kpi("Comparecimento",pct(pai.aptos?pai.tot/pai.aptos:NaN),fmt.format(pai.tot)+" de "+fmt.format(pai.aptos)+" aptos"));
-  // tabela de áreas
-  const titulos={regiao:"Regiões",municipio:"Municípios",bairro:"Bairros",zona:"Zonas",local:"Locais de votação",secao:"Seções"};
-  $("#t-areas").textContent=titulos[tipo]+" em "+area;
-  const gs=agrupa(rs,tipo).map(g=>calc(g,ref));
-  const {col,dir}=S.ordem; gs.sort((a,b)=>col==="nome"?dir*a.nome.localeCompare(b.nome,"pt-BR"):dir*((a[col]??-1)-(b[col]??-1)));
-  const podeAbrir=nivel<NIVEIS.length-1;
-  tabela("#tab",[["nome","Área"],["v","Votos"],["p","% válidos"],["ind","Índice"],["falt","Faltaram"],["part","Peso"],["val","Válidos"]],gs,g=>{
-    const nome=el("td",{},g.nome,el("span",{class:"sub"},g.sub||""));
-    const tr=el("tr",podeAbrir?{class:"click"}:{},nome,num(g.v),el("td",{class:"n"},pct(g.p)),el("td",{class:"n"},idx(g.ind)," ",chip(g)),num(g.falt),el("td",{class:"n"},pctP(g.part)),num(g.val));
-    if(podeAbrir)nome.addEventListener("click",()=>{S.caminho.push({tipo,k:g.k,nome:g.nome});S.ordem={col:"v",dir:-1};desenha();scrollTo({top:0,behavior:"smooth"})});
-    return tr},true);
-  mapa(rs,ref);
-  rankings(rs,ref);
+  if(!S.cand)return;
+  const c=S.cand, i=info(c);
+  // ficha
+  $("#f-foto").style.backgroundImage=i.foto?`url("${i.foto}")`:"";
+  $("#f-foto").hidden=!i.foto;
+  $("#f-nome").replaceChildren(i.nome,i.sg&&!i.leg?el("span",{class:"pt"}," - "+i.sg):"");
+  $("#f-sub").replaceChildren(el("span",{class:"num"},String(c.nr))," ",CARGOS[c.cargo]||c.ds_cargo," · ",i.leg?"votos dados só ao número do partido":titulo(i.completo));
+  $("#f-situ").hidden=!i.st;$("#f-situ").textContent=i.st;
+  const rank=S.cands.filter(x=>x.cargo===c.cargo&&!(String(x.nr).length===2&&x.cargo>=6)).sort((a,b)=>b.total-a.total).findIndex(x=>x.nr===c.nr)+1;
+  const reg=agrupa(S.linhas,"regiao").map(g=>calc(g,S.ufTot.p)).sort((a,b)=>b.ind-a.ind)[0];
+  const munsCom=new Set(S.linhas.filter(r=>r.v>0).map(r=>r.mun)).size;
+  $("#kpis").replaceChildren(
+    kpi("Votos no Ceará",fmt.format(S.ufTot.v),"dos votos válidos: "+pct(S.ufTot.p),true),
+    kpi("Posição no cargo",rank>0?rank+"º":"–","entre "+S.cands.filter(x=>x.cargo===c.cargo&&!(String(x.nr).length===2&&x.cargo>=6)).length+" candidatos"),
+    kpi("Teve voto em",munsCom+" de "+Object.keys(S.muns).length,"municípios"),
+    kpi("Região mais forte",reg?reg.nome:"–",reg?pct(reg.p)+" dos válidos ("+difTexto(reg.ind)+")":""));
+  forteFraco();
+  explorar();
   esperadosDesenha();
   salvaUrl();
 }
-const kpi=(r,v,s)=>el("div",{class:"kpi"},el("div",{class:"r"},r),el("div",{class:"v"},v),el("div",{class:"s"},s||""));
-const num=x=>el("td",{class:"n"},fmt.format(x));
-function tabela(sel,cols,dados,linha,ordenavel){
-  const t=$(sel);
-  t.tHead.replaceChildren(el("tr",{},...cols.map(([k,n])=>{const th=el("th",{scope:"col"},n);if(ordenavel){if(S.ordem.col===k)th.setAttribute("aria-sort",S.ordem.dir>0?"ascending":"descending");th.addEventListener("click",()=>{S.ordem={col:k,dir:S.ordem.col===k?-S.ordem.dir:(k==="nome"?1:-1)};desenha()})}return th})));
-  t.tBodies[0].replaceChildren(...(dados.length?dados.map(linha):[el("tr",{},el("td",{colspan:cols.length,class:"vazio"},"Nada para mostrar nesta área."))]));
+const kpi=(r,v,s,big)=>el("div",{class:"kpi"+(big?" big":"")},el("span",{},r),el("b",{},v),el("small",{},s||""));
+
+function forteFraco(){
+  const tipo=S.ffNivel, piso=PISO[tipo];
+  document.querySelectorAll("#ff-nivel button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===tipo));
+  const gs=agrupa(S.linhas,tipo).map(g=>calc(g,S.ufTot.p)).filter(g=>g.val>=piso);
+  const forte=gs.filter(g=>classe(g.ind)==="forte").sort((a,b)=>b.ind-a.ind).slice(0,8);
+  const fraco=gs.filter(g=>g.falt>0).sort((a,b)=>b.falt-a.falt).slice(0,8);
+  $("#ff-sub").textContent=`Comparação com a média do candidato no Ceará (${pct(S.ufTot.p)} dos válidos).${piso?` Só áreas com ${fmt.format(piso)} ou mais votos válidos.`:""}`;
+  const item=(g,lado)=>el("li",{},el("span",{class:"nome"},el("b",{},g.nome),el("small",{},g.sub||"")),
+    el("span",{class:"val"},lado==="f"?el("b",{},pct(g.p)):el("b",{},"+"+fmt.format(g.falt)+" votos"),lado==="f"?badge(g.ind):el("small",{},`fez ${pct(g.p)}, média ${pct(g.ref)}`)));
+  $("#ff-forte").replaceChildren(...(forte.length?forte.map(g=>item(g,"f")):[el("li",{class:"vazio"},"Nenhuma área ficou 10% acima da média neste nível.")]));
+  $("#ff-fraco").replaceChildren(...(fraco.length?fraco.map(g=>item(g,"d")):[el("li",{class:"vazio"},"Nenhuma área abaixo da média neste nível.")]));
 }
 
-/* ---------- rankings ---------- */
-function rankings(rs,ref){
-  const tipo=$("#rk-nivel").value, piso=+$("#rk-piso").value||0;
-  const gs=agrupa(rs,tipo).map(g=>calc(g,ref)).filter(g=>g.val>=piso);
-  const cols=[["nome","Área"],["v","Votos"],["p","% válidos"],["ind","Índice"],["falt","Faltaram"]];
-  const ln=g=>el("tr",{},el("td",{},g.nome,el("span",{class:"sub"},g.sub||"")),num(g.v),el("td",{class:"n"},pct(g.p)),el("td",{class:"n"},idx(g.ind)),num(g.falt));
-  tabela("#rk-f",cols,[...gs].filter(g=>g.ind>1).sort((a,b)=>b.ind-a.ind).slice(0,15),ln,false);
-  tabela("#rk-d",cols,[...gs].filter(g=>g.falt>0).sort((a,b)=>b.falt-a.falt).slice(0,15),ln,false);
+function explorar(){
+  const rs=linhasDoCaminho(), pai=soma(rs), ref=S.ref==="pai"?pai.p:S.ufTot.p;
+  const nivel=Math.min(S.caminho.length,NIVEIS.length-1), tipo=tipoNivel(nivel);
+  $("#agrup").hidden=NIVEIS[nivel]!=="grupo";
+  document.querySelectorAll("#agrup button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===S.agrup));
+  document.querySelectorAll("#ref button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===S.ref));
+  // trilha
+  const tr=[];
+  const itens=[{nome:"Ceará"},...S.caminho];
+  itens.forEach((p,i)=>{if(i)tr.push(el("span",{class:"sep"},"›"));const ult=i===itens.length-1;
+    tr.push(ult?el("span",{class:"at"},`${p.nome}: ${fmt.format(pai.v)} votos (${pct(pai.p)})`):el("button",{type:"button",onclick:()=>{S.caminho=S.caminho.slice(0,i);desenha()}},p.nome))});
+  $("#trilha").replaceChildren(...tr);
+  // exemplo do "como ler"
+  const exG=agrupa(rs,tipo).map(g=>calc(g,ref)).filter(g=>g.val>=PISO[tipo]).sort((a,b)=>b.v-a.v)[0];
+  if(exG)$("#exemplo").textContent=`Exemplo: ${info(S.cand).nome} teve ${pct(ref)} dos votos válidos ${S.ref==="pai"?"na área aberta":"no Ceará"}. Em ${exG.nome}, teve ${pct(exG.p)}. Como ${pct(exG.p)} é ${difTexto(exG.ind).replace("na média","igual à média")} de ${pct(ref)}, a área fica como "${classe(exG.ind)==="forte"?"Reduto":classe(exG.ind)==="fraco"?"Abaixo da média":"Na média"}".`;
+  // lista
+  const gs=agrupa(rs,tipo).map(g=>calc(g,ref));
+  const {col,dir}=S.ordem; gs.sort((a,b)=>col==="nome"?dir*a.nome.localeCompare(b.nome,"pt-BR"):dir*((a[col]||0)-(b[col]||0)));
+  const maxP=Math.max(ref,...gs.map(g=>g.p||0))||1;
+  const abre=nivel<NIVEIS.length-1;
+  $("#lista").replaceChildren(...(gs.length?gs.map(g=>{
+    const ln=el("div",{class:"ln"+(abre?" abre":""),role:abre?"button":null,tabindex:abre?"0":null},
+      el("div",{class:"n"},el("b",{},g.nome),el("small",{},[g.sub,`${fmt.format(g.val)} válidos`].filter(Boolean).join(" · ")),
+        el("div",{class:"barra",title:`Fatia ${pct(g.p)} · média ${pct(ref)}`},el("i",{style:`width:${Math.min(100,100*(g.p||0)/maxP)}%;background:var(${classe(g.ind)==="fraco"?"--red":classe(g.ind)==="forte"?"--accent":"--ink-3"})`}),el("em",{style:`left:${100*ref/maxP}%`}))),
+      el("div",{class:"r"},el("b",{},fmt.format(g.v)),el("small",{},pct(g.p))),
+      el("div",{class:"r"},badge(g.ind),g.falt?el("small",{style:"display:block;margin-top:3px"},`faltaram ${fmt.format(g.falt)}`):""));
+    if(abre){const ir=()=>{S.caminho.push({tipo,k:g.k,nome:g.nome});S.ordem={col:"v",dir:-1};desenha();$("#trilha").scrollIntoView({behavior:"smooth",block:"start"})};ln.addEventListener("click",ir);ln.addEventListener("keydown",e=>{if(e.key==="Enter")ir()})}
+    return ln}):[el("div",{class:"vazio-g"},"Nada para mostrar nesta área.")]));
+  mapa(rs,ref);
 }
 
 /* ---------- mapa ---------- */
-let M=null,camada=null,ultimoEnq="";
-function cores(){const cs=getComputedStyle(document.documentElement);return{f:cs.getPropertyValue("--forte").trim(),d:cs.getPropertyValue("--fraco").trim(),m:cs.getPropertyValue("--neutro").trim()}}
+let M=null,camada=null,ultimoEnq=null;
+function cor(cl){const cs=getComputedStyle(document.documentElement);return cs.getPropertyValue(cl==="forte"?"--accent":cl==="fraco"?"--red":"--ink-3").trim()}
 function mapa(rs,ref){
   if(!window.L){$("#mapa").textContent="O mapa não carregou.";return}
-  if(!M){M=L.map("mapa",{preferCanvas:true,scrollWheelZoom:false});L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:18,attribution:"© OpenStreetMap"}).addTo(M);M.setView([-5.2,-39.5],7)}
-  if(camada)camada.remove();
-  camada=L.layerGroup().addTo(M);
+  if(!M){M=L.map("mapa",{preferCanvas:true,scrollWheelZoom:false});L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:18,attribution:"© OpenStreetMap"}).addTo(M);M.setView([-5.2,-39.4],7)}
+  if(camada)camada.remove();camada=L.layerGroup().addTo(M);
   const gs=agrupa(rs.filter(r=>r.lat!=null&&r.lon!=null),"local").map(g=>calc(g,ref));
-  const max=Math.max(1,...gs.map(g=>g.v)), c=cores(), pts=[];
-  for(const g of gs){
-    const r=g.rs[0], cor=r2(g.ind)>=1.1?c.f:r2(g.ind)<=0.9?c.d:c.m;
-    const raio=3+13*Math.sqrt(g.v/max);
-    const mk=L.circleMarker([r.lat,r.lon],{radius:raio,color:cor,weight:1,fillColor:cor,fillOpacity:.55});
-    const pop=el("div",{},el("b",{},g.nome),el("br"),`${r.bairro} · ${S.muns[r.mun]} · Zona ${r.zona}`,el("br"),`Votos: ${fmt.format(g.v)} (${pct(g.p)})`,el("br"),`Índice: ${idx(g.ind)} · Faltaram: ${fmt.format(g.falt)}`);
-    mk.bindPopup(pop);mk.addTo(camada);pts.push([r.lat,r.lon]);
-  }
+  const max=Math.max(1,...gs.map(g=>g.v)),pts=[];
+  for(const g of gs){const r=g.rs[0],c=cor(classe(g.ind));
+    L.circleMarker([r.lat,r.lon],{radius:3+13*Math.sqrt(g.v/max),color:c,weight:1,fillColor:c,fillOpacity:.55})
+      .bindPopup(el("div",{},el("b",{},g.nome),el("br"),`${r.bairro} · ${S.muns[r.mun]}`,el("br"),`${fmt.format(g.v)} votos (${pct(g.p)}) · ${difTexto(g.ind)}`)).addTo(camada);
+    pts.push([r.lat,r.lon])}
   const enq=S.caminho.map(p=>p.k).join("/");
-  if(pts.length&&enq!==ultimoEnq){M.fitBounds(pts,{padding:[20,20],maxZoom:15})}
-  ultimoEnq=enq;
-  setTimeout(()=>M.invalidateSize(),50);
+  if(pts.length&&enq!==ultimoEnq&&S.caminho.length)M.fitBounds(pts,{padding:[24,24],maxZoom:15});
+  if(!S.caminho.length&&enq!==ultimoEnq)M.setView([-5.2,-39.4],7);
+  ultimoEnq=enq;setTimeout(()=>M.invalidateSize(),60);
 }
 
 /* ---------- votos esperados ---------- */
 function lerCSV(txt){
-  const linhas=txt.replace(/^﻿/,"").split(/\r?\n/).filter(l=>l.trim());
-  if(!linhas.length)return[];
-  const sep=(linhas[0].match(/;/g)||[]).length>=(linhas[0].match(/,/g)||[]).length?";":",";
+  const ls=txt.replace(/^﻿/,"").split(/\r?\n/).filter(l=>l.trim());if(!ls.length)return[];
+  const sep=(ls[0].match(/;/g)||[]).length>=(ls[0].match(/,/g)||[]).length?";":",";
   const parse=l=>{const o=[];let c="",q=false;for(let i=0;i<l.length;i++){const ch=l[i];if(q){if(ch==='"'&&l[i+1]==='"'){c+='"';i++}else if(ch==='"')q=false;else c+=ch}else if(ch==='"')q=true;else if(ch===sep){o.push(c);c=""}else c+=ch}o.push(c);return o.map(s=>s.trim())};
-  const cab=parse(linhas[0]).map(h=>norm(h).toLowerCase());
-  return linhas.slice(1).map(l=>{const v=parse(l),o={};cab.forEach((h,i)=>o[h]=v[i]||"");return o});
+  const cab=parse(ls[0]).map(h=>norm(h).toLowerCase());
+  return ls.slice(1).map(l=>{const v=parse(l),o={};cab.forEach((h,i)=>o[h]=v[i]||"");return o});
 }
-$("#arq").addEventListener("change",async e=>{
-  const f=e.target.files[0];if(!f)return;
-  const buf=await f.arrayBuffer();
-  let txt=new TextDecoder("utf-8").decode(buf);
-  if(txt.includes("�"))txt=new TextDecoder("windows-1252").decode(buf);
-  S.esperados=lerCSV(txt);desenha();
-});
+$("#arq").addEventListener("change",async e=>{const f=e.target.files[0];if(!f)return;const b=await f.arrayBuffer();let t=new TextDecoder("utf-8").decode(b);if(t.includes("�"))t=new TextDecoder("windows-1252").decode(b);S.esperados=lerCSV(t);esperadosDesenha()});
 function esperadosDesenha(){
-  const cols=[["nome","Área"],["e","Esperado"],["v","Obtido"],["d","Diferença"],["a","% atingido"]];
-  if(!S.esperados){tabela("#tab-esp",cols,[],()=>null,false);$("#tab-esp").tBodies[0].firstChild.firstChild.textContent="Nenhuma planilha carregada.";return}
-  const nomesMun={};for(const[k,n]of Object.entries(S.muns))nomesMun[norm(n)]=+k;
-  const out=S.esperados.map(o=>{
-    const esperado=+String(o.esperado||"").replace(/\./g,"").replace(",",".");
-    const mun=nomesMun[norm(o.municipio)];
-    let rs=S.linhas, nome=[];
-    if(o.municipio){rs=rs.filter(r=>r.mun===mun);nome.push(o.municipio)}
+  if(!S.esperados)return;
+  const nm={};for(const[k,n]of Object.entries(S.muns))nm[norm(n)]=+k;
+  const linhas=S.esperados.map(o=>{
+    const e=+String(o.esperado||"").replace(/\./g,"").replace(",",".")||0;let rs=S.linhas;const nome=[];
+    if(o.municipio){rs=rs.filter(r=>r.mun===nm[norm(o.municipio)]);nome.push(o.municipio)}
     if(o.zona){rs=rs.filter(r=>r.zona===+o.zona);nome.push("Zona "+o.zona)}
     if(o.bairro){rs=rs.filter(r=>norm(r.bairro)===norm(o.bairro));nome.push(o.bairro)}
     if(o.local){rs=rs.filter(r=>norm(r.local)===norm(o.local));nome.push(o.local)}
     if(o.secao){rs=rs.filter(r=>r.sec===+o.secao);nome.push("Seção "+o.secao)}
-    const s=soma(rs);
-    return{nome:nome.join(" · ")||"(linha sem área)",e:esperado,v:s.v,ok:rs.length>0,d:s.v-esperado,a:esperado?s.v/esperado:NaN};
+    const s=soma(rs),d=s.v-e;
+    return el("tr",{},el("td",{},nome.join(" · ")||"(linha sem área)",rs.length?"":el("small",{style:"display:block;color:var(--red)"},"Área não encontrada nos dados do TSE. Confira a grafia.")),
+      el("td",{},fmt.format(e)),el("td",{},fmt.format(s.v)),el("td",{style:`color:var(${d<0?"--red":"--accent"});font-weight:700`},(d>0?"+":d<0?"−":"")+fmt.format(Math.abs(d))),el("td",{},e?pct(s.v/e):"–"));
   });
-  tabela("#tab-esp",cols,out,g=>el("tr",{},el("td",{},g.nome,g.ok?"":el("span",{class:"sub",style:"color:var(--fraco)"},"Área não encontrada nos dados do TSE. Confira a grafia.")),num(g.e||0),num(g.v),el("td",{class:"n",style:`color:var(${g.d<0?"--fraco":"--forte"})`},(g.d>0?"+":"")+fmt.format(g.d)),el("td",{class:"n"},pct(g.a))),false);
+  $("#tab-esp").tBodies[0].replaceChildren(...linhas);
 }
 $("#modelo").addEventListener("click",()=>{
-  const rs=linhasDoCaminho(), m=new Map();
-  for(const r of rs){const k=r.mun+"|"+r.bairro;if(!m.has(k))m.set(k,[S.muns[r.mun],r.bairro])}
-  const csv="municipio;bairro;local;zona;secao;esperado\r\n"+[...m.values()].sort().map(([mu,b])=>`${mu};${b};;;;`).join("\r\n");
-  const a=el("a",{href:URL.createObjectURL(new Blob(["﻿"+csv],{type:"text/csv;charset=utf-8"})),download:"votos-esperados-modelo.csv"});
-  document.body.append(a);a.click();a.remove();
+  const m=new Map();for(const r of linhasDoCaminho()){const k=r.mun+"|"+r.bairro;if(!m.has(k))m.set(k,[S.muns[r.mun],r.bairro])}
+  const csv="municipio;bairro;local;zona;secao;esperado\r\n"+[...m.values()].sort((a,b)=>(a[0]+a[1]).localeCompare(b[0]+b[1],"pt-BR")).map(([mu,b])=>`${mu};${b};;;;`).join("\r\n");
+  const a=el("a",{href:URL.createObjectURL(new Blob(["﻿"+csv],{type:"text/csv;charset=utf-8"})),download:"votos-esperados-modelo.csv"});document.body.append(a);a.click();a.remove();
 });
 
-/* ---------- eventos e URL ---------- */
-function salvaUrl(){
-  const q=new URLSearchParams({cargo:S.cand.cargo,n:S.cand.nr});
-  if(S.caminho.length)q.set("area",JSON.stringify(S.caminho));
-  history.replaceState(null,"","?"+q);
-}
-$("#cargo").addEventListener("change",()=>{trocaCargo().catch(falha)});
-$("#cand").addEventListener("change",()=>{const v=$("#cand").value;const c=S.cands.find(c=>c.cargo===+$("#cargo").value&&rotulo(c)===v)||S.cands.find(c=>c.cargo===+$("#cargo").value&&String(c.nr)===v.trim());if(c)trocaCand(c).catch(falha)});
-$("#ref").addEventListener("change",desenha);
-$("#agrup").addEventListener("change",desenha);
-$("#rk-nivel").addEventListener("change",()=>{const p={municipio:0,bairro:200,local:150,secao:50};$("#rk-piso").value=p[$("#rk-nivel").value];desenha()});
-$("#rk-piso").addEventListener("change",desenha);
-function falha(e){$("#resumo").replaceChildren(el("div",{class:"kpi",style:"grid-column:1/-1"},el("div",{class:"r"},"Não foi possível carregar"),el("div",{class:"s"},String(e.message||e)+". Recarregue a página; se continuar, avise.")))}
+/* ---------- eventos ---------- */
+function salvaUrl(){const q=new URLSearchParams({cargo:S.cand.cargo,n:S.cand.nr});if(S.caminho.length)q.set("area",JSON.stringify(S.caminho));history.replaceState(null,"","?"+q)}
+$("#cargo").addEventListener("change",()=>trocaCargo().catch(falha));
+$("#ff-nivel").addEventListener("click",e=>{const b=e.target.closest("button");if(b){S.ffNivel=b.dataset.v;forteFraco()}});
+$("#ref").addEventListener("click",e=>{const b=e.target.closest("button");if(b){S.ref=b.dataset.v;explorar()}});
+$("#agrup").addEventListener("click",e=>{const b=e.target.closest("button");if(b){S.agrup=b.dataset.v;explorar()}});
+document.querySelector(".lista .cab").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;const k=b.dataset.o;S.ordem={col:k,dir:S.ordem.col===k?-S.ordem.dir:(k==="nome"?1:-1)};explorar()});
+function falha(e){$("#vazio").hidden=false;$("#vazio").replaceChildren(el("b",{},"Não foi possível carregar"),String(e.message||e)+". Recarregue a página; se continuar, avise.")}
 inicio().catch(falha);
 </script>
 </body>
