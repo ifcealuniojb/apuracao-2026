@@ -252,6 +252,7 @@ footer b{color:#fff}
         <p><b>Fatia de votos</b> é a porcentagem dos votos válidos daquela área que foram para o candidato.</p>
         <p><b>Comparação com a média</b> mostra quanto essa fatia ficou acima ou abaixo da fatia do candidato no Ceará inteiro (ou na área aberta, se você escolher "vs. área aberta").</p>
         <p class="ex" id="exemplo"></p>
+        <p>Quando a fatia passa do dobro da média, mostramos quantas vezes ela é maior ("37× a média" quer dizer que ali o candidato teve 37 vezes a sua fatia no Ceará). Isso é comum em deputados, que têm fatia pequena no estado e votação concentrada na sua base.</p>
         <p><span class="badge forte">Reduto</span> 10% ou mais acima da média. <span class="badge fraco">Abaixo da média</span> 10% ou mais abaixo. <span class="badge media">Na média</span> entre os dois.</p>
         <p><b>Faltaram</b> são os votos que o candidato teria a mais se tivesse feito a sua média naquela área. Serve para ver onde há mais votos a buscar, e não só onde a porcentagem é baixa.</p>
         <p>Nas listas de redutos e de faltas, áreas com poucos votos válidos ficam de fora para não distorcer.</p>
@@ -393,7 +394,7 @@ function linhasDoCaminho(){let rs=S.linhas;for(const p of S.caminho){const f=cha
 function agrupa(rs,tipo){const f=chaveDe[tipo],m=new Map();for(const r of rs){const k=f(r);let g=m.get(k);if(!g){g={k,tipo,nome:nomeDe[tipo](r),sub:subDe[tipo](r),rs:[]};m.set(k,g)}g.rs.push(r)}return[...m.values()].map(g=>Object.assign(g,soma(g.rs)))}
 function calc(g,ref){g.ref=ref;g.ind=ref?g.p/ref:NaN;g.falt=Math.max(0,Math.round(ref*g.val-g.v));return g}
 function classe(ind){if(!isFinite(ind))return"media";const x=r2(ind);return x>=1.1?"forte":x<=0.9?"fraco":"media"}
-function difTexto(ind){if(!isFinite(ind))return"–";const d=Math.round((ind-1)*100);if(classe(ind)==="media")return d===0?"na média":`na média (${d>0?"+":"−"}${Math.abs(d)}%)`;return(d>0?"+":"−")+Math.abs(d)+"% "+(d>0?"acima":"abaixo")}
+function difTexto(ind){if(!isFinite(ind))return"–";if(ind>=2){const v=ind>=10?Math.round(ind):Math.round(ind*10)/10;return v.toLocaleString("pt-BR")+"× a média"}const d=Math.round((ind-1)*100);if(classe(ind)==="media")return d===0?"na média":`na média (${d>0?"+":"−"}${Math.abs(d)}%)`;return(d>0?"+":"−")+Math.abs(d)+"% "+(d>0?"acima":"abaixo")}
 const badge=ind=>el("span",{class:"badge "+classe(ind)},difTexto(ind));
 
 /* ---------- desenho ---------- */
@@ -429,7 +430,7 @@ function forteFraco(){
   const fraco=gs.filter(g=>g.falt>0).sort((a,b)=>b.falt-a.falt).slice(0,8);
   $("#ff-sub").textContent=`Comparação com a média do candidato no Ceará (${pct(S.ufTot.p)} dos válidos).${piso?` Só áreas com ${fmt.format(piso)} ou mais votos válidos.`:""}`;
   const item=(g,lado)=>el("li",{},el("span",{class:"nome"},el("b",{},g.nome),el("small",{},g.sub||"")),
-    el("span",{class:"val"},lado==="f"?el("b",{},pct(g.p)):el("b",{},"+"+fmt.format(g.falt)+" votos"),lado==="f"?badge(g.ind):el("small",{},`fez ${pct(g.p)}, média ${pct(g.ref)}`)));
+    el("span",{class:"val"},lado==="f"?el("b",{},pct(g.p)):el("b",{},"+"+fmt.format(g.falt)+" votos"),lado==="f"?badge(g.ind):el("small",{},`fez ${pct(g.p)}, média ${pct(g.ref)}`),lado==="f"?el("small",{style:"display:block;margin-top:2px"},`média: ${pct(g.ref)}`):null));
   $("#ff-forte").replaceChildren(...(forte.length?forte.map(g=>item(g,"f")):[el("li",{class:"vazio"},"Nenhuma área ficou 10% acima da média neste nível.")]));
   $("#ff-fraco").replaceChildren(...(fraco.length?fraco.map(g=>item(g,"d")):[el("li",{class:"vazio"},"Nenhuma área abaixo da média neste nível.")]));
 }
