@@ -12,7 +12,7 @@
   --navy:#1b2a38; --navy-2:#24384a; --navy-mute:#9fb0bf; --lime:#d6f08f;
   --bg:#f3f4f1; --surface:#ffffff; --surface-2:#f7f8f5; --ink:#17222e; --ink-2:#465363; --ink-3:#7b8692;
   --line:#e2e5df; --accent:#4c7a1c; --accent-soft:#e8f3d2; --gold:#a67c00; --gold-soft:#fbf1cf;
-  --red:#b0412e; --red-soft:#f7e4df; --gray-soft:#eceee9; --on-accent:#ffffff;
+  --red:#b0412e; --red-soft:#f7e4df; --gray-soft:#eceee9; --on-accent:#ffffff; --blue:#2c5d9e;
   --shadow:0 1px 2px rgba(23,34,46,.05),0 10px 28px -14px rgba(23,34,46,.18);
   --radius:16px;
   --sans: ui-rounded,"SF Pro Rounded",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
@@ -22,13 +22,13 @@
   --navy:#0d1620; --navy-2:#172532; --lime:#cdea7e;
   --bg:#0f151b; --surface:#16202a; --surface-2:#1b2631; --ink:#eaf0f4; --ink-2:#b2bdc8; --ink-3:#83909c;
   --line:#26333f; --accent:#a9d45a; --accent-soft:#22331a; --gold:#f2c230; --gold-soft:#3a2f0c;
-  --red:#ef8a78; --red-soft:#3b1d18; --gray-soft:#22303c; --on-accent:#14240a;
+  --red:#ef8a78; --red-soft:#3b1d18; --gray-soft:#22303c; --on-accent:#14240a; --blue:#8fb2ec;
   --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px -14px rgba(0,0,0,.6); color-scheme:dark}}
 :root[data-theme="dark"]{
   --navy:#0d1620; --navy-2:#172532; --lime:#cdea7e;
   --bg:#0f151b; --surface:#16202a; --surface-2:#1b2631; --ink:#eaf0f4; --ink-2:#b2bdc8; --ink-3:#83909c;
   --line:#26333f; --accent:#a9d45a; --accent-soft:#22331a; --gold:#f2c230; --gold-soft:#3a2f0c;
-  --red:#ef8a78; --red-soft:#3b1d18; --gray-soft:#22303c; --on-accent:#14240a;
+  --red:#ef8a78; --red-soft:#3b1d18; --gray-soft:#22303c; --on-accent:#14240a; --blue:#8fb2ec;
   --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px -14px rgba(0,0,0,.6); color-scheme:dark}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
@@ -92,6 +92,14 @@ select,input{font:16px var(--sans);color:var(--ink);background:var(--surface);bo
 .kpi.big span,.kpi.big small{color:var(--navy-mute)}
 .kpi.big b{color:var(--lime);font-size:34px;letter-spacing:-.03em}
 
+.projbox{margin:0 16px 16px;border:1px solid var(--line);border-radius:14px;padding:12px 14px;font-size:14px;background:var(--surface)}
+.projbox h5{margin:0 0 8px;font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-3)}
+.projgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 10px}
+@media (max-width:520px){.projgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.projgrid div span{display:block;font-size:11.5px;color:var(--ink-3)}
+.projgrid div b{font-size:16px;font-weight:800}
+.ok-tag{font-size:11px;font-weight:800;color:var(--ink-3);letter-spacing:.04em}
+.callout{margin-top:10px;padding:9px 11px;border-radius:9px;background:var(--surface-2);font-size:13px;color:var(--ink-2)}
 .badge{display:inline-block;font-size:12px;font-weight:700;border-radius:999px;padding:3px 10px;white-space:nowrap}
 .badge.forte{background:var(--accent-soft);color:var(--accent)}
 .badge.fraco{background:var(--red-soft);color:var(--red)}
@@ -225,6 +233,7 @@ footer b{color:#fff}
         <span class="badge ouro" id="f-situ" hidden></span>
       </div>
       <div class="kpis" id="kpis"></div>
+      <div id="cadeiras"></div>
     </section>
 
     <div class="sec-t">
@@ -310,15 +319,24 @@ async function api(path){busy(1);try{let ult;for(let t=0;t<4;t++){if(t)await new
 const bloco=k=>api("/api/bloco?k2="+encodeURIComponent(`${ANO}/${TURNO}/${UF}/${k}`));
 
 /* nomes de urna, partidos, situação e fotos: ambiente oficial de resultados do TSE */
+const toInt=v=>+String(v??"").replace(/\D/g,"")||0;
 async function dadosTSE(cargo){
   if(S.tse[cargo])return S.tse[cargo];
   const ele=cargo===1?"6257":"6259", ab=cargo===1?"br":"ce", c=String(cargo).padStart(4,"0");
   const out={};
   try{
     const r=await fetch(`${TSE}/${ele}/dados/${ab}/${ab}-c${c}-e00${ele}-u.json`).then(r=>r.json());
-    for(const a of r.carg?.[0]?.agr||[])for(const p of a.par||[]){
-      out[p.n]=out[p.n]||{nmu:p.nm,sg:p.sg,legenda:true};
-      for(const k of p.cand||[])out[k.n]={nmu:k.nmu,sg:p.sg,st:k.st,sq:k.sqcand,foto:`${TSE}/${ele}/fotos/${ab}/${k.sqcand}.jpeg`};
+    const carg=r.carg?.[0]||{};
+    out._qe=toInt(carg.qe);
+    for(const a of carg.agr||[]){
+      // mesmas contas do site de apuração: votos da agremiação = nominais + legenda válidos (tvtn + tvtl)
+      const ag={nm:a.nm||(a.par?.[0]?.sg)||"",tp:a.tp,vag:a.vag!=null&&a.vag!==""?toInt(a.vag):null,sgs:(a.par||[]).map(p=>p.sg).join("/"),
+        votos:(a.par||[]).reduce((s,p)=>s+(p.tvtn!=null?toInt(p.tvtn):toInt(p.tvan))+(p.tvtl!=null?toInt(p.tvtl):toInt(p.tval)),0),lista:[]};
+      for(const p of a.par||[]){
+        out[p.n]=out[p.n]||{nmu:p.nm,sg:p.sg,legenda:true};
+        for(const k of p.cand||[]){const o={n:k.n,nmu:k.nmu||k.nm,sg:p.sg,st:(k.st||"").trim(),sq:k.sqcand,votos:toInt(k.vap),valido:/^v[áa]lido/i.test(k.dvt||"V\u00e1lido"),ag,foto:`${TSE}/${ele}/fotos/${ab}/${k.sqcand}.jpeg`};out[k.n]=o;ag.lista.push(o)}
+      }
+      ag.lista=ag.lista.filter(o=>o.valido).sort((x,y)=>y.votos-x.votos||x.nmu.localeCompare(y.nmu,"pt-BR"));
     }
   }catch(e){/* sem enriquecimento: usa os nomes do arquivo de seções */}
   return S.tse[cargo]=out;
@@ -439,12 +457,38 @@ function desenha(){
     kpi("Posição no cargo",rank>0?rank+"º":"–","entre "+S.cands.filter(x=>x.cargo===c.cargo&&!(String(x.nr).length===2&&x.cargo>=6)).length+" candidatos"),
     kpi("Teve voto em",munsCom+" de "+Object.keys(S.muns).length,"municípios"),
     kpi("Região mais forte",reg?reg.nome:"–",reg?pct(reg.p)+" dos válidos · média estado "+pct(S.ufTot.p):""));
+  cadeiras();
   forteFraco();
   explorar();
   esperadosDesenha();
   salvaUrl();
 }
 const kpi=(r,v,s,big)=>el("div",{class:"kpi"+(big?" big":"")},el("span",{},r),el("b",{},v),el("small",{},s||""));
+
+function cadeiras(){
+  const c=S.cand, box=$("#cadeiras"), t=(S.tse[c.cargo]||{})[c.nr];
+  box.replaceChildren();
+  if(c.cargo<6||!t||!t.ag||!t.ag.lista.length)return;           // só sistema proporcional (deputados) e candidato com nome
+  const a=t.ag, v=a.vag??0, qe=S.tse[c.cargo]._qe, pos=a.lista.indexOf(t)+1;
+  const tipo=a.tp==="f"?"federação":a.tp==="c"?"coligação":"partido", da=tipo==="partido"?"do partido":"da "+tipo;
+  const cls=/^eleito/i.test(t.st)?"in":(/suplente/i.test(t.st)||(pos>v&&v>0))?"sup":"out";
+  const cadeiraTxt=cls==="in"?`${pos}ª de ${v}`:cls==="sup"&&pos>v?`${pos-v}º suplente`:cls==="sup"?"Suplente":"Sem cadeira";
+  let call=null;
+  if(cls==="in"&&a.lista[v])call=["Está ",el("b",{},fmt.format(t.votos-a.lista[v].votos))," votos à frente do 1º suplente "+da+" ("+a.lista[v].nmu+")."];
+  else if(cls!=="in"&&v>0)call=["Faltam ",el("b",{},fmt.format(a.lista[v-1].votos-t.votos+1))," votos para passar "+a.lista[v-1].nmu+", que ocupa a última cadeira "+da+" ("+v+"ª)."];
+  else if(v===0)call=[(tipo==="partido"?"O partido":"A "+tipo)+" não conquistou cadeira."];
+  const curto=a.tp==="f"||a.tp==="c"?(a.tp==="f"?"Federação ":"Coligação ")+String(a.nm).replace(/^FEDERA[ÇC][ÃA]O\s+/i,"").split(" - ").pop().trim():(a.sgs||a.nm);
+  const cel=(r,v,extra,st)=>el("div",{},el("span",{},r),el("b",st?{style:st}:{},v),extra||null);
+  box.append(el("div",{class:"projbox"},el("h5",{},"Cadeiras · sistema proporcional"),
+    el("div",{class:"projgrid"},
+      cel("Cadeira",cadeiraTxt,null,`color:var(${cls==="in"?"--accent":cls==="sup"?"--blue":"--ink-3"})`),
+      cel("Cadeiras "+da,String(v),a.vag!=null?el("span",{class:"ok-tag"}," TSE"):null),
+      cel("Ordem de votação "+da,pos?pos+"º":"–"),
+      cel("Votos "+da,fmt.format(a.votos)),
+      cel("Quociente eleitoral",qe?fmt.format(qe):"–"),
+      cel(curto,a.sgs,null,"font-size:12.5px;color:var(--ink-2)")),
+    call?el("div",{class:"callout"},...call):null));
+}
 
 function forteFraco(){
   const rs=linhasDoCaminho(), pai=soma(rs), prof=S.caminho.length;
