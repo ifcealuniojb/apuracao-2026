@@ -60,7 +60,29 @@ header.top{background:var(--navy);color:#fff;padding-top:env(safe-area-inset-top
 
 main{padding:18px 0 40px}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
-.topo-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:16px;align-items:start}
+.topo-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:16px;align-items:stretch}
+.col-esq{display:flex;flex-direction:column;gap:16px;min-width:0;min-height:0}
+/* lista de estados: ocupa a altura que sobra ao lado do mapa */
+.estados{flex:1 1 0;min-height:280px;display:flex;flex-direction:column;padding:16px 16px 10px}
+.est-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.est-head h3{margin:0;font-size:17px;font-weight:800}
+.placar{margin-left:auto;display:flex;gap:12px;font-size:12.5px;color:var(--ink-2);flex-wrap:wrap}
+.placar i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px}
+.placar b{color:var(--ink)}
+.est-lista{flex:1 1 0;overflow:auto;min-height:0;margin:0 -6px;padding:0 6px}
+.er{display:grid;grid-template-columns:34px minmax(0,1fr) minmax(70px,1.1fr) 112px;gap:10px;align-items:center;padding:6px 4px;border-bottom:1px solid var(--line);font-size:13px;cursor:pointer;border-radius:8px}
+.er:last-child{border-bottom:0}
+.er:hover,.er.sel{background:var(--surface-2)}
+.er .u{width:30px;height:24px;border-radius:7px;background:var(--gray-soft);display:grid;place-items:center;font-weight:800;font-size:11.5px;color:var(--ink-2)}
+.er .u.gov{background:var(--navy);color:var(--lime)}
+.er .n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.er .ba{height:6px;border-radius:99px;background:var(--gray-soft);overflow:hidden;position:relative}
+.er .ba i{display:block;height:100%;border-radius:99px;background:var(--accent);transition:width .8s ease}
+.er .pa{font-size:11.5px;color:var(--ink-3);margin-top:2px}
+.er .li{text-align:right;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.er .li small{display:block;font-weight:600;color:var(--ink-3);font-size:11px}
+@media (max-width:1020px){.estados{flex:none;max-height:460px}.est-lista{flex:1 1 auto;max-height:400px}}
+@media (max-width:520px){.er{grid-template-columns:30px minmax(0,1fr) 92px}.er .bx{display:none}}
 @media (max-width:1020px){.topo-grid{grid-template-columns:minmax(0,1fr)}}
 .eyebrow{font-size:11.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-2)}
 
@@ -181,7 +203,13 @@ footer p{margin:4px 0}
 <main class="wrap">
   <div id="erro" class="erro" hidden></div>
   <div class="topo-grid">
-    <section class="card pres" id="pres" aria-live="polite"></section>
+    <div class="col-esq">
+      <section class="card pres" id="pres" aria-live="polite"></section>
+      <section class="card estados">
+        <div class="est-head"><h3>Apuração por estado</h3><div class="placar" id="placar"></div></div>
+        <div class="est-lista" id="estados"></div>
+      </section>
+    </div>
     <section class="card mapa">
       <div class="mapa-head">
         <h3>Presidente por estado</h3>
@@ -388,6 +416,35 @@ function mistura(hex, a){ // cor com intensidade a (0..1) sobre a superfície
   const m = (x, y) => Math.round(x + (y - x) * a);
   return `rgb(${m(r1,r2)},${m(g1,g2)},${m(b1,b2)})`;
 }
+function renderEstados(){
+  const cor = st.pres ? cores(st.pres.cands) : {};
+  const ufs = [...UFS, "ZZ"].filter(u => st.presUF[u] !== undefined);
+  ufs.sort((a, b) => ((st.presUF[b]?.pst || 0) - (st.presUF[a]?.pst || 0)) || (a === "ZZ") - (b === "ZZ") || NOME[a].localeCompare(NOME[b]));
+  const conta = {};
+  $("#estados").innerHTML = ufs.map(uf => {
+    const r = st.presUF[uf], p = r ? r.pst : 0;
+    let li = `<span style="color:var(--ink-3)">–</span>`;
+    if (r && p > 0){
+      const [a, b] = [...r.cands].sort((x,y) => y.v - x.v);
+      if (a.v > b.v){ if (uf !== "ZZ") conta[a.sq] = (conta[a.sq] || 0) + 1;
+        li = `<span style="color:${cor[a.sq]}">${esc(a.nome)}</span><small>${pct(a.pv)} × ${pct(b.pv)}</small>`; }
+      else li = `Empate`;
+    }
+    return `<div class="er" data-uf="${uf}">
+      <div class="u ${st.govUFs.includes(uf) ? "gov" : ""}" title="${st.govUFs.includes(uf) ? "2º turno para governador" : ""}">${uf === "ZZ" ? "EX" : uf}</div>
+      <div class="n">${NOME[uf]}</div>
+      <div class="bx"><div class="ba"><i style="width:${p}%"></i></div><div class="pa">${pct(p)} apurado</div></div>
+      <div class="li">${li}</div></div>`;
+  }).join("");
+  const pl = $("#placar");
+  pl.innerHTML = st.pres && Object.keys(conta).length
+    ? st.pres.cands.map(c => `<span><i style="background:${cor[c.sq]}"></i>${esc(c.nome)} lidera em <b>${conta[c.sq] || 0}</b></span>`).join("")
+    : `<span>Ordem pela apuração</span>`;
+}
+function marcaUF(uf){
+  document.querySelectorAll("#svg path.uf").forEach(p => p.classList.toggle("sel", p.dataset.uf === uf));
+  document.querySelectorAll(".er").forEach(e => e.classList.toggle("sel", e.dataset.uf === uf));
+}
 function renderMapa(){
   const cor = st.pres ? cores(st.pres.cands) : {};
   const empty = getComputedStyle(document.documentElement).getPropertyValue("--map-empty").trim();
@@ -403,6 +460,7 @@ function renderMapa(){
       }
     }
     p.style.fill = fill;
+    p.classList.toggle("sel", p.dataset.uf === st.sel);
   }
   const leg = $("#leg");
   if (st.modoMapa === "apur") leg.innerHTML = `<span>0%<span class="grad" style="background:linear-gradient(90deg,${mistura("#4c7a1c",.12)},#4c7a1c)"></span>100% das seções apuradas</span><span><i style="background:${empty}"></i>sem votos ainda</span>`;
@@ -589,7 +647,7 @@ async function ciclo(){
   let falhas = 0;
   try { falhas = SIM ? atualizarSim() : await atualizarReal(); $("#erro").hidden = true; }
   catch (e) { $("#erro").textContent = "Não foi possível ler os dados do TSE agora. Nova tentativa em instantes."; $("#erro").hidden = false; }
-  renderPres(); renderMapa(); renderGovs(); verificaAvisos();
+  renderPres(); renderMapa(); renderEstados(); renderGovs(); verificaAvisos();
   const r = st.pres, andando = r && r.est > 0 && !r.tf;
   $("#vivo").classList.toggle("off", !andando);
   $("#vivoTxt").textContent = SIM ? "simulação" : r?.tf ? "totalizado" : andando ? "ao vivo" : "aguardando";
@@ -629,6 +687,15 @@ function botoes(){
     else alert("As notificações deste site estão bloqueadas nas configurações do navegador.");
     pintaN();
   };
+  const lista = $("#estados");
+  lista.addEventListener("pointerover", ev => { const e = ev.target.closest(".er"); if (e) marcaUF(e.dataset.uf); });
+  lista.addEventListener("pointerleave", () => marcaUF(st.sel));
+  lista.addEventListener("click", ev => {
+    const e = ev.target.closest(".er"); if (!e) return;
+    st.sel = st.sel === e.dataset.uf ? null : e.dataset.uf; marcaUF(st.sel);
+    const card = st.sel && document.getElementById("gov-" + st.sel);
+    if (card){ card.scrollIntoView({behavior:"smooth", block:"center"}); card.classList.add("realce"); setTimeout(() => card.classList.remove("realce"), 2500); }
+  });
   $("#bAtu").onclick = () => ciclo();
   bSim.textContent = SIM ? "■ Sair da simulação" : "▶ Simular";
   bSim.classList.toggle("on", SIM);
