@@ -242,7 +242,7 @@ footer b{color:#fff}
       </section>
       <section class="card mapa-card">
         <div id="mapa" role="region" aria-label="Mapa dos locais de votação"></div>
-        <div class="leg"><span><i style="background:var(--accent)"></i>Reduto</span><span><i style="background:var(--ink-3)"></i>Na média</span><span><i style="background:var(--red)"></i>Abaixo da média</span><span>Círculo maior = mais votos</span></div>
+        <div class="leg"><span><i style="background:var(--accent)"></i>Reduto</span><span><i style="background:var(--ink-3)"></i>Na média</span><span><i style="background:var(--red)"></i>Abaixo da média</span><span id="leg-nivel">Círculo maior = mais votos</span></div>
       </section>
     </div>
 
@@ -393,7 +393,7 @@ function linhasDoCaminho(){let rs=S.linhas;for(const p of S.caminho){const f=cha
 function agrupa(rs,tipo){const f=chaveDe[tipo],m=new Map();for(const r of rs){const k=f(r);let g=m.get(k);if(!g){g={k,tipo,nome:nomeDe[tipo](r),sub:subDe[tipo](r),rs:[]};m.set(k,g)}g.rs.push(r)}return[...m.values()].map(g=>Object.assign(g,soma(g.rs)))}
 function calc(g,ref){g.ref=ref;g.ind=ref?g.p/ref:NaN;g.falt=Math.max(0,Math.round(ref*g.val-g.v));return g}
 function classe(ind){if(!isFinite(ind))return"media";const x=r2(ind);return x>=1.1?"forte":x<=0.9?"fraco":"media"}
-function difTexto(ind){if(!isFinite(ind))return"–";const d=Math.round((ind-1)*100);return d===0?"na média":(d>0?"+":"−")+Math.abs(d)+"% "+(d>0?"acima":"abaixo")}
+function difTexto(ind){if(!isFinite(ind))return"–";const d=Math.round((ind-1)*100);if(classe(ind)==="media")return d===0?"na média":`na média (${d>0?"+":"−"}${Math.abs(d)}%)`;return(d>0?"+":"−")+Math.abs(d)+"% "+(d>0?"acima":"abaixo")}
 const badge=ind=>el("span",{class:"badge "+classe(ind)},difTexto(ind));
 
 /* ---------- desenho ---------- */
@@ -472,15 +472,18 @@ function mapa(rs,ref){
   if(!window.L){$("#mapa").textContent="O mapa não carregou.";return}
   if(!M){M=L.map("mapa",{preferCanvas:true,scrollWheelZoom:false});L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:18,attribution:"© OpenStreetMap"}).addTo(M);M.setView([-5.2,-39.4],7)}
   if(camada)camada.remove();camada=L.layerGroup().addTo(M);
-  const gs=agrupa(rs.filter(r=>r.lat!=null&&r.lon!=null),"local").map(g=>calc(g,ref));
+  const porMun=S.caminho.length<2&&!S.caminho.some(p=>p.tipo==="municipio");
+  const gs=agrupa(rs.filter(r=>r.lat!=null&&r.lon!=null),porMun?"municipio":"local").map(g=>calc(g,ref));
   const max=Math.max(1,...gs.map(g=>g.v)),pts=[];
   for(const g of gs){const r=g.rs[0],c=cor(classe(g.ind));
-    L.circleMarker([r.lat,r.lon],{radius:3+13*Math.sqrt(g.v/max),color:c,weight:1,fillColor:c,fillOpacity:.55})
-      .bindPopup(el("div",{},el("b",{},g.nome),el("br"),`${r.bairro} · ${S.muns[r.mun]}`,el("br"),`${fmt.format(g.v)} votos (${pct(g.p)}) · ${difTexto(g.ind)}`)).addTo(camada);
-    pts.push([r.lat,r.lon])}
+    let lat=r.lat,lon=r.lon;if(porMun){let w=0;lat=0;lon=0;for(const x of g.rs){const p=x.val||1;lat+=x.lat*p;lon+=x.lon*p;w+=p}lat/=w;lon/=w}
+    L.circleMarker([lat,lon],{radius:3+13*Math.sqrt(g.v/max),color:c,weight:1,fillColor:c,fillOpacity:.55})
+      .bindPopup(el("div",{},el("b",{},g.nome),el("br"),porMun?r.reg:`${r.bairro} · ${S.muns[r.mun]}`,el("br"),`${fmt.format(g.v)} votos (${pct(g.p)}) · ${difTexto(g.ind)}`)).addTo(camada);
+    pts.push([lat,lon])}
   const enq=S.caminho.map(p=>p.k).join("/");
   if(pts.length&&enq!==ultimoEnq&&S.caminho.length)M.fitBounds(pts,{padding:[24,24],maxZoom:15});
   if(!S.caminho.length&&enq!==ultimoEnq)M.setView([-5.2,-39.4],7);
+  $("#leg-nivel").textContent=(porMun?"Um círculo por município":"Um círculo por local de votação")+" · maior = mais votos";
   ultimoEnq=enq;setTimeout(()=>M.invalidateSize(),60);
 }
 
