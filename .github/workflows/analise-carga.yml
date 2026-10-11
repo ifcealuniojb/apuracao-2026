@@ -10,7 +10,7 @@ on:
       uf: { description: "UF", default: "CE" }
       ano: { description: "Ano", default: "2026" }
       turno: { description: "Turno", default: "1" }
-      carga: { description: "Recarregar os dados do TSE no banco? (sim/nao)", default: "sim" }
+      carga: { description: "Recarregar os dados do TSE no banco? (sim/nao)", default: "nao" }
 
 concurrency: { group: analise-carga, cancel-in-progress: false }
 
@@ -34,19 +34,15 @@ jobs:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
 
-      # Os dados só são regravados quando pedido de propósito: execução manual com carga=sim,
-      # ou um push cuja mensagem de commit tenha [carga]. O limite grátis do D1 é de 100 mil linhas gravadas por dia.
+      # Os dados só são regravados numa execução manual (Actions → Run workflow) com carga=sim.
+      # Um push nunca regrava os dados. O limite grátis do D1 é de 100 mil linhas gravadas por dia.
       # Ajustes da página/API só republicam o Worker (o plano grátis do D1 tem limite de linhas gravadas por dia).
       - name: Decidir se recarrega os dados
         id: d
-        env:
-          MSG: ${{ github.event.head_commit.message }}
         run: |
           C=0
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             [ "${{ inputs.carga }}" = "sim" ] && C=1
-          else
-            case "$MSG" in *"[carga]"*) C=1;; esac
           fi
           echo "carga=$C" >> "$GITHUB_OUTPUT"
           [ $C = 1 ] && echo "::notice title=dados::Recarregando os dados do TSE" || echo "::notice title=dados::Dados mantidos (só a página/API foi publicada)"

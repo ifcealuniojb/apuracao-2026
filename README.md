@@ -26,7 +26,7 @@ Links antigos da apuração com parâmetros (`?uf=…`) são levados automaticam
 
 ## Mapa de Votos: publicação e carga
 - Um push no `main` que mexa em `analise/**` republica a página/API do Mapa de Votos no Cloudflare. **Os dados não são regravados.**
-- Para recarregar os dados (ex.: 2º turno), rode o workflow manualmente com `carga=sim` (escolhendo UF, ano e turno), ou faça um commit com `[carga]` na mensagem.
+- Para recarregar os dados (ex.: 2º turno), rode o workflow manualmente em Actions → "Run workflow", com `carga=sim` e escolhendo UF, ano e turno. Um push nunca regrava os dados.
 - O plano grátis do banco permite 100 mil linhas gravadas por dia; uma carga do Ceará usa cerca de 10%.
 - Segredos do repositório: `CLOUDFLARE_API_TOKEN` (obrigatório) e `ANALISE_CHAVE` (opcional, fecha o Mapa de Votos com link secreto).
 
