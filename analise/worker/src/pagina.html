@@ -465,7 +465,7 @@ function forteFraco(){
   trilha("#ff-trilha",pai);
   const podeAbrir=tipo!=="secao";
   const item=(g,lado)=>{const li=el("li",{class:"bloco"+(podeAbrir?" abre":""),...(podeAbrir?{tabindex:"0",role:"button"}:{})},
-      el("div",{class:"l1"},el("b",{class:"nm"},g.nome),el("b",{class:"fez"},`Fez ${pct(g.p)}`)),
+      el("div",{class:"l1"},el("b",{class:"nm"},g.nome),el("b",{class:"fez"},pct(g.p))),
       el("div",{class:"l2"},`teve ${fmt.format(g.v)} de ${fmt.format(g.val)}`),
       lado==="d"?el("div",{class:"l3"},"Precisa de ",el("b",{},`${fmt.format(g.falt)} votos`)," para atingir a média"):null);
     if(podeAbrir){const ir=()=>navega($("#ff-nivel"),()=>{S.caminho=caminhoAte(g)});li.addEventListener("click",ir);li.addEventListener("keydown",e=>{if(e.key==="Enter")ir()})}
