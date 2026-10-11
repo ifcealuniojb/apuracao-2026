@@ -850,6 +850,8 @@ async function loadNacional(c, token, fresh){
       try {
         const ele = eleFor(uf, c), raw = await tse(URLS.resAbr(ele, uf, c), {fresh});
         r = parseResultado(raw, c); r.ele = ele; r.uf = uf; r.turno = state.turno;
+        // 2º turno publicado mas ainda sem votos: mostra a disputa com os números do 1º turno
+        if (state.turno === "2" && !r.cands.some(x => x.votos > 0)) throw new NotAvailable("2º turno ainda sem votos");
       } catch(e){
         // 2º turno de governador: estado sem 2º turno (ou arquivo ainda não publicado) mostra o resultado do 1º turno
         if (!(e instanceof NotAvailable && state.turno === "2")) throw e;
@@ -908,7 +910,7 @@ function renderNacional(c, N){
       <div class="kpi"><span>Partidos com governador eleito</span><b>${partidos.size}</b><small>até agora</small></div>`;
   } else if (c === "3"){
     kpis = `<div class="kpi big"><span>Governadores eleitos</span><b>${eleitos}</b><small>de ${ufs.length} estados (1º e 2º turnos)</small></div>
-      <div class="kpi"><span>Ainda sem resultado</span><b>${aguardando}</b><small>2º turno em apuração ou não divulgado</small></div>
+      <div class="kpi"><span>2º turno sem resultado</span><b>${aguardando}</b><small>votação em 25 de outubro</small></div>
       <div class="kpi"><span>Partidos com governador eleito</span><b>${partidos.size}</b><small>até agora</small></div>`;
   } else {
     kpis = `<div class="kpi big"><span>${c === "5" ? "Senadores eleitos" : "Deputados federais eleitos"}</span><b>${fmt(eleitos)}</b><small>de ${fmt(totalVagas)} vagas em ${ufs.length} estados</small></div>
@@ -932,7 +934,7 @@ function renderNacional(c, N){
     if (c === "6") lista = ordenar(lista, r);
     mostrados += lista.length;
     const chave = c + "-" + uf, lim = state.expanded[chave] || state.q || c !== "6" ? lista.length : 8;
-    const sitUF = c === "3" ? (r.turno === "2" ? "2º turno" + (r.final ? " · apurado" : " · " + pctFmt(r.pst)) : lista.some(x => situacao(x, r).cls === "yes") ? "eleito no 1º turno" : "vai ao 2º turno")
+    const sitUF = c === "3" ? (r.turno === "2" ? "2º turno" + (r.final ? " · apurado" : " · " + pctFmt(r.pst) + " apurado") : lista.some(x => situacao(x, r).cls === "yes") ? "eleito no 1º turno" : state.turno === "2" ? "2º turno em 25 de outubro (votos do 1º turno)" : "vai ao 2º turno")
                 : `${lista.length}${lista.length !== selecionados(c, r).length ? " de " + selecionados(c, r).length : ""} eleito${lista.length > 1 ? "s" : ""} · ${r.vagas} vaga${r.vagas > 1 ? "s" : ""}`;
     html += `<div class="ufh"><b>${esc(UF_NOME[uf])}</b><span class="meta">${uf} · ${sitUF}</span>${c === "6" && r.proj && r.proj.tipo === "proporcional" ? `<button class="link" data-vagas="${c}" data-uf="${uf}">Cadeiras por partido →</button>` : ""}</div>
       <div class="list">`;
