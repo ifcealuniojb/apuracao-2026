@@ -1439,7 +1439,7 @@ function drawTable(el, rows, label, withFilter, csvName){
 
 /* ---------- Controles ---------- */
 const ufSel = $("#uf");
-ufSel.innerHTML = `<optgroup label="Destaques"><option value="BR">Brasil (Presidente)</option><option value="CE">Ceará</option></optgroup>`
+ufSel.innerHTML = `<optgroup label="Destaques"><option value="BR">Brasil</option><option value="CE">Ceará</option></optgroup>`
   + `<optgroup label="Outros estados">` + UFS.filter(([u]) => u !== "CE").map(([u,n]) => `<option value="${u}">${n}</option>`).join("") + `</optgroup>`
   + `<optgroup label="Fora do Brasil"><option value="ZZ">Exterior (Presidente)</option></optgroup>`;
 /* Cargo: só mostra os cargos que existem no local escolhido (Brasil: sem deputado estadual/distrital e sem "Todos") */
