@@ -70,11 +70,11 @@ main{padding:18px 0 40px}
 .placar i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px}
 .placar b{color:var(--ink)}
 .est-lista{flex:1 1 0;overflow:auto;min-height:0;margin:0 -6px;padding:0 6px}
-.er{display:grid;grid-template-columns:34px minmax(0,1fr) minmax(70px,1.1fr) 112px;gap:10px;align-items:center;padding:6px 4px;border-bottom:1px solid var(--line);font-size:13px;cursor:pointer;border-radius:8px}
+.er{display:grid;grid-template-columns:34px minmax(0,1fr) minmax(70px,1fr) 150px;gap:10px;align-items:center;padding:6px 4px;border-bottom:1px solid var(--line);font-size:13px;cursor:pointer;border-radius:8px}
 .er:last-child{border-bottom:0}
 .er:hover,.er.sel{background:var(--surface-2)}
 .er .u{width:30px;height:24px;border-radius:7px;background:var(--gray-soft);display:grid;place-items:center;font-weight:800;font-size:11.5px;color:var(--ink-2)}
-.er .u.gov{background:var(--navy);color:var(--lime)}
+.er .u.ug{background:var(--navy);color:var(--lime)}
 .er .n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
 .er .ba{height:6px;border-radius:99px;background:var(--gray-soft);overflow:hidden;position:relative}
 .er .ba i{display:block;height:100%;border-radius:99px;background:var(--accent);transition:width .8s ease}
@@ -82,7 +82,7 @@ main{padding:18px 0 40px}
 .er .li{text-align:right;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .er .li small{display:block;font-weight:600;color:var(--ink-3);font-size:11px}
 @media (max-width:1020px){.estados{flex:none;max-height:460px}.est-lista{flex:1 1 auto;max-height:400px}}
-@media (max-width:520px){.er{grid-template-columns:30px minmax(0,1fr) 92px}.er .bx{display:none}}
+@media (max-width:520px){.er{grid-template-columns:30px minmax(0,1fr) 140px}.er .bx{display:none}}
 @media (max-width:1020px){.topo-grid{grid-template-columns:minmax(0,1fr)}}
 .eyebrow{font-size:11.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-2)}
 
@@ -431,7 +431,7 @@ function renderEstados(){
       else li = `Empate`;
     }
     return `<div class="er" data-uf="${uf}">
-      <div class="u ${st.govUFs.includes(uf) ? "gov" : ""}" title="${st.govUFs.includes(uf) ? "2º turno para governador" : ""}">${uf === "ZZ" ? "EX" : uf}</div>
+      <div class="u ${st.govUFs.includes(uf) ? "ug" : ""}" title="${st.govUFs.includes(uf) ? "2º turno para governador" : ""}">${uf === "ZZ" ? "EX" : uf}</div>
       <div class="n">${NOME[uf]}</div>
       <div class="bx"><div class="ba"><i style="width:${p}%"></i></div><div class="pa">${pct(p)} apurado</div></div>
       <div class="li">${li}</div></div>`;
