@@ -186,6 +186,23 @@ svg.br line{stroke:var(--ink-3);stroke-width:1}
 footer{color:var(--ink-3);font-size:12px;padding:10px 0 30px}
 footer p{margin:4px 0}
 .erro{background:var(--red-soft);color:var(--red);border-radius:12px;padding:10px 14px;font-size:13px;margin-bottom:14px}
+/* aviso de Presidente eleito: destaque no centro da tela (os governadores seguem no canto) */
+.pres-aviso{position:fixed;inset:0;z-index:200;display:grid;place-items:center;padding:20px;background:rgba(43,10,24,.55);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);animation:fundo .4s ease}
+@keyframes fundo{from{opacity:0}}
+.pa-card{position:relative;width:min(440px,100%);background:var(--navy);color:#fff;border-radius:28px;padding:30px 24px 22px;text-align:center;border:4px solid var(--lime);box-shadow:0 30px 80px -20px rgba(0,0,0,.6);animation:sobe .7s cubic-bezier(.2,1.5,.4,1)}
+@keyframes sobe{from{transform:translateY(40px) scale(.85);opacity:0}}
+.pa-estrela{position:absolute;top:-34px;left:50%;width:68px;height:68px;transform:translateX(-50%);animation:gira 6s linear infinite}
+.pa-estrela svg{width:100%;height:100%;display:block;filter:drop-shadow(0 4px 10px rgba(0,0,0,.3))}
+@keyframes gira{50%{transform:translateX(-50%) rotate(12deg) scale(1.06)}}
+.pa-top{font-size:12px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--lime);margin:12px 0 14px}
+.pa-foto{width:128px;height:168px;margin:0 auto 14px;border-radius:20px;background:var(--gray-soft) center/cover no-repeat;border:4px solid var(--lime)}
+.pa-nome{font-size:30px;font-weight:900;letter-spacing:-.02em;line-height:1.1}
+.pa-part{font-size:14px;font-weight:700;color:var(--navy-mute);margin-top:4px}
+.pa-sel{display:inline-block;margin:14px 0 10px;background:var(--lime);color:var(--on-lime);font-weight:900;font-size:18px;padding:7px 18px;border-radius:999px}
+.pa-txt{font-size:13.5px;color:#fde4ec;line-height:1.45}
+.pa-fechar{all:unset;cursor:pointer;margin-top:16px;padding:9px 22px;border-radius:999px;background:rgba(255,255,255,.14);font-weight:800;font-size:14px}
+.pa-fechar:hover{background:rgba(255,255,255,.24)}
+.pa-fechar:focus-visible{outline:2px solid var(--lime);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -255,6 +272,7 @@ footer p{margin:4px 0}
   </footer>
 </main>
 <div class="toasts" id="toasts" aria-live="assertive"></div>
+<div class="pres-aviso" id="presAviso" aria-live="assertive" hidden></div>
 
 <script>
 "use strict";
@@ -516,20 +534,38 @@ function renderGovs(){
 }
 
 /* ---------- Alertas: aviso na tela, som e notificação ---------- */
+// Som do alerta: o som da urna eletrônica (arquivo /urna.mp3 servido pelo próprio painel).
 let audio = null;
 function tocar(){
   if (!st.som) return;
   try {
-    audio = audio || new (window.AudioContext || window.webkitAudioContext)();
-    if (audio.state === "suspended") audio.resume();
-    const t0 = audio.currentTime;
-    [[659.25,0],[783.99,.16],[1046.5,.32],[1318.5,.5]].forEach(([f, d]) => {
-      const o = audio.createOscillator(), g = audio.createGain();
-      o.type = "triangle"; o.frequency.value = f;
-      g.gain.setValueAtTime(0.0001, t0 + d); g.gain.exponentialRampToValueAtTime(0.35, t0 + d + .02); g.gain.exponentialRampToValueAtTime(0.0001, t0 + d + .55);
-      o.connect(g).connect(audio.destination); o.start(t0 + d); o.stop(t0 + d + .6);
-    });
+    audio = audio || new Audio("/urna.mp3");
+    audio.currentTime = 0;
+    const p = audio.play(); if (p) p.catch(() => {}); // o navegador só toca depois de um toque na página
   } catch {}
+}
+function avisarPresidente(titulo, c, texto, img, mat){
+  const box = $("#presAviso");
+  box.innerHTML = `<div class="pa-card" role="alertdialog" aria-label="${esc(titulo)}">
+    <div class="pa-estrela" aria-hidden="true">${$(".logo").innerHTML}</div>
+    <div class="pa-top">${SIM ? "Simulação · " : ""}Presidente da República</div>
+    ${img ? `<div class="pa-foto" style="background-image:url('${img}')"></div>` : ""}
+    <div class="pa-nome">${esc(c.nome)}</div>
+    <div class="pa-part">${esc(c.partido)} · ${esc(c.n)}</div>
+    <div class="pa-sel">${mat ? "Eleito(a) matematicamente" : "Eleito(a)"}</div>
+    <div class="pa-txt">${esc(texto)}</div>
+    <button type="button" class="pa-fechar">Fechar</button>
+  </div>`;
+  box.hidden = false;
+  const fecha = () => { box.hidden = true; box.innerHTML = ""; };
+  box.querySelector(".pa-fechar").onclick = fecha;
+  box.onclick = e => { if (e.target === box) fecha(); };
+  tocar();
+  try {
+    if ("Notification" in window && Notification.permission === "granted")
+      new Notification(titulo, {body: texto, tag: "BR", icon: img || undefined, requireInteraction: true});
+  } catch {}
+  document.title = "★ " + titulo;
 }
 function avisar(chave, titulo, texto, img){
   const t = document.createElement("div"); t.className = "toast";
@@ -557,7 +593,8 @@ function verificaAvisos(){
     const c = r.cands.find(x => x.sq === s.c.sq);
     const titulo = `${cargo}: ${c.nome} (${c.partido}) ${s.k === "mat" ? "eleito(a) matematicamente" : "eleito(a)"}`;
     const texto = `${pct(c.pv, 2)} dos votos válidos com ${pct(r.pst, 2)} das seções apuradas. Vantagem de ${fmt(s.dif)} votos; faltam ${mi(r.esnt)} eleitores.`;
-    avisar(chave, titulo, texto, foto(c, uf));
+    if (uf === "BR") avisarPresidente(titulo, c, texto, foto(c, uf), s.k === "mat");
+    else avisar(chave, titulo, texto, foto(c, uf));
     const alvo = uf === "BR" ? $("#pres") : document.getElementById("gov-" + uf);
     if (alvo){ alvo.classList.remove("flash"); void alvo.offsetWidth; alvo.classList.add("flash"); }
   }
@@ -689,10 +726,10 @@ setInterval(relogio, 1000);
 function botoes(){
   const bSom = $("#bSom"), bN = $("#bNotif"), bSim = $("#bSim");
   const pintaSom = () => { bSom.textContent = st.som ? "🔊 Som ligado" : "🔇 Som desligado"; bSom.classList.toggle("on", st.som); bSom.setAttribute("aria-pressed", st.som); };
-  st.som = guarda.get("p2t-som", false); pintaSom();
-  bSom.onclick = () => { st.som = !st.som; guarda.set("p2t-som", st.som); pintaSom(); if (st.som) tocar(); };
+  st.som = SIM ? guarda.get("p2t-som-sim", true) : guarda.get("p2t-som", false); pintaSom();
+  bSom.onclick = () => { st.som = !st.som; guarda.set(SIM ? "p2t-som-sim" : "p2t-som", st.som); pintaSom(); if (st.som) tocar(); };
   // o navegador só libera o som depois de um clique na página
-  document.addEventListener("pointerdown", () => { if (st.som && !audio) try { audio = new (window.AudioContext || window.webkitAudioContext)(); } catch {} }, {once:true});
+  document.addEventListener("pointerdown", () => { try { audio = audio || new Audio("/urna.mp3"); audio.load(); } catch {} }, {once:true});
 
   const pintaN = () => {
     if (!("Notification" in window)){ bN.textContent = "🔕 Sem notificações"; bN.disabled = true; return; }

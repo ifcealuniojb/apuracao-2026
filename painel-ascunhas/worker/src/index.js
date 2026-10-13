@@ -3,6 +3,7 @@
 // Worker painel-2turno, uma só instância). Abrir os dois painéis não aumenta as consultas ao TSE.
 // Aqui fica apenas o SHA-256 da chave: a chave em si não está no código.
 import PAGINA from "./pagina.html";
+import URNA from "./urna.mp3"; // som do alerta (urna eletrônica)
 import MAPA from "../../../painel/worker/src/mapa.json";
 
 const HASH = "3be8eabd40b4b1f55890620b696cadfc384c219487df39564c280bbab1fa14e5";
@@ -15,6 +16,7 @@ const CSP = [
   "style-src 'unsafe-inline'",
   "connect-src 'self'",
   "img-src https://resultados.tse.jus.br data:",
+  "media-src 'self'",
   "base-uri 'none'",
   "form-action 'none'",
   "frame-ancestors 'none'",
@@ -44,7 +46,7 @@ export default {
     if (req.method !== "GET" && req.method !== "HEAD") return nada();
     const url = new URL(req.url);
     if (url.pathname === "/robots.txt") return new Response("User-agent: *\nDisallow: /\n", { headers: { ...BASE, "content-type": "text/plain" } });
-    if (url.pathname !== "/" && url.pathname !== "/dados") return nada();
+    if (url.pathname !== "/" && url.pathname !== "/dados" && url.pathname !== "/urna.mp3") return nada();
 
     const k = url.searchParams.get("k");
     if (k && url.pathname === "/") {
@@ -59,6 +61,10 @@ export default {
     }
     const c = cookie(req);
     if (!c || (await sha256(c)) !== HASH) return nada();
+
+    if (url.pathname === "/urna.mp3") {
+      return new Response(URNA, { headers: { ...BASE, "content-type": "audio/mpeg", "cache-control": "private, max-age=86400" } });
+    }
 
     if (url.pathname === "/dados") {
       try {

@@ -9,6 +9,11 @@ type = "Text"
 globs = ["**/*.html"]
 fallthrough = true
 
+[[rules]]
+type = "Data"
+globs = ["**/*.mp3"]
+fallthrough = true
+
 # Usa o coletor do painel pessoal (Worker painel-2turno): o TSE continua sendo consultado por um só lugar.
 [[durable_objects.bindings]]
 name = "COLETOR"
