@@ -88,6 +88,8 @@ main{padding:18px 0 40px}
 @media (max-width:520px){.er{grid-template-columns:30px minmax(0,1fr) 140px}.er .bx{display:none}}
 @media (max-width:1020px){.topo-grid{grid-template-columns:minmax(0,1fr)}}
 .card.pres{border-top:5px solid var(--lime)}
+body.sim .card.pres{position:relative;overflow:hidden}
+body.sim .card.pres::after{content:"SIMULAÇÃO";position:absolute;right:-8px;bottom:6px;font-size:54px;font-weight:900;letter-spacing:.06em;color:var(--ink);opacity:.06;pointer-events:none;transform:rotate(-6deg)}
 footer .cred{font-weight:700;color:var(--ink-2)}
 .eyebrow{font-size:11.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-2)}
 
@@ -275,6 +277,7 @@ const guarda = { get(k, d){ try { const v = localStorage.getItem(k); return v ==
                  set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
 
 const SIM = new URLSearchParams(location.search).has("sim");
+if (SIM) document.body.classList.add("sim");
 const st = {
   pres: null, presUF: {}, gov: {}, govUFs: [], fin1: {},     // dados atuais
   modoMapa: "lider", ordem: guarda.get("p2t-ordem", "desc"),
@@ -602,7 +605,25 @@ function prepSim(d){
     const v = {}; for (const a of j.carg[0].agr) for (const p of a.par) for (const k of p.cand) v[k.sqcand] = +k.vap || 0;
     sim.uf[uf] = {te:+j.e.te, v, atraso:aleat(0, 8), ritmo:aleat(2.2, 5.5), vies:aleat(-.18, .18)};
   }
+  viradaDemo();
   for (const uf of st.govUFs) sim.gov[uf] = {te:sim.uf[uf].te, atraso:aleat(0, 8), ritmo:aleat(2.2, 5.5), vies:aleat(-.15, .15)};
+}
+// Demonstração do As Cunhãs: a simulação termina com vitória do Lula. Só aqui no navegador, só na simulação:
+// troca os votos dos dois finalistas em MG (e, se ainda não bastar, em SP). Nada muda nos dados do TSE.
+const VIRADA = ["MG", "SP"];
+function viradaDemo(){
+  const [a, b] = sim.presC, lula = sim.presC.find(c => c.partido === "PT"), outro = sim.presC.find(c => c !== lula);
+  if (!lula || !outro) return;
+  const total = sq => Object.values(sim.uf).reduce((t, u) => t + (u.v[sq] || 0), 0);
+  sim.trocados = [];
+  for (const uf of VIRADA){
+    if (total(lula.sq) > total(outro.sq)) break;
+    const u = sim.uf[uf]; if (!u) continue;
+    [u.v[lula.sq], u.v[outro.sq]] = [u.v[outro.sq], u.v[lula.sq]];
+    sim.trocados.push(uf);
+  }
+  const bar = $("#simbar");
+  if (bar && sim.trocados.length) bar.textContent = `SIMULAÇÃO DE DEMONSTRAÇÃO: resultado fictício. Votos do 1º turno com os dos dois candidatos trocados em ${sim.trocados.join(" e ")}. Não é resultado real.`;
 }
 function simCorrida(cfg, cands, votos){
   const p = Math.max(0, Math.min(100, (sim.t - cfg.atraso) * cfg.ritmo)), f = p / 100;
