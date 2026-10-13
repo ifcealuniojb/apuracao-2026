@@ -49,11 +49,12 @@ export default {
     const k = url.searchParams.get("k");
     if (k && url.pathname === "/") {
       if (!/^[A-Za-z0-9_-]{16,64}$/.test(k) || (await sha256(k)) !== HASH) return nada();
-      // guarda a chave num cookie e tira ela do endereço
+      // guarda a chave num cookie e tira ela do endereço (Lax: com Strict, quem abre pelo link vindo de outro site
+      // perde o cookie no redirecionamento e cai no 404)
       url.searchParams.delete("k");
       return new Response(null, {
         status: 302,
-        headers: { ...BASE, location: url.pathname + url.search, "set-cookie": `${COOKIE}=${k}; Path=/; Max-Age=7776000; HttpOnly; Secure; SameSite=Strict` },
+        headers: { ...BASE, location: url.pathname + url.search, "set-cookie": `${COOKIE}=${k}; Path=/; Max-Age=7776000; HttpOnly; Secure; SameSite=Lax` },
       });
     }
     const c = cookie(req);
