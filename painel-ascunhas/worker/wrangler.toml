@@ -1,0 +1,16 @@
+name = "painel-ascunhas"
+main = "src/index.js"
+compatibility_date = "2026-10-01"
+workers_dev = true
+preview_urls = false
+
+[[rules]]
+type = "Text"
+globs = ["**/*.html"]
+fallthrough = true
+
+# Usa o coletor do painel pessoal (Worker painel-2turno): o TSE continua sendo consultado por um só lugar.
+[[durable_objects.bindings]]
+name = "COLETOR"
+class_name = "Coletor"
+script_name = "painel-2turno"
