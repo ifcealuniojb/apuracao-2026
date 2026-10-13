@@ -151,7 +151,48 @@ select,input{font:16px var(--sans);color:var(--ink);background:var(--surface);bo
 .trilha button:hover{background:var(--accent-soft)}
 .trilha .at{background:var(--navy);color:#fff;border-radius:999px;padding:5px 12px;font-weight:700;font-size:13px}
 .trilha .sep{color:var(--ink-3)}
-.grade{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:14px;align-items:start}
+.grade{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:14px;align-items:stretch}
+/* tabela única: ranking completo, reordenável */
+.tabela{display:flex;flex-direction:column;overflow:hidden;min-height:0;height:640px}
+.tb-top{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.tb-busca{position:relative;flex:1 1 200px;max-width:320px}
+.tb-busca svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--ink-3)}
+.tb-busca input{height:38px;padding-left:32px;border-radius:10px;font-size:16px}
+.tb-conta{margin-left:auto;font-size:12.5px;color:var(--ink-2);font-weight:600}
+.tb-rola{flex:1 1 auto;overflow:auto;min-height:0;overscroll-behavior:contain}
+table.tb{width:100%;border-collapse:collapse;font-size:14px}
+.tb thead th{position:sticky;top:0;z-index:2;background:var(--surface);border-bottom:1px solid var(--line);padding:0;text-align:left}
+.tb thead button{all:unset;box-sizing:border-box;display:block;width:100%;cursor:pointer;padding:9px 10px;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap}
+.tb thead button:hover{color:var(--ink)}
+.tb thead button[aria-sort]{color:var(--ink)}
+.tb thead button[aria-sort="ascending"]::after{content:" ▲";font-size:9px}
+.tb thead button[aria-sort="descending"]::after{content:" ▼";font-size:9px}
+.tb .c-n{width:46px}.tb .c-p{width:120px}.tb .c-v{width:120px}.tb .c-m{width:118px}
+.tb .c-p button,.tb .c-v button,.tb .c-m button,.tb td.c-p,.tb td.c-v,.tb td.c-m{text-align:right}
+.tb td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+.tb tr.forte td{background:color-mix(in srgb,var(--accent-soft) 70%,transparent)}
+.tb tr.fraco td{background:color-mix(in srgb,var(--red-soft) 70%,transparent)}
+.tb tr.abre{cursor:pointer}
+.tb tr.abre:hover td,.tb tr.abre:focus-visible td{background:var(--gold-soft)}
+.tb td.c-n{color:var(--ink-3);font-weight:800;font-size:13px;text-align:center}
+.tb td.c-a b{display:block;font-weight:700;font-size:14.5px;line-height:1.25}
+.tb tr.abre td.c-a b::after{content:" ›";color:var(--ink-3)}
+.tb td.c-a small{display:block;color:var(--ink-3);font-size:12px;margin-top:1px}
+.tb td.c-a small.mob{display:none}
+.tb td.c-p b{font-size:15px;font-weight:800}
+.tb td.c-p .barra{margin-top:5px}
+.tb td.c-v b{display:block;font-weight:700}
+.tb td.c-v small{color:var(--ink-3);font-size:12px}
+.tb td.c-m{font-size:12.5px;font-weight:700;white-space:nowrap}
+.tb td.c-m.forte{color:var(--accent)}.tb td.c-m.fraco{color:var(--red)}.tb td.c-m.media{color:var(--ink-3)}
+.tb tr.pouco td{color:var(--ink-3)}
+.tb .vazio-g{padding:22px;text-align:center;color:var(--ink-3)}
+.tb-mais{all:unset;box-sizing:border-box;display:block;width:calc(100% - 28px);margin:12px 14px 16px;text-align:center;cursor:pointer;padding:10px;border-radius:10px;background:var(--gray-soft);font-weight:700;font-size:13.5px;color:var(--ink)}
+.tb-mais:hover{background:var(--accent-soft)}
+.mapa-card{display:flex;flex-direction:column;height:640px}
+.mapa-card #mapa{flex:1 1 auto;min-height:0;height:auto!important}
+@media (max-width:900px){.tabela{height:min(70vh,620px)}.mapa-card{height:440px}}
+@media (max-width:560px){.tb .c-v{display:none}.tb td.c-a small.mob{display:block}.tb .c-m{width:86px}.tb .c-p{width:84px}.tb td,.tb thead button{padding-left:7px;padding-right:7px}.tb td.c-m{white-space:normal}}
 @media (max-width:900px){.grade{grid-template-columns:minmax(0,1fr)}}
 .lista{overflow:hidden}
 .lista .cab,.lista .ln{display:grid;grid-template-columns:minmax(0,1fr) 92px 128px;gap:10px;align-items:center;padding:10px 14px}
@@ -171,8 +212,6 @@ select,input{font:16px var(--sans);color:var(--ink);background:var(--surface);bo
 .barra i{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:var(--accent)}
 .barra em{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink-2);border-radius:1px}
 @media (max-width:520px){.lista .cab,.lista .ln{grid-template-columns:minmax(0,1fr) 84px 108px;padding:10px 12px}}
-#mapa{height:600px}
-@media (max-width:900px){#mapa{height:380px}}
 .leg{display:flex;flex-wrap:wrap;gap:6px 14px;padding:10px 14px;font-size:12px;color:var(--ink-2);border-top:1px solid var(--line)}
 .leg i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
 .mapa-card{overflow:hidden}
@@ -248,28 +287,31 @@ a.voltar:hover{background:rgba(255,255,255,.1)}
     </section>
 
     <div class="sec-t">
-      <div><h3>Onde é forte e onde precisa de atenção</h3><p id="ff-sub"></p></div>
+      <div><h3>Desempenho por área</h3><p id="ff-sub"></p></div>
       <div class="dir"><div class="seg" id="ref" role="group" aria-label="Comparar com" title="Análise: compara com o desempenho do candidato na área aberta. vs. Ceará: compara com o desempenho no estado inteiro."><button type="button" data-v="pai" aria-pressed="true">Análise</button><button type="button" data-v="uf">vs. Ceará</button></div><div class="seg" id="ff-nivel" role="group" aria-label="Nível">
-        <button type="button" data-v="regiao" aria-pressed="true">Regiões</button><button type="button" data-v="municipio">Municípios</button><button type="button" data-v="bairro">Bairros</button><button type="button" data-v="local">Locais</button><button type="button" data-v="secao">Seções</button>
+        <button type="button" data-v="regiao" aria-pressed="true">Regiões</button><button type="button" data-v="municipio">Municípios</button><button type="button" data-v="bairro">Bairros</button><button type="button" data-v="zona">Zonas</button><button type="button" data-v="local">Locais</button><button type="button" data-v="secao">Seções</button>
       </div></div>
     </div>
     <nav class="trilha" id="ff-trilha" aria-label="Área aberta"></nav>
-    <div class="duas">
-      <div class="card lado"><h4 style="color:var(--accent)">Melhor desempenho</h4><p class="exp" id="exp-forte"></p><ol id="ff-forte"></ol></div>
-      <div class="card lado"><h4 style="color:var(--red)">Onde mais faltaram votos</h4><p class="exp" id="exp-fraco"></p><ol id="ff-fraco"></ol></div>
-    </div>
-
-    <div class="sec-t">
-      <div><h3>Explorar por área</h3><p>Toque numa área para abrir. A barra mostra a fatia de votos; o traço é a média de comparação.</p></div>
-      <div class="dir">
-        <div class="seg" id="agrup" role="group" aria-label="Agrupar" hidden><button type="button" data-v="bairro" aria-pressed="true">Bairros</button><button type="button" data-v="zona">Zonas</button></div>
-      </div>
-    </div>
-    <nav class="trilha" id="trilha" aria-label="Área aberta"></nav>
     <div class="grade">
-      <section class="card lista" aria-label="Áreas">
-        <div class="cab"><button type="button" data-o="nome">Área</button><button type="button" class="r" data-o="v">Votos</button><button type="button" class="r" data-o="ind">vs. média</button></div>
-        <div class="corpo" id="lista"></div>
+      <section class="card tabela" aria-label="Ranking das áreas">
+        <div class="tb-top">
+          <label class="tb-busca"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="tb-q" type="search" autocomplete="off" placeholder="Buscar"></label>
+          <span class="tb-conta" id="tb-conta"></span>
+        </div>
+        <div class="tb-rola" id="tb-rola">
+          <table class="tb">
+            <thead><tr>
+              <th class="c-n"><button type="button" data-o="rank">#</button></th>
+              <th class="c-a"><button type="button" data-o="nome">Área</button></th>
+              <th class="c-p"><button type="button" data-o="p">Fatia</button></th>
+              <th class="c-v"><button type="button" data-o="v">Votos</button></th>
+              <th class="c-m"><button type="button" data-o="ind">vs. média</button></th>
+            </tr></thead>
+            <tbody id="tb-corpo"></tbody>
+          </table>
+          <button type="button" class="tb-mais" id="tb-mais" hidden></button>
+        </div>
       </section>
       <section class="card mapa-card">
         <div id="mapa" role="region" aria-label="Mapa dos locais de votação"></div>
@@ -283,8 +325,8 @@ a.voltar:hover{background:rgba(255,255,255,.1)}
         <p><b>Fatia de votos</b> é a porcentagem dos votos válidos daquela área que foram para o candidato.</p>
         <p><b>Comparação com a média</b> mostra quanto essa fatia ficou acima ou abaixo da fatia do candidato na área que está aberta (botão <b>Análise</b>, o padrão; ex.: ao abrir o Vale do Jaguaribe, cada município é comparado com o resultado dele no Vale) ou no Ceará inteiro (botão <b>vs. Ceará</b>).</p>
         <p class="ex" id="exemplo"></p>
-        <p><span class="badge forte">Acima da média</span> (entra em "Melhor desempenho"): 10% ou mais acima da média. <span class="badge fraco">Abaixo da média</span> 10% ou mais abaixo. <span class="badge media">Na média</span> entre os dois.</p>
-        <p>Nas listas de melhor desempenho e de faltas, áreas com poucos votos válidos ficam de fora para não distorcer.</p>
+        <p><span class="badge forte">Acima da média</span> (linha verde na tabela): 10% ou mais acima da média. <span class="badge fraco">Abaixo da média</span> (linha vermelha): 10% ou mais abaixo. <span class="badge media">Na média</span> entre os dois.</p>
+        <p>A tabela traz todas as áreas. Ela começa do melhor para o pior desempenho e pode ser reordenada tocando no nome de cada coluna; o "#" é a posição no ranking. Áreas com poucos votos válidos aparecem no fim, sem posição, para não distorcer o ranking.</p>
       </div>
     </details>
 
@@ -311,7 +353,7 @@ const el=(t,a={},...f)=>{const e=document.createElement(t);for(const[k,v]of Obje
 const titulo=s=>String(s||"").toLowerCase().replace(/(^|[\s\-/(])([a-zà-ú])/g,(m,a,b)=>a+b.toUpperCase()).replace(/\b(De|Da|Do|Das|Dos|E)\b/g,w=>w.toLowerCase());
 
 const CARGOS={1:"Presidente",3:"Governador",5:"Senador",6:"Deputado Federal",7:"Deputado Estadual"};
-const S={muns:{},reg:{},cands:[],tse:{},G:null,T:{},C:null,linhas:[],caminho:[],ordem:{col:"v",dir:-1},ref:"pai",agrup:"bairro",ffNivel:"municipio"};
+const S={muns:{},reg:{},cands:[],tse:{},G:null,T:{},C:null,linhas:[],caminho:[],tb:{col:"rank",dir:1},tbQ:"",tbMax:300,ref:"pai",agrup:"bairro",ffNivel:"regiao"};
 
 let nCarreg=0;
 function busy(d){nCarreg+=d;$("#carreg").hidden=nCarreg<=0}
@@ -359,6 +401,7 @@ async function inicio(){
   const q=new URLSearchParams(location.search);
   $("#cargo").value=q.get("cargo")||"1";
   if(q.get("area"))try{S.caminho=JSON.parse(q.get("area"))}catch{}
+  S.ffCam=S.caminho.map(p=>p.k).join("/");S.ffNivel=FF.includes(q.get("nivel"))?q.get("nivel"):proximo();
   await trocaCargo(q.get("n"));
 }
 async function trocaCargo(nr){
@@ -415,25 +458,29 @@ function montaLinhas(){
 function soma(rs){let v=0,val=0,tot=0,aptos=0;for(const r of rs){v+=r.v;val+=r.val;tot+=r.tot;aptos+=r.aptos}return{v,val,tot,aptos,p:val?v/val:NaN}}
 
 /* ---------- níveis ---------- */
-const NIVEIS=["regiao","municipio","grupo","local","secao"];
 const chaveDe={regiao:r=>r.reg,municipio:r=>String(r.mun),bairro:r=>r.mun+"|"+r.bairro,zona:r=>r.mun+"|Z"+r.zona,local:r=>r.mun+"|"+r.zona+"|"+r.nrl,secao:r=>r.mun+"|"+r.zona+"|"+r.sec};
 const nomeDe={regiao:r=>r.reg,municipio:r=>S.muns[r.mun],bairro:r=>r.bairro,zona:r=>"Zona "+r.zona,local:r=>r.local,secao:r=>"Seção "+r.sec};
 const subDe={regiao:()=>"",municipio:r=>r.reg,bairro:r=>S.muns[r.mun],zona:r=>S.muns[r.mun],local:r=>`${r.bairro} · ${S.muns[r.mun]}`,secao:r=>`${r.local} · Zona ${r.zona}`};
-const PISO={regiao:0,municipio:300,bairro:300,local:200,secao:80};
-const FF=["regiao","municipio","bairro","local","secao"];
-function caminhoAte(g){const r=g.rs[0],c=[{tipo:"regiao",k:r.reg,nome:r.reg}],i=FF.indexOf(g.tipo);
-  if(i>=1)c.push({tipo:"municipio",k:String(r.mun),nome:S.muns[r.mun]});
-  if(i>=2)c.push({tipo:"bairro",k:chaveDe.bairro(r),nome:r.bairro});
-  if(i>=3)c.push({tipo:"local",k:chaveDe.local(r),nome:r.local});
-  if(i>=4)c.push({tipo:"secao",k:chaveDe.secao(r),nome:"Seção "+r.sec});
+const PISO={regiao:0,municipio:300,bairro:300,zona:300,local:200,secao:80};
+const FF=["regiao","municipio","bairro","zona","local","secao"];
+const ORDEM_N={regiao:0,municipio:1,bairro:2,zona:2,local:3,secao:4};
+const PLURAL={regiao:"regiões",municipio:"municípios",bairro:"bairros",zona:"zonas",local:"locais de votação",secao:"seções"};
+const SING={regiao:"região",municipio:"município",bairro:"bairro",zona:"zona",local:"local",secao:"seção"};
+// nível que abre por padrão depois da área aberta (região → municípios → bairros ou zonas → locais → seções)
+function proximo(){const u=S.caminho.at(-1);if(!u)return"regiao";return{regiao:"municipio",municipio:S.agrup,bairro:"local",zona:"local",local:"secao",secao:"secao"}[u.tipo]||"secao"}
+function caminhoAte(g){const r=g.rs[0],o=ORDEM_N[g.tipo],c=[{tipo:"regiao",k:r.reg,nome:r.reg}];
+  if(o>=1)c.push({tipo:"municipio",k:String(r.mun),nome:S.muns[r.mun]});
+  if(o>=2){const zona=g.tipo==="zona"||(g.tipo!=="bairro"&&S.caminho.some(p=>p.tipo==="zona"));
+    c.push(zona?{tipo:"zona",k:chaveDe.zona(r),nome:"Zona "+r.zona}:{tipo:"bairro",k:chaveDe.bairro(r),nome:r.bairro})}
+  if(o>=3)c.push({tipo:"local",k:chaveDe.local(r),nome:r.local});
+  if(o>=4)c.push({tipo:"secao",k:chaveDe.secao(r),nome:"Seção "+r.sec});
   return c}
-function prepos(p){if(p.tipo!=="regiao")return"em "+p.nome;return(/^(Grande|Serra)\b/.test(p.nome)?"na ":"no ")+p.nome}
+function prepos(p){if(p.tipo==="zona")return"na "+p.nome;if(p.tipo!=="regiao")return"em "+p.nome;return(/^(Grande|Serra)\b/.test(p.nome)?"na ":"no ")+p.nome}
 function navega(ancora,muda){const a=ancora.getBoundingClientRect().top;muda();desenha();const b=ancora.getBoundingClientRect().top;if(Math.abs(b-a)>1)window.scrollBy({top:b-a,left:0,behavior:"instant"})}
 function trilha(sel,pai){const tr=[],itens=[{nome:"Ceará"},...S.caminho];
   itens.forEach((p,i)=>{if(i)tr.push(el("span",{class:"sep"},"›"));const ult=i===itens.length-1;
     tr.push(ult?el("span",{class:"at"},`${p.nome}: ${fmt.format(pai.v)} votos (média de ${pct(pai.p)} dos votos válidos)`):el("button",{type:"button",onclick:()=>navega($(sel),()=>{S.caminho=S.caminho.slice(0,i)})},p.nome))});
   $(sel).replaceChildren(...tr)}
-const tipoNivel=i=>NIVEIS[i]==="grupo"?S.agrup:NIVEIS[i];
 function linhasDoCaminho(){let rs=S.linhas;for(const p of S.caminho){const f=chaveDe[p.tipo];rs=rs.filter(r=>f(r)===p.k)}return rs}
 function agrupa(rs,tipo){const f=chaveDe[tipo],m=new Map();for(const r of rs){const k=f(r);let g=m.get(k);if(!g){g={k,tipo,nome:nomeDe[tipo](r),sub:subDe[tipo](r),rs:[]};m.set(k,g)}g.rs.push(r)}return[...m.values()].map(g=>Object.assign(g,soma(g.rs)))}
 function calc(g,ref){g.ref=ref;g.ind=ref?g.p/ref:NaN;g.falt=Math.max(0,Math.round(ref*g.val-g.v));return g}
@@ -461,8 +508,7 @@ function desenha(){
     kpi("Teve voto em",munsCom+" de "+Object.keys(S.muns).length,"municípios"),
     kpi("Região mais forte",reg?reg.nome:"–",reg?pct(reg.p)+" dos válidos · média estado "+pct(S.ufTot.p):""));
   cadeiras();
-  forteFraco();
-  explorar();
+  tabela();
   salvaUrl();
 }
 const kpi=(r,v,s,big)=>el("div",{class:"kpi"+(big?" big":"")},el("span",{},r),el("b",{},v),el("small",{},s||""));
@@ -492,74 +538,80 @@ function cadeiras(){
     call?el("div",{class:"callout"},...call):null));
 }
 
-function forteFraco(){
+function tabela(){
   const rs=linhasDoCaminho(), pai=soma(rs), prof=S.caminho.length;
-  // a aba acompanha a área aberta: abriu uma região, mostra municípios; abriu um município, bairros...
+  // a aba acompanha a área aberta: abriu uma região, mostra municípios; abriu um município, bairros (ou zonas)...
   const chaveCam=S.caminho.map(p=>p.k).join("/");
-  if(S.ffCam!==chaveCam){S.ffCam=chaveCam;S.ffNivel=FF[Math.min(prof,FF.length-1)]}
+  if(S.ffCam!==chaveCam){S.ffCam=chaveCam;S.ffNivel=proximo();S.tb={col:"rank",dir:1};S.tbQ="";S.tbMax=300;$("#tb-q").value=""}
   const tipo=S.ffNivel, ref=S.ref==="pai"?pai.p:S.ufTot.p, nomeRef=S.ref==="pai"&&prof?prepos(S.caminho.at(-1)):"no Ceará";
-  $("#exp-forte").textContent=`Lugares onde a fatia de votos ficou 10% ou mais acima da média dele ${nomeRef} (${pct(ref)}).`;
-  $("#exp-fraco").textContent=`Lugares abaixo da média dele ${nomeRef} (${pct(ref)}), começando pelos que mais votos deixaram de render.`;
   document.querySelectorAll("#ref button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===S.ref));
-  document.querySelectorAll("#ff-nivel button").forEach(b=>{const k=FF.indexOf(b.dataset.v);b.setAttribute("aria-pressed",b.dataset.v===tipo)});
-  const piso=Math.min(PISO[tipo],Math.max(30,Math.round(pai.val*0.02)));
-  const gs=agrupa(rs,tipo).map(g=>calc(g,ref)).filter(g=>g.val>=piso);
-  const forte=gs.filter(g=>classe(g.ind)==="forte").sort((a,b)=>b.ind-a.ind).slice(0,8);
-  const fraco=gs.filter(g=>g.falt>0).sort((a,b)=>b.falt-a.falt).slice(0,8);
-  const area=prof?S.caminho.at(-1).nome:"Ceará";
-  $("#ff-sub").textContent=`${{regiao:"Regiões",municipio:"Municípios",bairro:"Bairros",local:"Locais de votação",secao:"Seções"}[tipo]} ${prof?prepos(S.caminho.at(-1)).replace(/^em /,"de ").replace(/^no /,"do ").replace(/^na /,"da "):"do Ceará"}, comparados com o desempenho do candidato ${nomeRef} (${pct(ref)} dos válidos).${piso?` Só áreas com ${fmt.format(piso)} ou mais votos válidos.`:""}${tipo!=="secao"?" Toque num lugar para abrir.":""}`;
+  document.querySelectorAll("#ff-nivel button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===tipo));
+  const piso=Math.min(PISO[tipo]??80,Math.max(30,Math.round(pai.val*0.02)));
+  const dondeTxt=prof?prepos(S.caminho.at(-1)).replace(/^em /,"de ").replace(/^no /,"do ").replace(/^na /,"da "):"do Ceará";
+  $("#ff-sub").textContent=`${PLURAL[tipo][0].toUpperCase()+PLURAL[tipo].slice(1)} ${dondeTxt}, do melhor para o pior desempenho, comparados com o resultado do candidato ${nomeRef} (${pct(ref)} dos válidos).${tipo!=="secao"?" Toque numa linha para abrir.":""}`;
   trilha("#ff-trilha",pai);
-  const podeAbrir=tipo!=="secao";
-  const item=(g,lado)=>{const li=el("li",{class:"bloco"+(podeAbrir?" abre":""),...(podeAbrir?{tabindex:"0",role:"button"}:{})},
-      el("div",{class:"l1"},el("b",{class:"nm"},g.nome),el("b",{class:"fez"},pct(g.p))),
-      el("div",{class:"l2"},`teve ${fmt.format(g.v)} de ${fmt.format(g.val)}`),
-      null);
-    if(podeAbrir){const ir=()=>navega($("#ff-nivel"),()=>{S.caminho=caminhoAte(g)});li.addEventListener("click",ir);li.addEventListener("keydown",e=>{if(e.key==="Enter")ir()})}
-    return li};
-  $("#ff-forte").replaceChildren(...(forte.length?forte.map(g=>item(g,"f")):[el("li",{class:"vazio"},`Nenhuma área ficou 10% acima da média ${nomeRef} neste nível.`)]));
-  $("#ff-fraco").replaceChildren(...(fraco.length?fraco.map(g=>item(g,"d")):[el("li",{class:"vazio"},`Nenhuma área ficou abaixo da média ${nomeRef} neste nível.`)]));
-}
-
-function explorar(){
-  const rs=linhasDoCaminho(), pai=soma(rs), ref=S.ref==="pai"?pai.p:S.ufTot.p;
-  const nivel=Math.min(S.caminho.length,NIVEIS.length-1), tipo=tipoNivel(nivel);
-  $("#agrup").hidden=NIVEIS[nivel]!=="grupo";
-  document.querySelectorAll("#agrup button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===S.agrup));
-  document.querySelectorAll("#ref button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===S.ref));
-  trilha("#trilha",pai);
-  // exemplo do "como ler"
-  const exG=agrupa(rs,tipo).map(g=>calc(g,ref)).filter(g=>g.val>=PISO[tipo]).sort((a,b)=>b.v-a.v)[0];
-  if(exG){const cl=classe(exG.ind);$("#exemplo").textContent=`Exemplo: ${info(S.cand).nome} teve ${pct(ref)} dos votos válidos ${S.ref==="pai"&&S.caminho.length?"em "+S.caminho.at(-1).nome:"no Ceará"}. Em ${exG.nome}, teve ${pct(exG.p)}. ${cl==="forte"?`Como ${pct(exG.p)} está 10% ou mais acima de ${pct(ref)}, ${exG.nome} fica acima da média e entra em "Melhor desempenho".`:cl==="fraco"?`Como ${pct(exG.p)} está 10% ou mais abaixo de ${pct(ref)}, ${exG.nome} fica abaixo da média.`:`Como ${pct(exG.p)} está a menos de 10% de distância de ${pct(ref)}, ${exG.nome} fica na média.`}`}
-  // lista
+  // ranking: posição pelo desempenho (fatia ÷ média); áreas com poucos votos válidos ficam sem posição, no fim
   const gs=agrupa(rs,tipo).map(g=>calc(g,ref));
-  const {col,dir}=S.ordem; gs.sort((a,b)=>col==="nome"?dir*a.nome.localeCompare(b.nome,"pt-BR"):dir*((a[col]||0)-(b[col]||0)));
+  const rk=gs.filter(g=>g.val>=piso&&isFinite(g.ind)).sort((a,b)=>b.ind-a.ind||b.v-a.v);
+  rk.forEach((g,i)=>g.rank=i+1);
+  for(const g of gs)if(!g.rank)g.rank=null;
+  const {col,dir}=S.tb;
+  const val=g=>col==="nome"?g.nome:col==="rank"?g.rank:(g[col]??0);
+  gs.sort((a,b)=>{
+    if(col==="rank"){if(a.rank==null||b.rank==null)return(a.rank==null)-(b.rank==null)||b.v-a.v;return dir*(a.rank-b.rank)}
+    if(col==="nome")return dir*a.nome.localeCompare(b.nome,"pt-BR");
+    const x=val(a),y=val(b);return dir*((isFinite(x)?x:-1)-(isFinite(y)?y:-1))});
+  document.querySelectorAll(".tb thead button").forEach(b=>{if(b.dataset.o===col)b.setAttribute("aria-sort",dir>0?"ascending":"descending");else b.removeAttribute("aria-sort")});
+  const q=norm(S.tbQ), filt=q?gs.filter(g=>norm(g.nome+" "+g.sub).includes(q)):gs;
+  $("#tb-q").placeholder="Buscar "+SING[tipo];
+  const area=prof?S.caminho.at(-1).nome:"Ceará";
+  const mostra=filt.slice(0,S.tbMax);
+  $("#tb-conta").textContent=q?`${fmt.format(filt.length)} de ${fmt.format(gs.length)} ${PLURAL[tipo]}`:`${fmt.format(gs.length)} ${PLURAL[tipo]} ${dondeTxt}`;
   const maxP=Math.max(ref,...gs.map(g=>g.p||0))||1;
-  const abre=nivel<NIVEIS.length-1;
-  $("#lista").replaceChildren(...(gs.length?gs.map(g=>{
-    const ln=el("div",{class:"ln"+(abre?" abre":""),role:abre?"button":null,tabindex:abre?"0":null},
-      el("div",{class:"n"},el("b",{},g.nome),el("small",{},[g.sub,`${fmt.format(g.val)} válidos`].filter(Boolean).join(" · ")),
-        el("div",{class:"barra",title:`Fatia ${pct(g.p)} · média ${pct(ref)}`},el("i",{style:`width:${Math.min(100,100*(g.p||0)/maxP)}%;background:var(${classe(g.ind)==="fraco"?"--red":classe(g.ind)==="forte"?"--accent":"--ink-3"})`}),el("em",{style:`left:${100*ref/maxP}%`}))),
-      el("div",{class:"r"},el("b",{},fmt.format(g.v)),el("small",{},pct(g.p))),
-      el("div",{class:"r"},badge(g.ind)));
-    if(abre){const ir=()=>navega($(".lista"),()=>{S.caminho.push({tipo,k:g.k,nome:g.nome});S.ordem={col:"v",dir:-1}});ln.addEventListener("click",ir);ln.addEventListener("keydown",e=>{if(e.key==="Enter")ir()})}
-    return ln}):[el("div",{class:"vazio-g"},"Nada para mostrar nesta área.")]));
+  const podeAbrir=tipo!=="secao", nomesCam=new Set(S.caminho.map(p=>p.nome));
+  $("#tb-corpo").replaceChildren(...(mostra.length?mostra.map(g=>{
+    const cl=g.rank?classe(g.ind):"media";
+    const tr=el("tr",{class:(g.rank?cl:"pouco")+(podeAbrir?" abre":""),...(podeAbrir?{tabindex:"0"}:{})},
+      el("td",{class:"c-n"},g.rank?g.rank+"º":"–"),
+      el("td",{class:"c-a"},el("b",{},g.nome),
+        (()=>{const sub=nomesCam.has(g.sub)?"":g.sub,t=[sub,g.rank?"":"poucos votos válidos, fora do ranking"].filter(Boolean).join(" · ");return t?el("small",{},t):null})(),
+        el("small",{class:"mob"},`teve ${fmt.format(g.v)} de ${fmt.format(g.val)}`)),
+      el("td",{class:"c-p"},el("b",{},pct(g.p)),
+        el("div",{class:"barra",title:`Fatia ${pct(g.p)} · média ${pct(ref)}`},el("i",{style:`width:${Math.min(100,100*(g.p||0)/maxP)}%;background:var(${cl==="fraco"?"--red":cl==="forte"?"--accent":"--ink-3"})`}),el("em",{style:`left:${100*ref/maxP}%`}))),
+      el("td",{class:"c-v"},el("b",{},fmt.format(g.v)),el("small",{},"de "+fmt.format(g.val))),
+      el("td",{class:"c-m "+cl},difTexto(g.ind)));
+    if(podeAbrir){const ir=()=>navega($("#ff-nivel"),()=>{S.caminho=caminhoAte(g)});tr.addEventListener("click",ir);tr.addEventListener("keydown",e=>{if(e.key==="Enter")ir()})}
+    tr.addEventListener("mouseenter",()=>destaca(g));tr.addEventListener("mouseleave",()=>destaca(null));
+    return tr}):[el("tr",{},el("td",{colspan:"5",class:"vazio-g"},q?"Nada encontrado com essa busca.":"Nada para mostrar nesta área."))]));
+  const resto=filt.length-mostra.length, bm=$("#tb-mais");
+  bm.hidden=resto<=0; if(resto>0)bm.textContent=`Mostrar mais ${fmt.format(Math.min(300,resto))} (faltam ${fmt.format(resto)})`;
+  // exemplo do "como ler"
+  const exG=[...rk].sort((a,b)=>b.v-a.v)[0];
+  if(exG){const cl=classe(exG.ind);$("#exemplo").textContent=`Exemplo: ${info(S.cand).nome} teve ${pct(ref)} dos votos válidos ${S.ref==="pai"&&prof?"em "+S.caminho.at(-1).nome:"no Ceará"}. Em ${exG.nome}, teve ${pct(exG.p)}. ${cl==="forte"?`Como ${pct(exG.p)} está 10% ou mais acima de ${pct(ref)}, ${exG.nome} fica acima da média (linha verde).`:cl==="fraco"?`Como ${pct(exG.p)} está 10% ou mais abaixo de ${pct(ref)}, ${exG.nome} fica abaixo da média (linha vermelha).`:`Como ${pct(exG.p)} está a menos de 10% de distância de ${pct(ref)}, ${exG.nome} fica na média.`}`}
   mapa(rs,ref);
 }
 
 /* ---------- mapa ---------- */
-let M=null,camada=null,ultimoEnq=null;
+let M=null,camada=null,ultimoEnq=null,MK=new Map(),MKmun=true,MKon=[];
+// passar o mouse numa linha da tabela destaca os círculos dela no mapa
+function destaca(g){
+  for(const {mk,c} of MKon)mk.setStyle({color:c,weight:1,fillOpacity:.55});MKon=[];
+  if(!g||!M)return;
+  const ks=new Set(g.rs.map(r=>MKmun?String(r.mun):chaveDe.local(r)));if(ks.size>300)return;
+  for(const k of ks){const m=MK.get(k);if(m){m.mk.setStyle({color:"#1b2a38",weight:3,fillOpacity:.9});m.mk.bringToFront();MKon.push(m)}}
+}
 function cor(cl){const cs=getComputedStyle(document.documentElement);return cs.getPropertyValue(cl==="forte"?"--accent":cl==="fraco"?"--red":"--ink-3").trim()}
 function mapa(rs,ref){
   if(!window.L){$("#mapa").textContent="O mapa não carregou.";return}
   if(!M){M=L.map("mapa",{preferCanvas:true,scrollWheelZoom:false});L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:18,attribution:"© OpenStreetMap"}).addTo(M);M.setView([-5.2,-39.4],7)}
-  if(camada)camada.remove();camada=L.layerGroup().addTo(M);
-  const porMun=S.caminho.length<2&&!S.caminho.some(p=>p.tipo==="municipio");
+  if(camada)camada.remove();camada=L.layerGroup().addTo(M);MK=new Map();
+  const porMun=S.caminho.length<2&&!S.caminho.some(p=>p.tipo==="municipio");MKmun=porMun;
   const gs=agrupa(rs.filter(r=>r.lat!=null&&r.lon!=null),porMun?"municipio":"local").map(g=>calc(g,ref));
   const max=Math.max(1,...gs.map(g=>g.v)),pts=[];
   for(const g of gs){const r=g.rs[0],c=cor(classe(g.ind));
     let lat=r.lat,lon=r.lon;if(porMun){let w=0;lat=0;lon=0;for(const x of g.rs){const p=x.val||1;lat+=x.lat*p;lon+=x.lon*p;w+=p}lat/=w;lon/=w}
-    L.circleMarker([lat,lon],{radius:3+13*Math.sqrt(g.v/max),color:c,weight:1,fillColor:c,fillOpacity:.55})
-      .bindPopup(el("div",{},el("b",{},g.nome),el("br"),porMun?r.reg:`${r.bairro} · ${S.muns[r.mun]}`,el("br"),`${fmt.format(g.v)} votos (${pct(g.p)}) · ${ROT[classe(g.ind)]}`)).addTo(camada);
+    const mk=L.circleMarker([lat,lon],{radius:3+13*Math.sqrt(g.v/max),color:c,weight:1,fillColor:c,fillOpacity:.55});MK.set(g.k,{mk,c});
+    mk.bindPopup(el("div",{},el("b",{},g.nome),el("br"),porMun?r.reg:`${r.bairro} · ${S.muns[r.mun]}`,el("br"),`${fmt.format(g.v)} votos (${pct(g.p)}) · ${ROT[classe(g.ind)]}`)).addTo(camada);
     pts.push([lat,lon])}
   const enq=S.caminho.map(p=>p.k).join("/");
   if(pts.length&&enq!==ultimoEnq){M.invalidateSize();M.fitBounds(pts,{padding:[24,24],maxZoom:15})}
@@ -568,16 +620,19 @@ function mapa(rs,ref){
 }
 
 /* ---------- eventos ---------- */
-function salvaUrl(){const q=new URLSearchParams({cargo:S.cand.cargo,n:S.cand.nr});if(S.caminho.length)q.set("area",JSON.stringify(S.caminho));history.replaceState(null,"","?"+q)}
+function salvaUrl(){const q=new URLSearchParams({cargo:S.cand.cargo,n:S.cand.nr});if(S.caminho.length)q.set("area",JSON.stringify(S.caminho));if(S.ffNivel!==proximo())q.set("nivel",S.ffNivel);history.replaceState(null,"","?"+q)}
 $("#cargo").addEventListener("change",()=>trocaCargo().catch(falha));
-$("#ff-nivel").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;const k=FF.indexOf(b.dataset.v);
-  if(k<S.caminho.length)navega($("#ff-nivel"),()=>{S.caminho=S.caminho.slice(0,k)});else navega($("#ff-nivel"),()=>{S.ffNivel=b.dataset.v})});
+$("#ff-nivel").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;const t=b.dataset.v;
+  navega($("#ff-nivel"),()=>{S.caminho=S.caminho.filter(p=>ORDEM_N[p.tipo]<ORDEM_N[t]);if(t==="bairro"||t==="zona")S.agrup=t;
+    S.ffCam=S.caminho.map(p=>p.k).join("/");S.ffNivel=t;S.tb={col:"rank",dir:1};S.tbQ="";S.tbMax=300;$("#tb-q").value=""})});
 $("#ref").addEventListener("click",e=>{const b=e.target.closest("button");if(b)navega($("#ff-nivel"),()=>{S.ref=b.dataset.v})});
-$("#agrup").addEventListener("click",e=>{const b=e.target.closest("button");if(b){S.agrup=b.dataset.v;explorar()}});
-document.querySelector(".lista .cab").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;const k=b.dataset.o;S.ordem={col:k,dir:S.ordem.col===k?-S.ordem.dir:(k==="nome"?1:-1)};explorar()});
+document.querySelector(".tb thead").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;const k=b.dataset.o;
+  S.tb={col:k,dir:S.tb.col===k?-S.tb.dir:(k==="nome"||k==="rank"?1:-1)};S.tbMax=300;tabela();$("#tb-rola").scrollTop=0});
+let tbT=null;$("#tb-q").addEventListener("input",e=>{clearTimeout(tbT);tbT=setTimeout(()=>{S.tbQ=e.target.value;S.tbMax=300;tabela();$("#tb-rola").scrollTop=0},150)});
+$("#tb-mais").addEventListener("click",()=>{S.tbMax+=300;tabela()});
 function falha(e){$("#vazio").hidden=false;$("#vazio").replaceChildren(el("b",{},"Não foi possível carregar"),String(e.message||e).replace(/\.$/,"")+". Recarregue a página; se continuar, avise.")}
 /* Contador de acessos silencioso (GoatCounter): só no endereço publicado, sem cookies, sem dados pessoais e sem dizer qual candidato. */
-function contar(extra){try{if(location.hostname!=="ifcealuniojb.github.io"||navigator.webdriver)return;
+function contar(extra){try{if(location.hostname!=="ifcealuniojb.github.io"||location.pathname.includes("/teste-")||navigator.webdriver)return;
   const q=new URLSearchParams(Object.assign({s:[screen.width,screen.height,Math.round(devicePixelRatio||1)].join(","),rnd:Math.random().toString(36).slice(2)},extra));
   const img=new Image();img.referrerPolicy="no-referrer";img.src="https://apuracao2026.goatcounter.com/count?"+q.toString()}catch(e){}}
 contar({p:location.pathname,t:"Mapa de Votos 2026 - Ceará",r:document.referrer||""});
