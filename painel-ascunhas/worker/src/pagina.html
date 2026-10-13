@@ -91,6 +91,8 @@ main{padding:18px 0 40px}
 body.sim .card.pres{position:relative;overflow:hidden}
 body.sim .card.pres::after{content:"SIMULAÇÃO";position:absolute;right:-8px;bottom:6px;font-size:54px;font-weight:900;letter-spacing:.06em;color:var(--ink);opacity:.06;pointer-events:none;transform:rotate(-6deg)}
 footer .cred{font-weight:700;color:var(--ink-2)}
+footer .dev{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);text-align:center;color:var(--ink-3)}
+footer .dev b{color:var(--ink-2)}
 .eyebrow{font-size:11.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-2)}
 
 /* presidente */
@@ -266,9 +268,10 @@ footer p{margin:4px 0}
   <div class="grid" id="govs"></div>
 
   <footer>
-    <p class="cred">Painel do 2º turno feito para o As Cunhãs.</p>
+    <p class="cred">Painel do 2º turno desenvolvido para o podcast As Cunhãs.</p>
     <p>Dados oficiais do TSE (resultados.tse.jus.br), coletados por este painel no servidor (a cada 10 s durante a apuração) e repassados a quem está com ele aberto. Contornos dos estados: IBGE.</p>
     <p>"Eleito matematicamente" é um cálculo deste painel: a vantagem do primeiro colocado já é maior que o número de eleitores das seções que faltam apurar. A situação oficial é a divulgada pelo TSE.</p>
+    <p class="dev">Desenvolvido por <b>Tritonia Soluções Tecnológicas</b></p>
   </footer>
 </main>
 <div class="toasts" id="toasts" aria-live="assertive"></div>
