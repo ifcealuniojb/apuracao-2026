@@ -568,13 +568,13 @@ function tabela(){
   const mostra=filt.slice(0,S.tbMax);
   $("#tb-conta").textContent=q?`${fmt.format(filt.length)} de ${fmt.format(gs.length)} ${PLURAL[tipo]}`:`${fmt.format(gs.length)} ${PLURAL[tipo]} ${dondeTxt}`;
   const maxP=Math.max(ref,...gs.map(g=>g.p||0))||1;
-  const podeAbrir=tipo!=="secao";
+  const podeAbrir=tipo!=="secao", nomesCam=new Set(S.caminho.map(p=>p.nome));
   $("#tb-corpo").replaceChildren(...(mostra.length?mostra.map(g=>{
     const cl=g.rank?classe(g.ind):"media";
     const tr=el("tr",{class:(g.rank?cl:"pouco")+(podeAbrir?" abre":""),...(podeAbrir?{tabindex:"0"}:{})},
       el("td",{class:"c-n"},g.rank?g.rank+"º":"–"),
       el("td",{class:"c-a"},el("b",{},g.nome),
-        (g.sub||!g.rank)?el("small",{},[g.sub,g.rank?"":"poucos votos válidos, fora do ranking"].filter(Boolean).join(" · ")):null,
+        (()=>{const sub=nomesCam.has(g.sub)?"":g.sub,t=[sub,g.rank?"":"poucos votos válidos, fora do ranking"].filter(Boolean).join(" · ");return t?el("small",{},t):null})(),
         el("small",{class:"mob"},`teve ${fmt.format(g.v)} de ${fmt.format(g.val)}`)),
       el("td",{class:"c-p"},el("b",{},pct(g.p)),
         el("div",{class:"barra",title:`Fatia ${pct(g.p)} · média ${pct(ref)}`},el("i",{style:`width:${Math.min(100,100*(g.p||0)/maxP)}%;background:var(${cl==="fraco"?"--red":cl==="forte"?"--accent":"--ink-3"})`}),el("em",{style:`left:${100*ref/maxP}%`}))),
