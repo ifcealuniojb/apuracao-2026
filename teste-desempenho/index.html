@@ -475,7 +475,7 @@ function caminhoAte(g){const r=g.rs[0],o=ORDEM_N[g.tipo],c=[{tipo:"regiao",k:r.r
   if(o>=3)c.push({tipo:"local",k:chaveDe.local(r),nome:r.local});
   if(o>=4)c.push({tipo:"secao",k:chaveDe.secao(r),nome:"Seção "+r.sec});
   return c}
-function prepos(p){if(p.tipo!=="regiao")return"em "+p.nome;return(/^(Grande|Serra)\b/.test(p.nome)?"na ":"no ")+p.nome}
+function prepos(p){if(p.tipo==="zona")return"na "+p.nome;if(p.tipo!=="regiao")return"em "+p.nome;return(/^(Grande|Serra)\b/.test(p.nome)?"na ":"no ")+p.nome}
 function navega(ancora,muda){const a=ancora.getBoundingClientRect().top;muda();desenha();const b=ancora.getBoundingClientRect().top;if(Math.abs(b-a)>1)window.scrollBy({top:b-a,left:0,behavior:"instant"})}
 function trilha(sel,pai){const tr=[],itens=[{nome:"Ceará"},...S.caminho];
   itens.forEach((p,i)=>{if(i)tr.push(el("span",{class:"sep"},"›"));const ult=i===itens.length-1;
