@@ -406,7 +406,7 @@ a.voltar:hover{background:rgba(255,255,255,.1)}
               <th class="c-p"><button type="button" data-o="p" title="Fatia observada: votos do candidato ÷ votos válidos da área (resultado oficial)">Observada</button></th>
               <th class="c-j"><button type="button" data-o="adj" title="Fatia ajustada pelo tamanho (estimativa do modelo, não é resultado oficial)">Ajustada</button></th>
               <th class="c-v"><button type="button" data-o="v">Votos</button></th>
-              <th class="c-o" hidden><button type="button" data-o="pos" title="Posição do candidato na área entre os mais votados do cargo">Posição</button></th>
+              <th class="c-o" hidden><button type="button" data-o="pos" title="Colocação do candidato na área entre todos os candidatos do cargo">Posição</button></th>
               <th class="c-w"><button type="button" data-o="peso" title="Quanto dos votos do candidato na área aberta vieram daqui">Peso</button></th>
             </tr></thead>
             <tbody id="tb-corpo"></tbody>
@@ -444,7 +444,7 @@ a.voltar:hover{background:rgba(255,255,255,.1)}
         <p><b>O modelo:</b> Beta-Binomial (y<sub>i</sub> | θ<sub>i</sub> ~ Binomial(n<sub>i</sub>, θ<sub>i</sub>), θ<sub>i</sub> ~ Beta(α, β)). α e β são estimados por <b>máxima verossimilhança marginal</b> com as áreas da lista mostrada (mesmo cargo, turno e candidato; só áreas com votos válidos). Fatia ajustada = (votos + α) ÷ (válidos + α + β). O padrão do modelo (m = α ÷ (α+β)) vem dos dados da lista e não muda quando você troca o botão "Comparar com". A conta de cada linha mostra α, β e a versão.</p>
         <p><b>Quando o ajuste fica indisponível:</b> menos de 5 áreas com votos válidos, candidato sem votos (ou com todos) na lista, otimização que não converge, ou diferenças entre as áreas do tamanho esperado só pelo acaso. Nesses casos nenhum parâmetro substituto é usado: a tabela mostra só a fatia observada e o indicador fica "○ Sem ajuste".</p>
         <p class="ex" id="exemplo"></p>
-        <p><span class="ind forte">▲ Forte</span> fatia ajustada pelo menos 10% acima da referência (ex.: referência 40% → 44% ou mais) <b>e</b> o modelo dá pelo menos 90% de probabilidade de a área estar acima da referência. <span class="ind fraco">▼ Fraco</span> o espelho: pelo menos 10% abaixo (40% → 36% ou menos) e 90% de probabilidade de estar abaixo. <span class="ind media">● Intermediário</span> todo o resto: perto da referência, ou com poucos votos para o modelo ter certeza (ex.: um candidato com 0,1% do município e 1 voto numa seção). <span class="ind media">○ Sem ajuste</span> o modelo não pôde ser estimado nesta lista. Regra da versão bb-mle-1; mudar o limite gera nova versão.</p>
+        <p><span class="ind forte">▲ Forte</span> fatia ajustada pelo menos 10% acima da referência (ex.: referência 40% → 44% ou mais) <b>e</b>, como condição separada, o modelo dá pelo menos 90% de probabilidade de a fatia da área estar <b>acima da referência</b> (é a probabilidade de passar da referência, não de passar dos 10%). <span class="ind fraco">▼ Fraco</span> o espelho: pelo menos 10% abaixo (40% → 36% ou menos) e, separadamente, 90% de probabilidade de estar abaixo da referência. <span class="ind media">● Intermediário</span> todo o resto: perto da referência, ou com poucos votos para o modelo ter certeza (ex.: um candidato com 0,1% do município e 1 voto numa seção). <span class="ind media">○ Sem ajuste</span> o modelo não pôde ser estimado nesta lista. Regra da versão bb-mle-1; mudar o limite gera nova versão.</p>
         <p><b>Visão do todo:</b> acima da tabela, a área aberta aparece com o próprio indicador entre as áreas vizinhas e contra o Ceará, e com o peso dela nos votos dele. Assim uma seção "forte" dentro de um colégio que foi fraco no geral não engana.</p>
         <p>Os quadros acima da tabela mostram, para cada grupo, duas barras: <b>"Votos no/na [área aberta]"</b> é o tamanho do grupo (quanto de todos os votos válidos da área aberta é dado ali, somando todos os candidatos); <b>"Votos de [candidato]"</b> é quanto dos votos dele na área aberta saiu dali. Se ele fosse igual em todo lugar, as duas barras teriam o mesmo tamanho.</p>
         <p><b>Limites:</b> o resultado é agregado por seção. Ele descreve o território eleitoral; não mostra a preferência de nenhum eleitor, não explica causas e não é previsão. O bairro é o do local de votação, não o da residência. As diferenças entre áreas são descritivas, não causais.</p>
@@ -491,7 +491,7 @@ async function dadosTSE(cargo){
   try{
     const r=await fetch(`${TSE}/${ele}/dados/${ab}/${ab}-c${c}-e00${ele}-u.json`).then(r=>r.json());
     const carg=r.carg?.[0]||{};
-    out._qe=toInt(carg.qe);
+    out._qe=toInt(carg.qe);out._nv=toInt(carg.nv)||1;
     for(const a of carg.agr||[]){
       // mesmas contas do site de apuração: votos da agremiação = nominais + legenda válidos (tvtn + tvtl)
       const ag={nm:a.nm||(a.par?.[0]?.sg)||"",tp:a.tp,vag:a.vag!=null&&a.vag!==""?toInt(a.vag):null,sgs:(a.par||[]).map(p=>p.sg).join("/"),
@@ -556,7 +556,7 @@ let contouConsulta=false;
 S.rivCache={};
 async function carregaRivais(c){
   if(![1,3,5].includes(c.cargo))return;
-  const outros=S.cands.filter(x=>x.cargo===c.cargo&&x.nr!==c.nr).sort((a,b)=>b.total-a.total).slice(0,5);
+  const outros=S.cands.filter(x=>x.cargo===c.cargo&&x.nr!==c.nr).sort((a,b)=>b.total-a.total).slice(0,30); // todos (Presidente, Governador e Senador têm poucos candidatos)
   try{
     const bs=await Promise.all(outros.map(x=>S.rivCache[x.cargo+"/"+x.nr]||(S.rivCache[x.cargo+"/"+x.nr]=bloco(`c/${x.cargo}/${x.nr}`))));
     if(S.cand!==c)return;
@@ -615,7 +615,10 @@ function posicao(g){if(!g.rv||!S.riv)return null;const os=S.riv.map((c,i)=>({c,v
   const acima=os.filter(o=>o.v>g.v),pos=acima.length+1;
   if(pos===1){const s2=os[0];return{pos,txt:s2?`à frente de ${s2.c.nome} por ${fmt.format(g.v-s2.v)} votos`:"",outro:s2}}
   const p1=os[0];return{pos,txt:`atrás de ${p1.c.nome} por ${fmt.format(p1.v-g.v)} votos`,outro:p1}}
-const comparec=g=>g.aptos?{c:g.tot/g.aptos,bn:g.tot?(g.tot-g.val)/g.tot:NaN}:null;
+// escolhas por eleitor: Senado 2026 elege 2 por estado, então cada eleitor faz 2 escolhas (TSE)
+const escolhas=()=>S.cand&&S.cand.cargo===5?Math.max(1,(S.tse[5]||{})._nv||2):1;
+const comparec=g=>{if(!g.aptos)return null;const e=escolhas(),eleit=g.tot/e;return{c:eleit/g.aptos,bn:g.tot?(g.tot-g.val)/g.tot:NaN,e,eleit}};
+const unVoto=cp=>cp.e>1?"das escolhas":"dos votos";
 
 /* ---------- níveis ---------- */
 const chaveDe={regiao:r=>r.reg,municipio:r=>String(r.mun),bairro:r=>r.mun+"|"+r.bairro,zona:r=>r.mun+"|Z"+r.zona,local:r=>r.mun+"|"+r.zona+"|"+r.nrl,secao:r=>r.mun+"|"+r.zona+"|"+r.sec};
@@ -817,10 +820,10 @@ const reclass=(g,ref)=>{const pa=probAcima(g.v,g.val,g.fit,ref);return{...g,ref,
 const p2=x=>isFinite(x)?(x*100).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2})+"%":"–";
 const num=x=>Number(x).toLocaleString("pt-BR",{maximumFractionDigits:x>=100?1:x>=1?2:4});
 const CONF=Math.round(MODELO.confianca*100);
-const probTxt=g=>g.pa==null?"":` · probabilidade de estar acima da referência: ${Math.round(g.pa*100)}%`;
-const regraTxt=(g)=>g.cat==="forte"?`ajustada ${p2(g.adj)} ≥ referência × 1,${LIM} (${p2(g.ref*(1+MODELO.limiar))}) e ≥ ${CONF}% de probabilidade de estar acima${probTxt(g)}`:
-  g.cat==="fraco"?`ajustada ${p2(g.adj)} ≤ referência × 0,${100-LIM} (${p2(g.ref*(1-MODELO.limiar))}) e ≥ ${CONF}% de probabilidade de estar abaixo${probTxt(g)}`:
-  g.cat==="inter"?(g.adj>=g.ref*(1+MODELO.limiar)||g.adj<=g.ref*(1-MODELO.limiar)?`ajustada ${p2(g.adj)} passou de ${LIM}% de diferença, mas com poucos votos o modelo não tem ${CONF}% de certeza de que ela é diferente da referência${probTxt(g)}`:`ajustada ${p2(g.adj)} entre ${p2(g.ref*(1-MODELO.limiar))} e ${p2(g.ref*(1+MODELO.limiar))} (menos de ${LIM}% de diferença da referência)`):
+const probTxt=g=>g.pa==null?"":` · probabilidade, pelo modelo, de a fatia da área estar acima da referência: ${Math.round(g.pa*100)}%`;
+const regraTxt=(g)=>g.cat==="forte"?`ajustada ${p2(g.adj)} ≥ referência × 1,${LIM} (${p2(g.ref*(1+MODELO.limiar))}) e, separadamente, pelo menos ${CONF}% de probabilidade de estar acima da referência (não de estar ${LIM}% acima)${probTxt(g)}`:
+  g.cat==="fraco"?`ajustada ${p2(g.adj)} ≤ referência × 0,${100-LIM} (${p2(g.ref*(1-MODELO.limiar))}) e, separadamente, pelo menos ${CONF}% de probabilidade de estar abaixo da referência (não de estar ${LIM}% abaixo)${probTxt(g)}`:
+  g.cat==="inter"?(g.adj>=g.ref*(1+MODELO.limiar)||g.adj<=g.ref*(1-MODELO.limiar)?`ajustada ${p2(g.adj)} passou de ${LIM}% de diferença, mas o modelo não chega a ${CONF}% de probabilidade de a área estar do mesmo lado da referência${probTxt(g)}`:`ajustada ${p2(g.adj)} entre ${p2(g.ref*(1-MODELO.limiar))} e ${p2(g.ref*(1+MODELO.limiar))} (menos de ${LIM}% de diferença da referência)`):
   g.cat==="semaj"?"sem classificação: o ajuste está indisponível nesta lista":"sem votos válidos: fatia não calculável";
 function modeloTxt(f){
   if(!f)return"sem modelo";
@@ -860,7 +863,7 @@ function contaTexto(g,nomeRef){
     ["Peso",[`${pctPeso(g.peso)} dos votos dele e ${pctPeso(g.eleit)} dos votos válidos da área aberta`]]];
   const po=posicao(g),cp=comparec(g);
   if(po)L.push(["Posição",[el("b",{},po.pos+"º"),` (${po.txt})`]]);
-  if(cp)L.push(["Comparecimento",[`${pct(cp.c)} dos aptos; brancos e nulos: ${pct(cp.bn)} dos votos`]]);
+  if(cp)L.push(["Comparecimento",[`${pct(cp.c)} dos aptos; brancos e nulos: ${pct(cp.bn)} ${unVoto(cp)}${cp.e>1?` (cada eleitor fez ${cp.e} escolhas para Senador)`:""}`]]);
   L.push(["Modelo",[modeloTxt(f)]]);
   return[el("div",{class:"conta"},el("b",{class:"conta-t"},"Como foi calculado?"),el("dl",{},...L.flatMap(([t,v])=>[el("dt",{},t),el("dd",{},...v)])))]}
 
@@ -883,12 +886,12 @@ function desenha(){
       kpi("Votos "+em,fmt.format(a.v),`${pct(a.p)} dos votos válidos · ${pctPeso(a.v/S.ufTot.v)} dos votos dele no Ceará`,true),
       po?kpi("Posição "+em,po.pos+"º",po.txt+(S.riv.length+1<S.cands.filter(x=>x.cargo===c.cargo).length?` (entre os ${S.riv.length+1} mais votados no Ceará)`:""),false,dica(`Colocação dele ${em} comparando os votos dele com os dos ${S.riv.length} concorrentes mais votados do cargo no Ceará.`,"Para deputados a posição não é calculada: são centenas de candidatos.")):
         kpi("Votos válidos "+em,fmt.format(a.val),`do cargo ${CARGOS[c.cargo]||""}`.trim()),
-      cp?kpi("Comparecimento "+em,pct(cp.c),`abstenção ${pct(1-cp.c)} · brancos e nulos ${pct(cp.bn)} dos votos`,false,dica(`Comparecimento: dos ${fmt.format(a.aptos)} eleitores aptos ${em}, ${fmt.format(a.tot)} votaram para este cargo.`,`Abstenção: quem estava apto e não votou. Brancos e nulos: dos votos dados, quantos não foram para nenhum candidato (${fmt.format(a.tot-a.val)}).`)):kpi("Comparecimento","–",""),
+      cp?kpi("Comparecimento "+em,pct(cp.c),`abstenção ${pct(1-cp.c)} · brancos e nulos ${pct(cp.bn)} ${unVoto(cp)}`,false,dica(cp.e>1?`Comparecimento: para Senador cada eleitor fez ${cp.e} escolhas; ${fmt.format(a.tot)} escolhas ÷ ${cp.e} = ${fmt.format(Math.round(cp.eleit))} eleitores, de ${fmt.format(a.aptos)} aptos ${em}.`:`Comparecimento: dos ${fmt.format(a.aptos)} eleitores aptos ${em}, ${fmt.format(a.tot)} votaram para este cargo.`,`Abstenção: quem estava apto e não votou. Brancos e nulos: dos votos dados, quantos não foram para nenhum candidato (${fmt.format(a.tot-a.val)}).`)):kpi("Comparecimento","–",""),
       kpi("No Ceará",fmt.format(S.ufTot.v)+" votos",`${pct(S.ufTot.p)} dos válidos · ${rank>0?rank+"º no Ceará":""}`));
   } else $("#kpis").replaceChildren(
     kpi("Votos no Ceará",fmt.format(S.ufTot.v),"dos votos válidos: "+pct(S.ufTot.p),true),
     kpi("Posição no Ceará",rank>0?rank+"º no Ceará":"–","entre "+S.cands.filter(x=>x.cargo===c.cargo&&!(String(x.nr).length===2&&x.cargo>=6)).length+" candidatos, pelos votos no estado"),
-    (()=>{const cp=comparec(S.ufTot);return cp?kpi("Comparecimento no Ceará",pct(cp.c),`abstenção ${pct(1-cp.c)} · brancos e nulos ${pct(cp.bn)} dos votos · voto em ${munsCom} de ${Object.keys(S.muns).length} municípios`):kpi("Teve voto em",munsCom+" de "+Object.keys(S.muns).length,"municípios")})(),
+    (()=>{const cp=comparec(S.ufTot);return cp?kpi("Comparecimento no Ceará",pct(cp.c),`abstenção ${pct(1-cp.c)} · brancos e nulos ${pct(cp.bn)} ${unVoto(cp)} · voto em ${munsCom} de ${Object.keys(S.muns).length} municípios`):kpi("Teve voto em",munsCom+" de "+Object.keys(S.muns).length,"municípios")})(),
     kpi("Região mais forte",reg?reg.nome:"–",reg?pct(reg.p)+" dos válidos · média estado "+pct(S.ufTot.p):""));
   cadeiras();
   resumoTxt(rank);
@@ -930,7 +933,7 @@ function qualidade(){
   it.push(li(sb.length?"av":"ok",sb.length?"Incompleto":"Completo",sb.length?[`Recorte por bairro: `,b(fmt.format(sb.length)),` seções (${pct(vb.val/S.ufTot.val)} dos votos válidos) sem bairro informado pelo TSE aparecem como "Sem Bairro". Os votos continuam nos totais.`]:"Recorte por bairro: todas as seções têm bairro do local de votação."));
   const sc=S.linhas.filter(r=>r.lat==null),locs=new Set(S.linhas.map(r=>chaveDe.local(r))).size;
   it.push(li(sc.length?"av":"ok",sc.length?"Atenção":"Completo",`Mapa: ${fmt.format(locs)} locais de votação.`,sc.length?` ${fmt.format(sc.length)} seções (${pct(soma(sc).val/S.ufTot.val)} dos votos válidos) sem coordenada ficam fora do mapa, mas entram em todas as contas.`:""));
-  it.push(li("pd","Versão",`Dados: TSE, votação por seção${S.geracao?` (arquivo gerado em ${S.geracao})`:""}. Indicador: modelo ${MODELO.versao} (${MODELO.data}). Comparecimento = votos do cargo ÷ aptos; brancos e nulos = votos do cargo − válidos.`));
+  it.push(li("pd","Versão",`Dados: TSE, votação por seção${S.geracao?` (arquivo gerado em ${S.geracao})`:""}. Indicador: modelo ${MODELO.versao} (${MODELO.data}). Comparecimento = votos do cargo ÷ aptos (Senador: ÷ 2, porque cada eleitor fez 2 escolhas); brancos e nulos = votos do cargo − válidos.`));
   $("#qual-l").replaceChildren(...it);
 }
 const kpi=(r,v,s,big,d)=>el("div",{class:"kpi"+(big?" big":"")},el("span",{class:"kr"},r,d||null),el("b",{},v),el("small",{},s||""));
@@ -995,23 +998,22 @@ function tabela(){
   else{
     const deA=prof?prepos(S.caminho.at(-1)).replace(/^em /,"de ").replace(/^no /,"do ").replace(/^na /,"da "):"do Ceará", emA=prof?prepos(S.caminho.at(-1)):"no Ceará";
     const refTxt=`${pct(ref)} dos votos válidos ${S.ref==="pai"?emA:"no Ceará"}`;
-    const oque={forte:`a fatia ajustada dele ficou ${LIM}% ou mais ACIMA da referência (${refTxt}), com pelo menos ${CONF}% de probabilidade pelo modelo.`,
-      inter:`a fatia ajustada dele ficou PERTO da referência (${refTxt}): menos de ${LIM}% acima ou abaixo, ou com poucos votos para o modelo ter ${CONF}% de certeza.`,
-      fraco:`a fatia ajustada dele ficou ${LIM}% ou mais ABAIXO da referência (${refTxt}), com pelo menos ${CONF}% de probabilidade pelo modelo.`};
+    const oque={forte:`duas condições: a fatia ajustada ficou ${LIM}% ou mais ACIMA da referência (${refTxt}) e o modelo dá pelo menos ${CONF}% de probabilidade de a fatia da área estar acima da referência (não de estar ${LIM}% acima).`,
+      inter:`a fatia ajustada ficou a menos de ${LIM}% da referência (${refTxt}), ou passou de ${LIM}% mas sem ${CONF}% de probabilidade de estar do mesmo lado da referência.`,
+      fraco:`duas condições: a fatia ajustada ficou ${LIM}% ou mais ABAIXO da referência (${refTxt}) e o modelo dá pelo menos ${CONF}% de probabilidade de a fatia da área estar abaixo da referência (não de estar ${LIM}% abaixo).`};
     const nomeC=titulo(info(S.cand).nome), areaA=prof?S.caminho.at(-1).nome:"Ceará", totA=gs.reduce((t,g)=>t+g.val,0);
     const barra=(rot,v,cor,d)=>el("div",{class:"rs-bar"},el("span",{title:rot},rot),el("i",{},el("em",{style:`width:${Math.min(100,v*100)}%;background:${cor}`})),el("b",{},pctPeso(v)),d);
     const lugares=(n)=>`${fem?(n===1?"desta":"destas"):(n===1?"deste":"destes")} ${n===1?SING[tipo]:fmt.format(n)+" "+PLURAL[tipo]}`;
     $("#tb-resumo").replaceChildren(
-      el("p",{class:"rs-tit"},`${fem?"As":"Os"} ${unid(gs.length)} ${deA} em ${cats.length} grupos. Em cada grupo: primeiro o tamanho dele (quanto dos votos ${deA} é dado ali), depois quanto dos votos de ${nomeC} veio dali. Toque num grupo para ver só ele na tabela.`),
+      el("p",{class:"rs-tit"},`${fem?"As":"Os"} ${unid(gs.length)} ${deA} em ${cats.length} grupos. As duas barras são partes do total ${deA}: o tamanho do grupo (votos válidos) e a parte dos votos de ${nomeC} que saiu dali. A linha de baixo compara a fatia observada do grupo com a mesma referência do indicador (${pct(ref)} ${S.ref==="pai"?emA:"no Ceará"}). Toque num grupo para ver só ele na tabela.`),
       ...cats.map(k=>{const x=somaCat[k],c=CAT[k],corB=c.c==="forte"?"var(--accent)":c.c==="fraco"?"var(--red)":"var(--ink-2)";
-        const mais=x.peso>x.eleit*1.02,menos=x.peso<x.eleit*.98;
         const card=el("div",{class:"rs-card "+c.c,role:"button",tabindex:"0","aria-pressed":String(S.tbCat===k)},
           el("div",{class:"rh"},el("span",{},`${c.s} ${c.t} `,el("small",{},`· ${fmt.format(x.n)} ${x.n===1?SING[tipo]:PLURAL[tipo]}`)),
             dica(`${c.s} ${c.t}: ${PLURAL[tipo]} onde ${oque[k]}`)),
           barra(`Votos ${emA}`,x.eleit,"var(--ink-3)",dica(`De todos os votos válidos ${deA} (${fmt.format(totA)}, somando todos os candidatos), ${pctPeso(x.eleit)} (${fmt.format(Math.round(x.eleit*totA))}) foram dados ${lugares(x.n).replace(/^d/,"n")}.`,`É o tamanho do grupo dentro ${deA.replace(/^de /,"de ")}: não depende do candidato.`)),
-          barra(`Votos de ${nomeC}`,x.peso,corB,dica(`Dos votos que ${nomeC} teve ${emA} (${fmt.format(somaCat_tot.v)}), ${pctPeso(x.peso)} (${fmt.format(x.v)}) saíram ${lugares(x.n).replace(/^d/,"d")}.`,prof?`É a parte dos votos dele ${emA}, não dos votos dele no Ceará inteiro.`:"É a parte de todos os votos dele no Ceará.")),
-          (()=>{const vg=x.eleit*totA,fg=vg?x.v/vg:NaN,fA=totA?somaCat_tot.v/totA:NaN;
-            return el("div",{class:"rs-lei "+(mais?"up":menos?"dn":"eq")},`${mais?"↑":menos?"↓":"="} ${lugares(x.n).replace(/^d/,"N")}, ${nomeC} teve o aproveitamento de ${pct(fg)} dos votos; sendo um total de ${fmt.format(x.v)} votos, equivalente a ${pctPeso(x.v/S.ufTot.val)} dos votos válidos do Ceará.`)})());
+          barra(`Votos de ${nomeC}`,x.peso,corB,dica(`Dos votos que ${nomeC} teve ${emA} (${fmt.format(somaCat_tot.v)}), ${pctPeso(x.peso)} (${fmt.format(x.v)}) saíram ${lugares(x.n).replace(/^d/,"d")}.`,prof?`É a parte dos votos dele ${emA}, não dos votos dele no Ceará inteiro.`:"É a parte de todos os votos dele no Ceará.",`Se esta barra for maior que a de cima, a fatia do grupo está acima da fatia dele ${emA}${S.ref==="uf"&&prof?" (a área aberta, não o Ceará: a referência do indicador é o Ceará e aparece na linha de baixo)":""}.`)),
+          (()=>{const vg=Math.round(x.eleit*totA),fg=vg?x.v/vg:NaN,d=fg-ref,dz=Math.abs(d)<0.0005,refN=S.ref==="pai"?emA:"no Ceará";
+            return el("div",{class:"rs-lei "+(dz?"eq":d>0?"up":"dn")},`${dz?"=":d>0?"↑":"↓"} Fatia observada do grupo: ${pct(fg)} (${fmt.format(x.v)} de ${fmt.format(vg)} votos válidos), ${dz?"igual à":pp(d)+" em relação à"} referência ${refN} (${pct(ref)}).`)})());
         const vai=()=>{S.tbCat=S.tbCat===k?null:k;S.tbMax=300;tabela();$("#tb-rola").scrollTop=0};
         card.addEventListener("click",vai);card.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();vai()}});
         return card}));
@@ -1061,15 +1063,15 @@ function tabela(){
   if(exP)ex.push(` Já ${exP.nome} teve ${pct(exP.p)}, mas com só ${fmt.format(exP.val)} votos válidos; ajustada pelo tamanho, a fatia fica em ${pct(exP.adj)} e a área aparece como ${CAT[exP.cat].s} ${CAT[exP.cat].t}.`);
   $("#exemplo").textContent=ex.join("");
   mapa(rs,ref,(q||S.tbCat)?filt:null);
-  distribuicao(gs,ref,tipo,nomeRefCurto,dondeTxt);
-  S.csv={linhas:filt,tipo,ref,nomeRef:nomeRefCurto,fit,donde:dondeTxt};
+  distribuicao(filt,ref,tipo,nomeRefCurto,dondeTxt,(q||S.tbCat)?gs.length:0);
+  S.csv={linhas:filt,total:gs.length,tipo,ref,nomeRef:nomeRefCurto,fit,donde:dondeTxt,okFit};
   salvaUrl();
 }
 
 /* distribuição entre as áreas: mediana, quartis, heterogeneidade e histograma da fatia observada (manual, seções 4 e 13) */
-function distribuicao(gs,ref,tipo,nomeRef,donde){
+function distribuicao(gs,ref,tipo,nomeRef,donde,total){
   const com=gs.filter(g=>g.val>0),ps=com.map(g=>g.p),N=com.length;
-  $("#dist-sub").textContent=`Fatia observada das ${fmt.format(N)} ${PLURAL[tipo]} ${donde} com votos válidos. Descreve como o voto se espalha; não explica causas.`;
+  $("#dist-sub").textContent=`Fatia observada das ${fmt.format(N)} ${PLURAL[tipo]} ${donde} com votos válidos${total?` que passam no filtro da tabela (${fmt.format(gs.length)} de ${fmt.format(total)}; a dispersão e a mediana são deste recorte)`:""}. Descreve como o voto se espalha; não explica causas.`;
   if(N<2){$("#dist-k").replaceChildren();$("#dist-g").replaceChildren(el("p",{class:"hist-l"},"Poucas áreas para mostrar uma distribuição."));return}
   const het=heterogeneidade(com.map(g=>({y:g.v,n:g.val}))),md=quantil(ps,.5),q1=quantil(ps,.25),q3=quantil(ps,.75);
   const k=(r,v,s)=>el("div",{},el("span",{},r),el("b",{},v),s?el("small",{},s):null);
@@ -1097,11 +1099,14 @@ function baixaCSV(){
   const nome=info(S.cand).nome,area=S.caminho.length?S.caminho.map(p=>p.nome).join(" > "):"Ceará";
   const cab=[`# Mapa de Votos 2026 - Ceará · Eleições 2026, 1º turno · ${CARGOS[S.cand.cargo]||""} · ${nome} (${S.cand.nr})`,
     `# Área aberta: ${area} · Linhas: ${PLURAL[X.tipo]} ${X.donde} · Referência: fatia ${X.nomeRef} = ${n4(X.ref)}`,
+    `# Consulta: ${location.href}`,
+    `# Filtros da tabela: busca=${S.tbQ?JSON.stringify(S.tbQ):"(nenhuma)"}; grupo=${S.tbCat?CAT[S.tbCat].t:"(todos)"}; ordenação=${{rank:"ranking",nome:"área",p:"fatia observada",adj:"fatia ajustada",v:"votos",pos:"colocação do candidato",peso:"peso"}[S.tb.col]||S.tb.col} ${S.tb.dir>0?"crescente":"decrescente"}; linhas exportadas: ${X.linhas.length} de ${X.total}.`,
+    `# ordem_ranking = posição da área no ranking da página (pela fatia ${X.okFit?"ajustada":"observada"}, da maior para a menor). colocacao_candidato = colocação do candidato na área entre ${S.riv?S.riv.length+1:0} candidatos do cargo (coluna "Posição" da página; vazia para deputados).`,
     `# Fonte: TSE, Portal de Dados Abertos (votação por seção${S.geracao?`, arquivo gerado em ${S.geracao}`:""}; eleitorado por local de votação). Exportado em ${new Date().toLocaleString("pt-BR")}.`,
     `# Modelo ${MODELO.versao} (${MODELO.data}): ${ok?`Beta-Binomial por máxima verossimilhança; alfa=${n4(f.alpha)}; beta=${n4(f.beta)}; unidades=${f.unidades}; validos=${f.totalN}`:`ajuste indisponível (${f.motivo})`}.`,
-    `# fatia_ajustada é estimativa do modelo, não resultado oficial. Forte/Fraco: ajustada ${LIM}% acima/abaixo da referência e ${CONF}% de probabilidade pelo modelo. Bairro = bairro do local de votação. Não indica preferência individual nem previsão.`];
-  const head=["posicao","area","detalhe","votos_candidato","votos_validos","fatia_observada","fatia_ajustada","referencia","diferenca_pp","indicador","peso_votos_candidato","status_ajuste"];
-  const rows=X.linhas.map(g=>[g.rank??"",q(g.nome),q(g.sub),g.v,g.val,g.val?n4(g.p):"",n4(g.adj),n4(g.ref),g.val?n4((g.p-g.ref)*100):"",q(CAT[g.cat].t),n4(g.peso),ok?"ok":"indisponivel"]);
+    `# fatia_ajustada é estimativa do modelo, não resultado oficial. Forte/Fraco: duas condições separadas: ajustada ${LIM}% acima/abaixo da referência E probabilidade (modelo) >= ${CONF}% de estar acima/abaixo da referência (prob_acima_referencia; não é a probabilidade de passar dos ${LIM}%). Bairro = bairro do local de votação. Não indica preferência individual nem previsão.`];
+  const head=["ordem_ranking","area","detalhe","votos_candidato","votos_validos","fatia_observada","fatia_ajustada","prob_acima_referencia","referencia","diferenca_pp","indicador","peso_votos_candidato","colocacao_candidato","status_ajuste"];
+  const rows=X.linhas.map(g=>[g.rank??"",q(g.nome),q(g.sub),g.v,g.val,g.val?n4(g.p):"",n4(g.adj),n4(g.pa),n4(g.ref),g.val?n4((g.p-g.ref)*100):"",q(CAT[g.cat].t),n4(g.peso),g.pos??"",ok?"ok":"indisponivel"]);
   const txt="\ufeff"+[...cab,head.join(";"),...rows.map(r=>r.join(";"))].join("\r\n");
   const a=el("a",{href:URL.createObjectURL(new Blob([txt],{type:"text/csv;charset=utf-8"})),download:`mapa-votos-${S.cand.cargo}-${S.cand.nr}-${X.tipo}.csv`});
   document.body.append(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000)}
