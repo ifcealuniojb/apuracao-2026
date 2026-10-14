@@ -184,6 +184,7 @@ table.tb{width:100%;border-collapse:collapse;font-size:14px}
 .tb-resumo .rs-tit{flex:1 1 100%;margin:0;font-size:12px;color:var(--ink-3)}
 .tb-resumo button[aria-pressed="true"]{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
 .tb-resumo button.forte b{color:var(--accent)}.tb-resumo button.fraco b{color:var(--red)}
+.ref-g{display:inline-flex;align-items:center;gap:8px}.ref-l{font-size:12px;font-weight:700;color:var(--ink-3)}
 .ctx{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:9px 12px;margin:0 0 12px;font-size:13px;color:var(--ink-2)}
 .ctx .ind{cursor:default}
 .ctx b{color:var(--ink)}
@@ -208,6 +209,7 @@ table.tb{width:100%;border-collapse:collapse;font-size:14px}
 .tb tr.pouco td{color:var(--ink-3)}
 .tb .vazio-g{padding:22px;text-align:center;color:var(--ink-3)}
 .tb-mais{all:unset;box-sizing:border-box;display:block;width:calc(100% - 28px);margin:12px 14px 16px;text-align:center;cursor:pointer;padding:10px;border-radius:10px;background:var(--gray-soft);font-weight:700;font-size:13.5px;color:var(--ink)}
+.tb-nota{margin:10px 14px 14px;font-size:12px;color:var(--ink-3)}
 .tb-mais:hover{background:var(--accent-soft)}
 .mapa-card{display:flex;flex-direction:column;height:640px}
 .mapa-card #mapa{flex:1 1 auto;min-height:0;height:auto!important}
@@ -308,7 +310,7 @@ a.voltar:hover{background:rgba(255,255,255,.1)}
 
     <div class="sec-t">
       <div><h3>Desempenho por área</h3><p id="ff-sub"></p></div>
-      <div class="dir"><div class="seg" id="ref" role="group" aria-label="Comparar com" title="Análise: compara com o desempenho do candidato na área aberta. vs. Ceará: compara com o desempenho no estado inteiro."><button type="button" data-v="pai" aria-pressed="true">Análise</button><button type="button" data-v="uf">vs. Ceará</button></div><div class="seg" id="ff-nivel" role="group" aria-label="Nível">
+      <div class="dir"><div class="ref-g"><span class="ref-l">Comparar com</span><div class="seg" id="ref" role="group" aria-label="Comparar com" title="Área aberta: compara com o resultado do candidato na área que está aberta. Ceará: compara com o resultado no estado inteiro."><button type="button" data-v="pai" aria-pressed="true">Área aberta</button><button type="button" data-v="uf">Ceará</button></div></div><div class="seg" id="ff-nivel" role="group" aria-label="Nível">
         <button type="button" data-v="regiao" aria-pressed="true">Regiões</button><button type="button" data-v="municipio">Municípios</button><button type="button" data-v="bairro">Bairros</button><button type="button" data-v="zona">Zonas</button><button type="button" data-v="local">Locais</button><button type="button" data-v="secao">Seções</button>
       </div></div>
     </div>
@@ -334,6 +336,7 @@ a.voltar:hover{background:rgba(255,255,255,.1)}
             <tbody id="tb-corpo"></tbody>
           </table>
           <button type="button" class="tb-mais" id="tb-mais" hidden></button>
+          <p class="tb-nota" id="tb-nota" hidden>O bairro é o do local de votação informado ao TSE, não o endereço do eleitor.</p>
         </div>
       </section>
       <section class="card mapa-card">
@@ -346,7 +349,7 @@ a.voltar:hover{background:rgba(255,255,255,.1)}
       <summary>Como ler: o indicador de desempenho</summary>
       <div class="corpo">
         <p><b>Fatia</b> é a porcentagem dos votos válidos daquela área que foram para o candidato. <b>Peso</b> é quanto dos votos dele na área aberta vieram daquela linha (a coluna soma 100%).</p>
-        <p><b>Referência</b> é a fatia dele na área aberta (botão <b>Análise</b>, o padrão) ou no Ceará inteiro (botão <b>vs. Ceará</b>). A diferença para a referência é dada em <b>pontos percentuais (p.p.)</b>: 60% contra 52% = +8,0 p.p.</p>
+        <p><b>Referência</b> é a fatia dele na área aberta (botão <b>Comparar com: Área aberta</b>, o padrão) ou no Ceará inteiro (botão <b>Ceará</b>). A diferença para a referência é dada em <b>pontos percentuais (p.p.)</b>: 60% contra 52% = +8,0 p.p.</p>
         <p><b>Por que não usar só a fatia:</b> numa seção com 20 votos válidos, 10 votos já são 50%; com 1 voto a menos, 45%. Áreas pequenas pulam para cima e para baixo por acaso. Por isso o indicador usa uma <b>fatia ajustada pelo tamanho</b>: quanto menor a área, mais a fatia dela é puxada para perto da referência, até haver votos suficientes para dizer que ela é diferente (método de Bayes empírico, o mesmo usado para mapear taxas em áreas pequenas). Áreas grandes quase não mudam.</p>
         <p class="ex" id="exemplo"></p>
         <p><span class="ind forte">▲ Forte</span> fatia ajustada 10% ou mais acima da referência. <span class="ind media">● Intermediário</span> a menos de 10% dela. <span class="ind fraco">◎ Fraco, com potencial</span> 10% ou mais abaixo e entre as áreas fracas onde há mais votos em jogo: juntas, elas concentram metade dos votos que faltariam para ele chegar à referência em todas as áreas fracas. <span class="ind fraco">▼ Fraco</span> 10% ou mais abaixo, nas demais.</p>
@@ -428,6 +431,10 @@ async function inicio(){
   $("#cargo").value=q.get("cargo")||"1";
   if(q.get("area"))try{S.caminho=JSON.parse(q.get("area"))}catch{}
   S.ffCam=S.caminho.map(p=>p.k).join("/");S.ffNivel=FF.includes(q.get("nivel"))?q.get("nivel"):proximo();
+  if(q.get("ref")==="uf")S.ref="uf";
+  {const o=/^(rank|nome|p|v|peso)(-?)$/.exec(q.get("ord")||"");if(o)S.tb={col:o[1],dir:o[2]?-1:1}}
+  if(CAT[q.get("grupo")])S.tbCat=q.get("grupo");
+  if(q.get("busca")){S.tbQ=q.get("busca").slice(0,60);$("#tb-q").value=S.tbQ}
   await trocaCargo(q.get("n"));
 }
 async function trocaCargo(nr){
@@ -530,7 +537,7 @@ function avalia(gs,m){
     g.w=s2/(s2+m*(1-m)/g.val);g.adj=m+g.w*(g.p-m);
     const x=r2(g.adj/m);
     g.cat=x>=1.1?"forte":x<=.9?"fraco":"inter";
-    g.espaco=Math.max(0,Math.round((m-g.adj)*g.val));
+    g.espaco=Math.max(0,Math.round(m*g.val-g.v)); // pela fatia observada: votos que faltaram para chegar à referência
   }
   // "com potencial": as áreas fracas que, somadas, concentram metade dos votos que faltam para chegar à referência
   const fr=gs.filter(g=>g.cat==="fraco").sort((a,b)=>b.espaco-a.espaco), tot=fr.reduce((t,g)=>t+g.espaco,0);
@@ -552,9 +559,10 @@ function contexto(){
   const ind=g=>el("span",{class:"ind "+CAT[g.cat].c+(g.cat==="pot"?" pot":"")},CAT[g.cat].s+" "+CAT[g.cat].t);
   const nomeCima=cima.length?prepos(cima.at(-1)):"no Ceará";
   box.replaceChildren(el("b",{},A.nome+":"),
-    ...(cima.length?[ind(naCima),` ${nomeCima}`,el("span",{style:"color:var(--ink-3)"},"·")]:[]),
-    ind(noCE)," no Ceará",el("span",{style:"color:var(--ink-3)"},"·"),
-    `${pct(naCima.p)} dos válidos daqui; teve `,el("b",{},pctPeso(naCima.v/S.ufTot.v))," dos votos dele no Ceará");
+    `${pct(naCima.p)} dos válidos daqui`,el("span",{style:"color:var(--ink-3)"},"·"),
+    ...(cima.length?[ind(naCima),` ${pp(naCima.p-pc)} ${nomeCima} (${pct(pc)})`,el("span",{style:"color:var(--ink-3)"},"·")]:[]),
+    ind(noCE),` ${pp(noCE.p-S.ufTot.p)} no Ceará (${pct(S.ufTot.p)})`,el("span",{style:"color:var(--ink-3)"},"·"),
+    "teve ",el("b",{},pctPeso(naCima.v/S.ufTot.v))," dos votos dele no Ceará");
   box.hidden=false;
 }
 function contaTexto(g,nomeRef){
@@ -562,7 +570,7 @@ function contaTexto(g,nomeRef){
   return [`Aqui ele teve `,el("b",{},fmt.format(g.v)),` de ${fmt.format(g.val)} votos válidos (`,el("b",{},pct(g.p)),`). `,
     `Referência ${nomeRef}: ${pct(g.ref)}; diferença de `,el("b",{},pp(g.p-g.ref)),` `,
     aj?`Como a área tem ${g.val<300?"poucos":"menos"} votos válidos, a fatia ajustada pelo tamanho fica em ${pct(g.adj)}. `:"",
-    `Resultado: `,el("b",{},c.s+" "+c.t),g.cat==="pot"?` (está entre as áreas fracas que concentram metade dos votos que faltam; ${fmt.format(g.espaco)} votos a mais o levariam à referência).`:g.cat==="fraco"&&g.espaco?` (${fmt.format(g.espaco)} votos a mais o levariam à referência).`:". ",
+    `Resultado: `,el("b",{},c.s+" "+c.t),g.cat==="pot"?` (está entre as áreas abaixo da referência que concentram metade dos votos que faltaram). Pela fatia observada, faltaram ${fmt.format(g.espaco)} votos para ele chegar à referência aqui.`:g.cat==="fraco"&&g.espaco?`. Pela fatia observada, faltaram ${fmt.format(g.espaco)} votos para ele chegar à referência aqui.`:". ",
     ` Peso: ${pctPeso(g.peso)} dos votos dele e ${pctPeso(g.eleit)} dos votos válidos da área aberta.`]}
 const badge=ind=>el("span",{class:"badge "+classe(ind)},ROT[classe(ind)]);
 
@@ -678,6 +686,7 @@ function tabela(){
     if(S.tbAberto===g.k)linhas.push(el("tr",{class:"det"},el("td",{colspan:"6"},...contaTexto(g,nomeRefCurto))));
   }
   $("#tb-corpo").replaceChildren(...(linhas.length?linhas:[el("tr",{},el("td",{colspan:"6",class:"vazio-g"},q?"Nada encontrado com essa busca.":"Nada para mostrar nesta área."))]));
+  $("#tb-nota").hidden=tipo!=="bairro";
   const resto=filt.length-mostra.length, bm=$("#tb-mais");
   bm.hidden=resto<=0; if(resto>0)bm.textContent=`Mostrar mais ${fmt.format(Math.min(300,resto))} (faltam ${fmt.format(resto)})`;
   // exemplo do "como ler": a área com mais votos válidos e, se houver, uma pequena que o ajuste segurou
@@ -687,7 +696,8 @@ function tabela(){
   if(exG)ex.push(`Exemplo: em ${exG.nome}, ${info(S.cand).nome} teve ${fmt.format(exG.v)} de ${fmt.format(exG.val)} votos válidos (${pct(exG.p)}); a referência ${nomeRefCurto} é ${pct(ref)} (${pp(exG.p-ref)}). ${Math.abs(exG.adj-exG.p)<0.0005?"Com tantos votos válidos, o ajuste não muda a fatia":"Ajustada pelo tamanho, a fatia fica em "+pct(exG.adj)}: ${CAT[exG.cat].s} ${CAT[exG.cat].t}.`);
   if(exP)ex.push(` Já ${exP.nome} teve ${pct(exP.p)}, mas com só ${fmt.format(exP.val)} votos válidos; ajustada pelo tamanho, a fatia fica em ${pct(exP.adj)} e a área aparece como ${CAT[exP.cat].s} ${CAT[exP.cat].t}.`);
   $("#exemplo").textContent=ex.join("");
-  mapa(rs,ref);
+  mapa(rs,ref,(q||S.tbCat)?filt:null);
+  salvaUrl();
 }
 
 /* ---------- mapa ---------- */
@@ -700,26 +710,34 @@ function destaca(g){
   for(const k of ks){const m=MK.get(k);if(m){m.mk.setStyle({color:"#1b2a38",weight:3,fillOpacity:.9});m.mk.bringToFront();MKon.push(m)}}
 }
 function cor(cl){const cs=getComputedStyle(document.documentElement);return cs.getPropertyValue(cl==="forte"?"--accent":cl==="fraco"?"--red":"--ink-3").trim()}
-function mapa(rs,ref){
+function mapa(rs,ref,sel){
   if(!window.L){$("#mapa").textContent="O mapa não carregou.";return}
   if(!M){M=L.map("mapa",{preferCanvas:true,scrollWheelZoom:false});L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:18,attribution:"© OpenStreetMap"}).addTo(M);M.setView([-5.2,-39.4],7)}
   if(camada)camada.remove();camada=L.layerGroup().addTo(M);MK=new Map();
   const porMun=S.caminho.length<2&&!S.caminho.some(p=>p.tipo==="municipio");MKmun=porMun;
-  const gs=avalia(agrupa(rs.filter(r=>r.lat!=null&&r.lon!=null),porMun?"municipio":"local").map(g=>calc(g,ref)),ref);
-  const max=Math.max(1,...gs.map(g=>g.v)),pts=[];
-  for(const g of gs){const r=g.rs[0],c=cor(CAT[g.cat].c);
-    let lat=r.lat,lon=r.lon;if(porMun){let w=0;lat=0;lon=0;for(const x of g.rs){const p=x.val||1;lat+=x.lat*p;lon+=x.lon*p;w+=p}lat/=w;lon/=w}
-    const pot=g.cat==="pot",mk=L.circleMarker([lat,lon],{radius:3+13*Math.sqrt(g.v/max),color:c,weight:pot?3:1,fillColor:c,fillOpacity:pot?.35:.55});MK.set(g.k,{mk,c,w:pot?3:1,o:pot?.35:.55});
-    mk.bindPopup(el("div",{},el("b",{},g.nome),el("br"),porMun?r.reg:`${r.bairro} · ${S.muns[r.mun]}`,el("br"),`${fmt.format(g.v)} votos (${pct(g.p)}) · ${CAT[g.cat].s} ${CAT[g.cat].t}`)).addTo(camada);
-    pts.push([lat,lon])}
-  const enq=S.caminho.map(p=>p.k).join("/");
-  if(pts.length&&enq!==ultimoEnq){M.invalidateSize();M.fitBounds(pts,{padding:[24,24],maxZoom:15})}
-  $("#leg-nivel").textContent=(porMun?"Um círculo por município":"Um círculo por local de votação")+" · maior = mais votos";
+  // os votos de cada círculo somam todas as seções (com ou sem coordenada); a coordenada só define onde o círculo fica
+  const gs=avalia(agrupa(rs,porMun?"municipio":"local").map(g=>calc(g,ref)),ref);
+  const marca=sel?new Set(sel.flatMap(g=>g.rs.map(r=>porMun?String(r.mun):chaveDe.local(r)))):null;
+  const max=Math.max(1,...gs.map(g=>g.v)),pts=[],ptsSel=[];let semCoord=0;
+  for(const g of gs){const cc=g.rs.filter(x=>x.lat!=null&&x.lon!=null);if(!cc.length){semCoord++;continue}
+    const r=cc[0],c=cor(CAT[g.cat].c);
+    let w=0,lat=0,lon=0;for(const x of cc){const p=x.val||1;lat+=x.lat*p;lon+=x.lon*p;w+=p}lat/=w;lon/=w;
+    const fora=marca&&!marca.has(g.k),pot=g.cat==="pot";
+    const st={color:c,weight:pot?3:1,fillOpacity:fora?.06:pot?.35:.55,opacity:fora?.15:1};
+    const mk=L.circleMarker([lat,lon],{radius:3+13*Math.sqrt(g.v/max),fillColor:c,...st});MK.set(g.k,{mk,c,w:st.weight,o:st.fillOpacity});
+    mk.bindPopup(el("div",{},el("b",{},g.nome),el("br"),porMun?r.reg:`${r.bairro} · ${S.muns[r.mun]}`,el("br"),`${fmt.format(g.v)} de ${fmt.format(g.val)} votos válidos (${pct(g.p)}) · ${CAT[g.cat].s} ${CAT[g.cat].t}`)).addTo(camada);
+    pts.push([lat,lon]);if(!fora)ptsSel.push([lat,lon])}
+  const enq=S.caminho.map(p=>p.k).join("/")+"|"+(marca?[...marca].slice(0,50).join(","):"");
+  const alvo=marca&&ptsSel.length?ptsSel:pts;
+  if(alvo.length&&enq!==ultimoEnq){M.invalidateSize();M.fitBounds(alvo,{padding:[24,24],maxZoom:15})}
+  const un=porMun?["município","municípios"]:["local","locais"];
+  $("#leg-nivel").textContent=(porMun?"Um círculo por município":"Um círculo por local de votação")+" · maior = mais votos"+
+    (marca?" · em destaque, só o que está na busca ou no filtro da tabela":"")+(semCoord?` · ${semCoord} ${semCoord===1?un[0]:un[1]} sem coordenada fora do mapa (os votos entram na tabela)`:"");
   ultimoEnq=enq;setTimeout(()=>M.invalidateSize(),60);
 }
 
 /* ---------- eventos ---------- */
-function salvaUrl(){const q=new URLSearchParams({cargo:S.cand.cargo,n:S.cand.nr});if(S.caminho.length)q.set("area",JSON.stringify(S.caminho));if(S.ffNivel!==proximo())q.set("nivel",S.ffNivel);history.replaceState(null,"","?"+q)}
+function salvaUrl(){if(!S.cand)return;const q=new URLSearchParams({cargo:S.cand.cargo,n:S.cand.nr});if(S.caminho.length)q.set("area",JSON.stringify(S.caminho));if(S.ffNivel!==proximo())q.set("nivel",S.ffNivel);if(S.ref!=="pai")q.set("ref",S.ref);if(S.tb.col!=="rank"||S.tb.dir!==1)q.set("ord",S.tb.col+(S.tb.dir>0?"":"-"));if(S.tbCat)q.set("grupo",S.tbCat);if(S.tbQ)q.set("busca",S.tbQ);history.replaceState(null,"","?"+q)}
 $("#cargo").addEventListener("change",()=>trocaCargo().catch(falha));
 $("#ff-nivel").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;const t=b.dataset.v;
   navega($("#ff-nivel"),()=>{S.caminho=S.caminho.filter(p=>ORDEM_N[p.tipo]<ORDEM_N[t]);if(t==="bairro"||t==="zona")S.agrup=t;
