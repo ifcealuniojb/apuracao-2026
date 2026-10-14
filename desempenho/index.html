@@ -606,7 +606,7 @@ function avalia(gs,m){
   return gs;
 }
 const pp=x=>isFinite(x)?(x>=0?"+":"−")+Math.abs(x*100).toLocaleString("pt-BR",{minimumFractionDigits:1,maximumFractionDigits:1})+" p.p.":"–";
-const pctPeso=x=>!isFinite(x)?"–":x===0?"0%":x<0.001?"<0,1%":(x*100).toLocaleString("pt-BR",{maximumFractionDigits:x<0.1?1:0,minimumFractionDigits:x<0.1?1:0})+"%";
+const pctPeso=x=>!isFinite(x)?"–":x===0?"0%":x<0.0005?"<0,1%":(x*100).toLocaleString("pt-BR",{maximumFractionDigits:1,minimumFractionDigits:1})+"%"; // sempre 1 casa: as partes somam o total
 function indicador(g,abrir){const c=CAT[g.cat];return el("button",{type:"button",class:"ind "+c.c+(g.cat==="pot"?" pot":""),title:c.t+" · toque para ver a conta","aria-label":c.t,onclick:abrir},c.s,el("span",{class:"tx"},c.k))}
 // a área aberta vista de cima: o indicador dela entre as vizinhas e no Ceará, e o peso nos votos dele
 function contexto(){
