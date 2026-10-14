@@ -417,7 +417,7 @@ a.voltar:hover{background:rgba(255,255,255,.1)}
     Fonte única: arquivos públicos de divulgação de resultados do Tribunal Superior Eleitoral (<code>https://resultados.tse.jus.br/oficial</code>), conforme as
     “Informações técnicas sobre a divulgação de resultados 2026”. Este site bloqueia, via Content-Security-Policy, qualquer conexão a outro endereço.
     Resultados parciais podem mudar até o fim da totalização.
-    <div class="ver">Versão 2026-10-11 · 20h · <a href="../" style="color:inherit">início</a> · <a href="../desempenho/" style="color:inherit">mapa de votos (Ceará)</a></div>
+    <div class="ver">Versão 2026-10-14 · 14h30 · <a href="../" style="color:inherit">início</a> · <a href="../desempenho/" style="color:inherit">mapa de votos (Ceará)</a></div>
   </div>
 </footer>
 
@@ -1071,7 +1071,7 @@ function render(){
       if (state.errors[c]) html += `<div class="group"><h3>${esc(CARGOS[c])} <span class="meta">— ${esc(state.errors[c])}</span></h3></div>`;
       continue;
     }
-    if (r.nacional){ const o = renderNacional(c, r); html += o.html; total += o.total; continue; }
+    if (r.nacional === true){ const o = renderNacional(c, r); html += o.html; total += o.total; continue; }
     const list = ordenar(r.cands.map((x,i)=>({...x, pos:i+1})).filter(x => matches(x, state.q) && (!state.soEleitos || situacao(x, r).cls === "yes")), r);
     total += list.length;
     if (!list.length) continue;
