@@ -1071,7 +1071,7 @@ function tabela(){
 /* distribuição entre as áreas: mediana, quartis, heterogeneidade e histograma da fatia observada (manual, seções 4 e 13) */
 function distribuicao(gs,ref,tipo,nomeRef,donde,total){
   const com=gs.filter(g=>g.val>0),ps=com.map(g=>g.p),N=com.length;
-  $("#dist-sub").textContent=`Fatia observada das ${fmt.format(N)} ${PLURAL[tipo]} ${donde} com votos válidos${total?` que passam no filtro da tabela (${fmt.format(gs.length)} de ${fmt.format(total)}; a dispersão e a mediana são deste recorte)`:""}. Descreve como o voto se espalha; não explica causas.`;
+  $("#dist-sub").textContent=`Fatia observada ${["regiao","zona","secao"].includes(tipo)?"das":"dos"} ${fmt.format(N)} ${PLURAL[tipo]} ${donde} com votos válidos${total?` que passam no filtro da tabela (${fmt.format(gs.length)} de ${fmt.format(total)}; a dispersão e a mediana são deste recorte)`:""}. Descreve como o voto se espalha; não explica causas.`;
   if(N<2){$("#dist-k").replaceChildren();$("#dist-g").replaceChildren(el("p",{class:"hist-l"},"Poucas áreas para mostrar uma distribuição."));return}
   const het=heterogeneidade(com.map(g=>({y:g.v,n:g.val}))),md=quantil(ps,.5),q1=quantil(ps,.25),q3=quantil(ps,.75);
   const k=(r,v,s)=>el("div",{},el("span",{},r),el("b",{},v),s?el("small",{},s):null);
