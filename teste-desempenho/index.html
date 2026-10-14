@@ -181,6 +181,7 @@ table.tb{width:100%;border-collapse:collapse;font-size:14px}
 .tb-resumo{display:flex;gap:8px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid var(--line)}
 .tb-resumo button{all:unset;box-sizing:border-box;cursor:pointer;border:1px solid var(--line);border-radius:12px;padding:6px 10px;font-size:12px;color:var(--ink-2);line-height:1.35;background:var(--surface)}
 .tb-resumo button b{display:block;font-size:13px;color:var(--ink)}
+.tb-resumo .rs-tit{flex:1 1 100%;margin:0;font-size:12px;color:var(--ink-3)}
 .tb-resumo button[aria-pressed="true"]{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
 .tb-resumo button.forte b{color:var(--accent)}.tb-resumo button.fraco b{color:var(--red)}
 .ctx{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:9px 12px;margin:0 0 12px;font-size:13px;color:var(--ink-2)}
@@ -350,7 +351,7 @@ a.voltar:hover{background:rgba(255,255,255,.1)}
         <p class="ex" id="exemplo"></p>
         <p><span class="ind forte">▲ Forte</span> fatia ajustada 10% ou mais acima da referência. <span class="ind media">● Intermediário</span> a menos de 10% dela. <span class="ind fraco">◎ Fraco, com potencial</span> 10% ou mais abaixo e entre as áreas fracas onde há mais votos em jogo: juntas, elas concentram metade dos votos que faltariam para ele chegar à referência em todas as áreas fracas. <span class="ind fraco">▼ Fraco</span> 10% ou mais abaixo, nas demais.</p>
         <p><b>Visão do todo:</b> acima da tabela, a área aberta aparece com o próprio indicador dentro da área de cima e no Ceará, e com o peso dela nos votos dele. Assim uma seção "forte" dentro de um colégio que foi fraco no geral não engana.</p>
-        <p>As faixas no topo da tabela mostram quantas áreas há em cada grupo, quanto dos votos dele elas somam e quanto do eleitorado (votos válidos) elas reúnem. Toque numa faixa para ver só aquele grupo. Toque no indicador de uma linha para ver a conta completa.</p>
+        <p>As faixas no topo da tabela mostram quantas áreas há em cada grupo, que parte dos votos dele na área aberta veio delas e que parte dos votos válidos da área aberta elas reúnem. Ex.: "▲ Forte: 27 bairros · 61% dos votos dele · 29% dos votos válidos" quer dizer que esses 27 bairros têm só 29% dos votos de Fortaleza, mas deram 61% dos votos dele na cidade. Toque numa faixa para ver só aquele grupo. Toque no indicador de uma linha para ver a conta completa.</p>
         <p class="fontes">Base: quociente locacional e concentração eleitoral (Avelino, Biderman e Silva, <i>Dados</i>, 2011; Silva e Davidian, <i>Brazilian Political Science Review</i>, 2013), que comparam a distribuição dos votos do candidato com a do eleitorado; tipologia de dominância de Barry Ames; suavização de taxas por Bayes empírico (Marshall, 1991). O indicador descreve o resultado; não explica as causas.</p>
       </div>
     </details>
@@ -635,9 +636,16 @@ function tabela(){
   // faixas de resumo por grupo
   const somaCat={};for(const g of gs){const x=somaCat[g.cat]||(somaCat[g.cat]={n:0,peso:0,eleit:0});x.n++;x.peso+=g.peso;x.eleit+=g.eleit}
   if(S.tbCat&&!somaCat[S.tbCat])S.tbCat=null;
-  $("#tb-resumo").replaceChildren(...ORDEM_CAT.filter(k=>somaCat[k]&&k!=="sem").map(k=>{const x=somaCat[k],c=CAT[k];
+  // faixas: quantas áreas há em cada grupo e que parte dos votos dele e dos votos válidos da área aberta elas reúnem
+  const cats=ORDEM_CAT.filter(k=>somaCat[k]&&k!=="sem"), areaNome=prof?S.caminho.at(-1).nome:"Ceará";
+  const unid=n=>`${fmt.format(n)} ${n===1?SING[tipo]:PLURAL[tipo]}`;
+  if(cats.length<=1){const k=cats[0];
+    $("#tb-resumo").replaceChildren(el("p",{class:"rs-tit"},k?`Todas as ${unid(gs.length)} ficaram no mesmo grupo: ${CAT[k].s} ${CAT[k].t}.`:"Sem votos válidos para comparar."))}
+  else $("#tb-resumo").replaceChildren(
+    el("p",{class:"rs-tit"},`Como se dividem as ${unid(gs.length)}: quantas há em cada grupo, quanto dos votos dele vieram delas e quanto dos votos válidos ${prof?prepos(S.caminho.at(-1)).replace(/^em /,"de ").replace(/^no /,"do ").replace(/^na /,"da "):"do Ceará"} elas reúnem. Toque para filtrar.`),
+    ...cats.map(k=>{const x=somaCat[k],c=CAT[k];
     return el("button",{type:"button",class:c.c,"aria-pressed":String(S.tbCat===k),onclick:()=>{S.tbCat=S.tbCat===k?null:k;S.tbMax=300;tabela();$("#tb-rola").scrollTop=0}},
-      el("b",{},`${c.s} ${c.t}: ${fmt.format(x.n)}`),`${pctPeso(x.peso)} dos votos dele · ${pctPeso(x.eleit)} do eleitorado`)}));
+      el("b",{},`${c.s} ${c.t}: ${unid(x.n)}`),`${pctPeso(x.peso)} dos votos dele · ${pctPeso(x.eleit)} dos votos válidos`)}));
   const {col,dir}=S.tb;
   gs.sort((a,b)=>{
     if(col==="rank"){if(a.rank==null||b.rank==null)return(a.rank==null)-(b.rank==null)||b.v-a.v;return dir*(a.rank-b.rank)}
