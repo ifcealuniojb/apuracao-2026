@@ -5,3 +5,4 @@ exclude:
   - README.md
   - painel
   - painel-ascunhas
+  - testes
