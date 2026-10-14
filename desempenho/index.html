@@ -192,10 +192,13 @@ table.tb{width:100%;border-collapse:collapse;font-size:14px}
 .rs-card .rh>span:first-child{flex:1;min-width:0}
 .rs-card .rh small{font-weight:600;color:var(--ink-3)}
 .rs-card.forte .rh{color:var(--accent)}.rs-card.fraco .rh{color:var(--red)}.rs-card.media .rh{color:var(--ink)}
-.rs-bar{display:grid;grid-template-columns:96px 1fr 40px;align-items:center;gap:8px;font-size:12px;color:var(--ink-2);white-space:nowrap}
+.rs-bar{display:grid;grid-template-columns:minmax(0,128px) 1fr 40px 16px;align-items:center;gap:8px;font-size:12px;color:var(--ink-2);white-space:nowrap}
 .rs-bar i{display:block;height:7px;border-radius:99px;background:var(--gray-soft);position:relative;overflow:hidden}
 .rs-bar i em{position:absolute;left:0;top:0;bottom:0;border-radius:99px}
 .rs-bar b{text-align:right;font-size:12.5px;color:var(--ink)}
+.rs-bar>span{overflow:hidden;text-overflow:ellipsis}
+.rs-bar .i{width:14px;height:14px;font-size:9.5px}
+.rs-lei{font-size:11.5px;font-weight:700;margin-top:2px}.rs-lei.up{color:var(--accent)}.rs-lei.dn{color:var(--red)}.rs-lei.eq{color:var(--ink-3)}
 .tb-resumo .rs-tit.so{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:9px 12px;margin:0}
 .i{display:inline-grid;place-items:center;width:16px;height:16px;border-radius:50%;border:1.5px solid var(--ink-3);color:var(--ink-3);font:800 10.5px/1 Georgia,serif;font-style:italic;cursor:help;flex:none;user-select:none}
 .i:hover,.i:focus-visible{border-color:var(--ink);color:var(--ink);outline:none}
@@ -378,7 +381,7 @@ a.voltar:hover{background:rgba(255,255,255,.1)}
         <p class="ex" id="exemplo"></p>
         <p><span class="ind forte">▲ Forte</span> fatia ajustada 10% ou mais acima da referência. <span class="ind media">● Intermediário</span> a menos de 10% dela. <span class="ind fraco">◎ Fraco · muitos votos em jogo</span> 10% ou mais abaixo e entre as áreas fracas onde mais votos faltaram: juntas, elas concentram metade dos votos que faltaram para ele chegar à referência em todas as áreas fracas. É uma medida de tamanho, não uma previsão de que o voto vá mudar. <span class="ind fraco">▼ Fraco</span> 10% ou mais abaixo, nas demais.</p>
         <p><b>Visão do todo:</b> acima da tabela, a área aberta aparece com o próprio indicador dentro da área de cima e no Ceará, e com o peso dela nos votos dele. Assim uma seção "forte" dentro de um colégio que foi fraco no geral não engana.</p>
-        <p>As faixas no topo da tabela mostram quantas áreas há em cada grupo, que parte dos votos dele na área aberta veio delas e que parte dos votos válidos da área aberta elas reúnem. Ex.: "▲ Forte: 27 bairros · 61% dos votos dele · 29% dos votos válidos" quer dizer que esses 27 bairros têm só 29% dos votos de Fortaleza, mas deram 61% dos votos dele na cidade. Toque numa faixa para ver só aquele grupo. Toque no indicador de uma linha para ver a conta completa.</p>
+        <p>Os quadros acima da tabela mostram, para cada grupo, duas barras: <b>"Votos no/na [área aberta]"</b> é o tamanho do grupo (quanto de todos os votos válidos da área aberta é dado ali, somando todos os candidatos); <b>"Votos de [candidato]"</b> é quanto dos votos dele na área aberta saiu dali. Se ele fosse igual em todo lugar, as duas barras teriam o mesmo tamanho. Ex.: no Cariri, os 9 municípios fortes do Elmano têm 17% dos votos do Cariri, mas deram 20% dos votos dele no Cariri. Toque numa faixa para ver só aquele grupo. Toque no indicador de uma linha para ver a conta completa.</p>
         <p class="fontes" id="cobertura"></p>
         <p class="fontes">Base: quociente locacional e concentração eleitoral (Avelino, Biderman e Silva, <i>Dados</i>, 2011; Silva e Davidian, <i>Brazilian Political Science Review</i>, 2013), que comparam a distribuição dos votos do candidato com a do eleitorado; tipologia de dominância de Barry Ames; suavização de taxas por Bayes empírico (Marshall, 1991). O indicador descreve o resultado; não explica as causas.</p>
       </div>
@@ -728,17 +731,19 @@ function tabela(){
       inter:`a fatia de votos dele ficou PERTO da referência (${refTxt}): menos de 10% acima ou abaixo.`,
       pot:`a fatia de votos dele ficou 10% ou mais ABAIXO da referência (${refTxt}) e onde mais votos faltaram para ele chegar a ela: juntos, esses lugares concentram metade dos votos que faltaram em todos os lugares fracos. É uma medida de tamanho, não uma previsão de que o voto vá mudar.`,
       fraco:`a fatia de votos dele ficou 10% ou mais ABAIXO da referência (${refTxt}), em lugares onde faltaram menos votos.`};
-    const barra=(rot,v,cor)=>el("div",{class:"rs-bar"},el("span",{},rot),el("i",{},el("em",{style:`width:${Math.min(100,v*100)}%;background:${cor}`})),el("b",{},pctPeso(v)));
+    const nomeC=titulo(info(S.cand).nome), areaA=prof?S.caminho.at(-1).nome:"Ceará", totA=gs.reduce((t,g)=>t+g.val,0);
+    const barra=(rot,v,cor,d)=>el("div",{class:"rs-bar"},el("span",{title:rot},rot),el("i",{},el("em",{style:`width:${Math.min(100,v*100)}%;background:${cor}`})),el("b",{},pctPeso(v)),d);
+    const lugares=(n)=>`${fem?(n===1?"desta":"destas"):(n===1?"deste":"destes")} ${n===1?SING[tipo]:fmt.format(n)+" "+PLURAL[tipo]}`;
     $("#tb-resumo").replaceChildren(
-      el("p",{class:"rs-tit"},`${fem?"As":"Os"} ${unid(gs.length)} ${deA} em ${cats.length} grupos. Toque num grupo para ver só ele na tabela.`),
+      el("p",{class:"rs-tit"},`${fem?"As":"Os"} ${unid(gs.length)} ${deA} em ${cats.length} grupos. Em cada grupo: primeiro o tamanho dele (quanto dos votos ${deA} é dado ali), depois quanto dos votos de ${nomeC} veio dali. Toque num grupo para ver só ele na tabela.`),
       ...cats.map(k=>{const x=somaCat[k],c=CAT[k],corB=c.c==="forte"?"var(--accent)":c.c==="fraco"?"var(--red)":"var(--ink-2)";
+        const mais=x.peso>x.eleit*1.02,menos=x.peso<x.eleit*.98;
         const card=el("div",{class:"rs-card "+c.c,role:"button",tabindex:"0","aria-pressed":String(S.tbCat===k)},
-          el("div",{class:"rh"},el("span",{},`${c.s} ${c.t} `,el("small",{},`· ${fmt.format(x.n)} ${x.n===1?SING[tipo]:PLURAL[tipo]}`)),dica(`${c.s} ${c.t}: ${PLURAL[tipo]} onde ${oque[k]}`,
-            `"Votos dele": dos ${fmt.format(somaCat_tot.v)} votos que ele teve ${emA}, ${fmt.format(x.v)} (${pctPeso(x.peso)}) vieram deste grupo.`,
-            `"Todos os votos": dos votos válidos ${deA} (de todos os candidatos), ${pctPeso(x.eleit)} foram dados neste grupo.`,
-            x.peso>x.eleit*1.02?"Como a barra dos votos dele é maior que a de todos os votos, este grupo pesa mais para ele do que para o conjunto.":x.peso<x.eleit*.98?"Como a barra dos votos dele é menor que a de todos os votos, este grupo pesa menos para ele do que para o conjunto.":"As duas barras são parecidas: este grupo pesa para ele o mesmo que para o conjunto.",
-            ...(k==="pot"||k==="fraco")&&x.falt?[`Pela fatia observada, faltaram ${fmt.format(x.falt)} votos para ele chegar à referência nestes lugares.`]:[])),
-          barra("Votos dele",x.peso,corB),barra("Todos os votos",x.eleit,"var(--ink-3)"));
+          el("div",{class:"rh"},el("span",{},`${c.s} ${c.t} `,el("small",{},`· ${fmt.format(x.n)} ${x.n===1?SING[tipo]:PLURAL[tipo]}`)),
+            dica(`${c.s} ${c.t}: ${PLURAL[tipo]} onde ${oque[k]}`,...(k==="pot"||k==="fraco")&&x.falt?[`Pela fatia observada, faltaram ${fmt.format(x.falt)} votos para ${nomeC} chegar à referência nestes lugares.`]:[])),
+          barra(`Votos ${emA}`,x.eleit,"var(--ink-3)",dica(`De todos os votos válidos ${deA} (${fmt.format(totA)}, somando todos os candidatos), ${pctPeso(x.eleit)} (${fmt.format(Math.round(x.eleit*totA))}) foram dados ${lugares(x.n)}.`,`É o tamanho do grupo dentro ${deA.replace(/^de /,"de ")}: não depende do candidato.`)),
+          barra(`Votos de ${nomeC}`,x.peso,corB,dica(`Dos votos que ${nomeC} teve ${emA} (${fmt.format(somaCat_tot.v)}), ${pctPeso(x.peso)} (${fmt.format(x.v)}) saíram ${lugares(x.n).replace(/^d/,"d")}.`,`É a parte dos votos dele ${emA}, não dos votos dele no Ceará inteiro${prof?"":""}.`)),
+          el("div",{class:"rs-lei "+(mais?"up":menos?"dn":"eq")},mais?`↑ Deram a ele mais do que o tamanho deles`:menos?`↓ Deram a ele menos do que o tamanho deles`:`= Deram a ele o mesmo que o tamanho deles`));
         const vai=()=>{S.tbCat=S.tbCat===k?null:k;S.tbMax=300;tabela();$("#tb-rola").scrollTop=0};
         card.addEventListener("click",vai);card.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();vai()}});
         return card}));
