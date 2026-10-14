@@ -153,9 +153,9 @@ select,input{font:16px var(--sans);color:var(--ink);background:var(--surface);bo
 .trilha button:hover{background:var(--accent-soft)}
 .trilha .at{background:var(--navy);color:#fff;border-radius:999px;padding:5px 12px;font-weight:700;font-size:13px}
 .trilha .sep{color:var(--ink-3)}
-.grade{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:14px;align-items:stretch}
+.grade{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:14px;align-items:stretch}
 /* tabela única: ranking completo, reordenável */
-.tabela{display:flex;flex-direction:column;overflow:hidden;min-height:0;height:640px}
+.tabela{display:flex;flex-direction:column;overflow:hidden;min-height:0;height:700px}
 .tb-top{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line);flex-wrap:wrap}
 .tb-busca{position:relative;flex:1 1 200px;max-width:320px}
 .tb-busca svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--ink-3)}
@@ -169,22 +169,22 @@ table.tb{width:100%;border-collapse:collapse;font-size:14px}
 .tb thead button[aria-sort]{color:var(--ink)}
 .tb thead button[aria-sort="ascending"]::after{content:" ▲";font-size:9px}
 .tb thead button[aria-sort="descending"]::after{content:" ▼";font-size:9px}
-.tb .c-n{width:46px}.tb .c-d{width:150px}.tb .c-p{width:96px}.tb .c-v{width:118px;white-space:nowrap}.tb .c-w{width:74px}
-.tb .c-p button,.tb .c-v button,.tb .c-w button,.tb td.c-p,.tb td.c-v,.tb .c-o{width:90px}.tb .c-o button,.tb td.c-o{text-align:right}.tb td.c-o b{display:block;font-weight:800}.tb td.c-o small{color:var(--ink-3);font-size:11.5px}
+.tb .c-n{width:42px}.tb .c-d{width:124px}.tb .c-p{width:70px}.tb .c-v{width:96px;white-space:nowrap}.tb .c-w{width:62px}
+.tb .c-p button,.tb .c-v button,.tb .c-w button,.tb td.c-p,.tb td.c-v,.tb .c-o{width:80px}.tb .c-o button,.tb td.c-o{text-align:right}.tb td.c-o b{display:block;font-weight:800}.tb td.c-o small{color:var(--ink-3);font-size:11.5px}
 .tb td.c-w{text-align:right}
 .ind{display:inline-flex;align-items:center;gap:5px;font-weight:800;font-size:12.5px;border-radius:999px;padding:3px 9px;white-space:nowrap;border:0;font-family:inherit;cursor:pointer;line-height:1.3}
 .ind.forte{background:var(--accent-soft);color:var(--accent)}
 .ind.media{background:var(--gray-soft);color:var(--ink-2)}
 .ind.fraco{background:var(--red-soft);color:var(--red)}
 .ind.pot{box-shadow:inset 0 0 0 1.5px var(--red)}
-.tb .c-o{width:90px}.tb .c-o button,.tb td.c-o{text-align:right}.tb td.c-o b{display:block;font-weight:800}.tb td.c-o small{color:var(--ink-3);font-size:11.5px}
+.tb .c-o{width:80px}.tb .c-o button,.tb td.c-o{text-align:right}.tb td.c-o b{display:block;font-weight:800}.tb td.c-o small{color:var(--ink-3);font-size:11.5px}
 .tb td.c-w{color:var(--ink-2);font-weight:700;font-size:13px}
 .tb tr.det td{background:var(--surface-2)!important;font-size:13px;color:var(--ink-2);line-height:1.5;padding:10px 14px 12px}
 .tb tr.det b{color:var(--ink)}
-.tb-resumo{display:flex;gap:8px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid var(--line)}
-.tb-resumo button{all:unset;box-sizing:border-box;cursor:pointer;border:1px solid var(--line);border-radius:12px;padding:6px 10px;font-size:12px;color:var(--ink-2);line-height:1.35;background:var(--surface)}
+.tb-resumo{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:6px;padding:8px 14px;border-bottom:1px solid var(--line)}
+.tb-resumo button{all:unset;box-sizing:border-box;cursor:pointer;border:1px solid var(--line);border-radius:10px;padding:5px 9px;font-size:11.5px;color:var(--ink-2);line-height:1.35;background:var(--surface)}
 .tb-resumo button b{display:block;font-size:13px;color:var(--ink)}
-.tb-resumo .rs-tit{flex:1 1 100%;margin:0;font-size:12px;color:var(--ink-3)}
+.tb-resumo .rs-tit{grid-column:1/-1;margin:0;font-size:11.5px;color:var(--ink-3)}
 .tb-resumo button[aria-pressed="true"]{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
 .tb-resumo button.forte b{color:var(--accent)}.tb-resumo button.fraco b{color:var(--red)}
 .ref-g{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap}.ref-l{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
@@ -217,7 +217,7 @@ table.tb{width:100%;border-collapse:collapse;font-size:14px}
 .tb-mais{all:unset;box-sizing:border-box;display:block;width:calc(100% - 28px);margin:12px 14px 16px;text-align:center;cursor:pointer;padding:10px;border-radius:10px;background:var(--gray-soft);font-weight:700;font-size:13.5px;color:var(--ink)}
 .tb-nota{margin:10px 14px 14px;font-size:12px;color:var(--ink-3)}
 .tb-mais:hover{background:var(--accent-soft)}
-.mapa-card{display:flex;flex-direction:column;height:640px}
+.mapa-card{display:flex;flex-direction:column;height:700px}
 .mapa-card #mapa{flex:1 1 auto;min-height:0;height:auto!important}
 @media (max-width:900px){.tabela{height:min(70vh,620px)}.mapa-card{height:440px}}
 @media (max-width:640px){.tb .c-v,.tb .c-w,.tb .c-o{display:none}.tb td.c-a small.mob{display:block}.tb .c-d{width:112px}.tb .c-p{width:70px}.tb .c-n{width:38px}.tb td,.tb thead button{padding-left:6px;padding-right:6px}.ind .tx{display:none}.ind{font-size:14px;padding:4px 10px}}
@@ -554,7 +554,7 @@ const ROT={forte:"acima da média",fraco:"abaixo da média",media:"na média"};
    são puxadas para a referência, para que 10 votos numa seção pequena não pareçam "melhor desempenho".
    Depois: Forte (≥10% acima da referência), Intermediário, Fraco com muitos votos em jogo (≥10% abaixo e entre as
    áreas fracas que concentram metade dos votos que faltam para chegar à referência) e Fraco (as demais). */
-const CAT={forte:{s:"▲",t:"Forte",c:"forte"},inter:{s:"●",t:"Intermediário",c:"media"},pot:{s:"◎",t:"Fraco · muitos votos em jogo",c:"fraco"},fraco:{s:"▼",t:"Fraco",c:"fraco"},sem:{s:"–",t:"Sem votos válidos",c:"media"}};
+const CAT={forte:{s:"▲",t:"Forte",c:"forte",k:"Forte"},inter:{s:"●",t:"Intermediário",c:"media",k:"Intermediário"},pot:{s:"◎",t:"Fraco · muitos votos em jogo",c:"fraco",k:"Fraco"},fraco:{s:"▼",t:"Fraco",c:"fraco",k:"Fraco"},sem:{s:"–",t:"Sem votos válidos",c:"media",k:"Sem dados"}};
 const ORDEM_CAT=["forte","inter","pot","fraco","sem"];
 function avalia(gs,m){
   const T=gs.reduce((t,g)=>t+g.val,0),V=gs.reduce((t,g)=>t+g.v,0),com=gs.filter(g=>g.val>0),n=com.length||1;
@@ -575,7 +575,7 @@ function avalia(gs,m){
 }
 const pp=x=>isFinite(x)?(x>=0?"+":"−")+Math.abs(x*100).toLocaleString("pt-BR",{minimumFractionDigits:1,maximumFractionDigits:1})+" p.p.":"–";
 const pctPeso=x=>!isFinite(x)?"–":x===0?"0%":x<0.001?"<0,1%":(x*100).toLocaleString("pt-BR",{maximumFractionDigits:x<0.1?1:0,minimumFractionDigits:x<0.1?1:0})+"%";
-function indicador(g,abrir){const c=CAT[g.cat];return el("button",{type:"button",class:"ind "+c.c+(g.cat==="pot"?" pot":""),title:c.t+" · toque para ver a conta","aria-label":c.t,onclick:abrir},c.s,el("span",{class:"tx"},c.t))}
+function indicador(g,abrir){const c=CAT[g.cat];return el("button",{type:"button",class:"ind "+c.c+(g.cat==="pot"?" pot":""),title:c.t+" · toque para ver a conta","aria-label":c.t,onclick:abrir},c.s,el("span",{class:"tx"},c.k))}
 // a área aberta vista de cima: o indicador dela entre as vizinhas e no Ceará, e o peso nos votos dele
 function contexto(){
   const box=$("#ff-ctx"),A=S.caminho.at(-1);
@@ -692,10 +692,10 @@ function tabela(){
   if(cats.length<=1){const k=cats[0];
     $("#tb-resumo").replaceChildren(el("p",{class:"rs-tit"},k?`${fem?"Todas as":"Todos os"} ${unid(gs.length)} ficaram no mesmo grupo: ${CAT[k].s} ${CAT[k].t}.`:"Sem votos válidos para comparar."))}
   else $("#tb-resumo").replaceChildren(
-    el("p",{class:"rs-tit"},`Como se dividem ${fem?"as":"os"} ${unid(gs.length)}: quant${fem?"a":"o"}s há em cada grupo, quanto dos votos dele veio del${fem?"a":"e"}s e quanto dos votos válidos ${prof?prepos(S.caminho.at(-1)).replace(/^em /,"de ").replace(/^no /,"do ").replace(/^na /,"da "):"do Ceará"} el${fem?"a":"e"}s reúnem. Toque para filtrar.`),
+    el("p",{class:"rs-tit"},`Como se dividem ${fem?"as":"os"} ${unid(gs.length)}: em cada grupo, a parte dos votos dele e a parte dos votos válidos ${prof?prepos(S.caminho.at(-1)).replace(/^em /,"de ").replace(/^no /,"do ").replace(/^na /,"da "):"do Ceará"}. Toque para filtrar.`),
     ...cats.map(k=>{const x=somaCat[k],c=CAT[k];
     return el("button",{type:"button",class:c.c,"aria-pressed":String(S.tbCat===k),onclick:()=>{S.tbCat=S.tbCat===k?null:k;S.tbMax=300;tabela();$("#tb-rola").scrollTop=0}},
-      el("b",{},`${c.s} ${c.t}: ${unid(x.n)}`),`${pctPeso(x.peso)} dos votos dele · ${pctPeso(x.eleit)} dos votos válidos`)}));
+      el("b",{},`${c.s} ${c.t}: ${fmt.format(x.n)}`),`${pctPeso(x.peso)} dos votos dele · ${pctPeso(x.eleit)} dos válidos`)}));
   const {col,dir}=S.tb;
   gs.sort((a,b)=>{
     if(col==="rank"){if(a.rank==null||b.rank==null)return(a.rank==null)-(b.rank==null)||b.v-a.v;return dir*(a.rank-b.rank)}
