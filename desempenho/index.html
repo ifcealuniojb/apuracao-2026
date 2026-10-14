@@ -744,7 +744,7 @@ function tabela(){
           barra(`Votos ${emA}`,x.eleit,"var(--ink-3)",dica(`De todos os votos válidos ${deA} (${fmt.format(totA)}, somando todos os candidatos), ${pctPeso(x.eleit)} (${fmt.format(Math.round(x.eleit*totA))}) foram dados ${lugares(x.n).replace(/^d/,"n")}.`,`É o tamanho do grupo dentro ${deA.replace(/^de /,"de ")}: não depende do candidato.`)),
           barra(`Votos de ${nomeC}`,x.peso,corB,dica(`Dos votos que ${nomeC} teve ${emA} (${fmt.format(somaCat_tot.v)}), ${pctPeso(x.peso)} (${fmt.format(x.v)}) saíram ${lugares(x.n).replace(/^d/,"d")}.`,prof?`É a parte dos votos dele ${emA}, não dos votos dele no Ceará inteiro.`:"É a parte de todos os votos dele no Ceará.")),
           (()=>{const vg=x.eleit*totA,fg=vg?x.v/vg:NaN,fA=totA?somaCat_tot.v/totA:NaN;
-            return el("div",{class:"rs-lei "+(mais?"up":menos?"dn":"eq")},`${mais?"↑":menos?"↓":"="} ${lugares(x.n).replace(/^d/,"N")}, ${nomeC} teve ${pct(fg)} dos votos; ${emA}, ${pct(fA)}.`)})());
+            return el("div",{class:"rs-lei "+(mais?"up":menos?"dn":"eq")},`${mais?"↑":menos?"↓":"="} ${lugares(x.n).replace(/^d/,"N")}, ${nomeC} teve o aproveitamento de ${pct(fg)} dos votos; sendo um total de ${fmt.format(x.v)} votos, equivalente a ${pctPeso(x.v/S.ufTot.val)} dos votos válidos do Ceará.`)})());
         const vai=()=>{S.tbCat=S.tbCat===k?null:k;S.tbMax=300;tabela();$("#tb-rola").scrollTop=0};
         card.addEventListener("click",vai);card.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();vai()}});
         return card}));
