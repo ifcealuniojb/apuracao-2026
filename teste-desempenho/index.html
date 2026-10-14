@@ -185,15 +185,14 @@ table.tb{width:100%;border-collapse:collapse;font-size:14px}
 .tb tr.det b{color:var(--ink)}
 .tb-resumo{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;padding:10px 14px;border-bottom:1px solid var(--line)}
 .tb-resumo .rs-tit{grid-column:1/-1;margin:0;font-size:12px;color:var(--ink-3)}
-.rs-card{box-sizing:border-box;cursor:pointer;border:1px solid var(--line);border-radius:12px;padding:8px 10px 9px;background:var(--surface);display:flex;flex-direction:column;gap:3px;min-width:0}
+.rs-card{box-sizing:border-box;cursor:pointer;border:1px solid var(--line);border-radius:12px;padding:7px 9px 8px;background:var(--surface);display:flex;flex-direction:column;gap:3px;min-width:0}
 .rs-card:hover{border-color:var(--ink-3)}
 .rs-card[aria-pressed="true"]{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
 .rs-card .rh{display:flex;align-items:flex-start;gap:6px;font-weight:800;font-size:12.5px;line-height:1.25}
-.rs-card .rh span{flex:1;min-width:0}
+.rs-card .rh>span:first-child{flex:1;min-width:0}
+.rs-card .rh small{font-weight:600;color:var(--ink-3)}
 .rs-card.forte .rh{color:var(--accent)}.rs-card.fraco .rh{color:var(--red)}.rs-card.media .rh{color:var(--ink)}
-.rs-card .rn{font-size:19px;font-weight:800;color:var(--ink);letter-spacing:-.01em}
-.rs-card .rn small{font-size:12px;font-weight:600;color:var(--ink-3)}
-.rs-bar{display:grid;grid-template-columns:76px 1fr 38px;align-items:center;gap:6px;font-size:11px;color:var(--ink-2)}
+.rs-bar{display:grid;grid-template-columns:72px 1fr 34px;align-items:center;gap:6px;font-size:11px;color:var(--ink-2)}
 .rs-bar i{display:block;height:7px;border-radius:99px;background:var(--gray-soft);position:relative;overflow:hidden}
 .rs-bar i em{position:absolute;left:0;top:0;bottom:0;border-radius:99px}
 .rs-bar b{text-align:right;font-size:11.5px;color:var(--ink)}
@@ -733,12 +732,11 @@ function tabela(){
       el("p",{class:"rs-tit"},`${fem?"As":"Os"} ${unid(gs.length)} ${deA} em ${cats.length} grupos. Toque num grupo para ver só ele na tabela.`),
       ...cats.map(k=>{const x=somaCat[k],c=CAT[k],corB=c.c==="forte"?"var(--accent)":c.c==="fraco"?"var(--red)":"var(--ink-2)";
         const card=el("div",{class:"rs-card "+c.c,role:"button",tabindex:"0","aria-pressed":String(S.tbCat===k)},
-          el("div",{class:"rh"},el("span",{},`${c.s} ${c.t}`),dica(`${c.s} ${c.t}: ${PLURAL[tipo]} onde ${oque[k]}`,
+          el("div",{class:"rh"},el("span",{},`${c.s} ${c.t} `,el("small",{},`· ${fmt.format(x.n)} ${x.n===1?SING[tipo]:PLURAL[tipo]}`)),dica(`${c.s} ${c.t}: ${PLURAL[tipo]} onde ${oque[k]}`,
             `"Votos dele": dos ${fmt.format(somaCat_tot.v)} votos que ele teve ${emA}, ${fmt.format(x.v)} (${pctPeso(x.peso)}) vieram deste grupo.`,
             `"Todos os votos": dos votos válidos ${deA} (de todos os candidatos), ${pctPeso(x.eleit)} foram dados neste grupo.`,
             x.peso>x.eleit*1.02?"Como a barra dos votos dele é maior que a de todos os votos, este grupo pesa mais para ele do que para o conjunto.":x.peso<x.eleit*.98?"Como a barra dos votos dele é menor que a de todos os votos, este grupo pesa menos para ele do que para o conjunto.":"As duas barras são parecidas: este grupo pesa para ele o mesmo que para o conjunto.",
             ...(k==="pot"||k==="fraco")&&x.falt?[`Pela fatia observada, faltaram ${fmt.format(x.falt)} votos para ele chegar à referência nestes lugares.`]:[])),
-          el("div",{class:"rn"},fmt.format(x.n)+" ",el("small",{},x.n===1?SING[tipo]:PLURAL[tipo])),
           barra("Votos dele",x.peso,corB),barra("Todos os votos",x.eleit,"var(--ink-3)"));
         const vai=()=>{S.tbCat=S.tbCat===k?null:k;S.tbMax=300;tabela();$("#tb-rola").scrollTop=0};
         card.addEventListener("click",vai);card.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();vai()}});
