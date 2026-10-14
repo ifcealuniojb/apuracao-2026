@@ -638,11 +638,11 @@ function tabela(){
   if(S.tbCat&&!somaCat[S.tbCat])S.tbCat=null;
   // faixas: quantas áreas há em cada grupo e que parte dos votos dele e dos votos válidos da área aberta elas reúnem
   const cats=ORDEM_CAT.filter(k=>somaCat[k]&&k!=="sem"), areaNome=prof?S.caminho.at(-1).nome:"Ceará";
-  const unid=n=>`${fmt.format(n)} ${n===1?SING[tipo]:PLURAL[tipo]}`;
+  const unid=n=>`${fmt.format(n)} ${n===1?SING[tipo]:PLURAL[tipo]}`, fem=["regiao","zona","secao"].includes(tipo);
   if(cats.length<=1){const k=cats[0];
-    $("#tb-resumo").replaceChildren(el("p",{class:"rs-tit"},k?`Todas as ${unid(gs.length)} ficaram no mesmo grupo: ${CAT[k].s} ${CAT[k].t}.`:"Sem votos válidos para comparar."))}
+    $("#tb-resumo").replaceChildren(el("p",{class:"rs-tit"},k?`${fem?"Todas as":"Todos os"} ${unid(gs.length)} ficaram no mesmo grupo: ${CAT[k].s} ${CAT[k].t}.`:"Sem votos válidos para comparar."))}
   else $("#tb-resumo").replaceChildren(
-    el("p",{class:"rs-tit"},`Como se dividem as ${unid(gs.length)}: quantas há em cada grupo, quanto dos votos dele vieram delas e quanto dos votos válidos ${prof?prepos(S.caminho.at(-1)).replace(/^em /,"de ").replace(/^no /,"do ").replace(/^na /,"da "):"do Ceará"} elas reúnem. Toque para filtrar.`),
+    el("p",{class:"rs-tit"},`Como se dividem ${fem?"as":"os"} ${unid(gs.length)}: quant${fem?"a":"o"}s há em cada grupo, quanto dos votos dele veio del${fem?"a":"e"}s e quanto dos votos válidos ${prof?prepos(S.caminho.at(-1)).replace(/^em /,"de ").replace(/^no /,"do ").replace(/^na /,"da "):"do Ceará"} el${fem?"a":"e"}s reúnem. Toque para filtrar.`),
     ...cats.map(k=>{const x=somaCat[k],c=CAT[k];
     return el("button",{type:"button",class:c.c,"aria-pressed":String(S.tbCat===k),onclick:()=>{S.tbCat=S.tbCat===k?null:k;S.tbMax=300;tabela();$("#tb-rola").scrollTop=0}},
       el("b",{},`${c.s} ${c.t}: ${unid(x.n)}`),`${pctPeso(x.peso)} dos votos dele · ${pctPeso(x.eleit)} dos votos válidos`)}));
