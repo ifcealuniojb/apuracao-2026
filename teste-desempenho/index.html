@@ -444,7 +444,7 @@ a.voltar:hover{background:rgba(255,255,255,.1)}
         <p><b>O modelo:</b> Beta-Binomial (y<sub>i</sub> | θ<sub>i</sub> ~ Binomial(n<sub>i</sub>, θ<sub>i</sub>), θ<sub>i</sub> ~ Beta(α, β)). α e β são estimados por <b>máxima verossimilhança marginal</b> com as áreas da lista mostrada (mesmo cargo, turno e candidato; só áreas com votos válidos). Fatia ajustada = (votos + α) ÷ (válidos + α + β). O padrão do modelo (m = α ÷ (α+β)) vem dos dados da lista e não muda quando você troca o botão "Comparar com". A conta de cada linha mostra α, β e a versão.</p>
         <p><b>Quando o ajuste fica indisponível:</b> menos de 5 áreas com votos válidos, candidato sem votos (ou com todos) na lista, otimização que não converge, ou diferenças entre as áreas do tamanho esperado só pelo acaso. Nesses casos nenhum parâmetro substituto é usado: a tabela mostra só a fatia observada e o indicador fica "○ Sem ajuste".</p>
         <p class="ex" id="exemplo"></p>
-        <p><span class="ind forte">▲ Forte</span> fatia ajustada pelo menos 10% acima da referência (ex.: referência 40% → 44% ou mais). <span class="ind media">● Intermediário</span> a menos de 10% dela. <span class="ind fraco">▼ Fraco</span> pelo menos 10% abaixo (40% → 36% ou menos). <span class="ind media">○ Sem ajuste</span> o modelo não pôde ser estimado nesta lista. Regra da versão bb-mle-1; mudar o limite gera nova versão.</p>
+        <p><span class="ind forte">▲ Forte</span> fatia ajustada pelo menos 10% acima da referência (ex.: referência 40% → 44% ou mais) <b>e</b> o modelo dá pelo menos 90% de probabilidade de a área estar acima da referência. <span class="ind fraco">▼ Fraco</span> o espelho: pelo menos 10% abaixo (40% → 36% ou menos) e 90% de probabilidade de estar abaixo. <span class="ind media">● Intermediário</span> todo o resto: perto da referência, ou com poucos votos para o modelo ter certeza (ex.: um candidato com 0,1% do município e 1 voto numa seção). <span class="ind media">○ Sem ajuste</span> o modelo não pôde ser estimado nesta lista. Regra da versão bb-mle-1; mudar o limite gera nova versão.</p>
         <p><b>Visão do todo:</b> acima da tabela, a área aberta aparece com o próprio indicador entre as áreas vizinhas e contra o Ceará, e com o peso dela nos votos dele. Assim uma seção "forte" dentro de um colégio que foi fraco no geral não engana.</p>
         <p>Os quadros acima da tabela mostram, para cada grupo, duas barras: <b>"Votos no/na [área aberta]"</b> é o tamanho do grupo (quanto de todos os votos válidos da área aberta é dado ali, somando todos os candidatos); <b>"Votos de [candidato]"</b> é quanto dos votos dele na área aberta saiu dali. Se ele fosse igual em todo lugar, as duas barras teriam o mesmo tamanho.</p>
         <p><b>Limites:</b> o resultado é agregado por seção. Ele descreve o território eleitoral; não mostra a preferência de nenhum eleitor, não explica causas e não é previsão. O bairro é o do local de votação, não o da residência. As diferenças entre áreas são descritivas, não causais.</p>
@@ -678,6 +678,7 @@ const MODELO={
   data:"14/10/2026",
   // regras versionadas (mudar qualquer uma = nova versão)
   limiar:0.10,        // Forte: ajustada ≥ referência × 1,10; Fraco: ≤ referência × 0,90
+  confianca:0.90,     // e o modelo precisa dar ≥ 90% de probabilidade de a área estar acima (Forte) ou abaixo (Fraco) da referência
   minUnidades:5,      // mínimo de unidades com votos válidos para estimar α e β (simulação em testes/simulacao.mjs: a partir de 4 a ajustada já erra menos que a observada)
   kMin:1e-2, kMax:1e7,// limites de k = α+β na otimização; ótimo colado em kMax = sem variação além do acaso
   maxIter:600, tol:1e-10
@@ -752,10 +753,31 @@ function ajustaBB(us,cfg=MODELO){
   if(!parametrosValidos(a,b)){reg.motivo="parâmetros fora do domínio";return reg}
   Object.assign(reg,{status:"ok",motivo:"",alpha:a,beta:b,m,k});
   return reg}
-// classificação: valor (ajustado, ou observado se o ajuste estiver indisponível) contra a referência exibida
-function classifica(x,ref,cfg=MODELO){
+// função beta incompleta regularizada I_x(a,b) (frações contínuas; aproximação normal quando a e b são enormes)
+function betacf(a,b,x){const FP=1e-300;let c=1,d=1-(a+b)*x/(a+1);if(Math.abs(d)<FP)d=FP;d=1/d;let h=d;
+  for(let m=1;m<=20000;m++){const m2=2*m;let aa=m*(b-m)*x/((a+m2-1)*(a+m2));d=1+aa*d;if(Math.abs(d)<FP)d=FP;c=1+aa/c;if(Math.abs(c)<FP)c=FP;d=1/d;h*=d*c;
+    aa=-(a+m)*(a+b+m)*x/((a+m2)*(a+m2+1));d=1+aa*d;if(Math.abs(d)<FP)d=FP;c=1+aa/c;if(Math.abs(c)<FP)c=FP;d=1/d;const del=d*c;h*=del;if(Math.abs(del-1)<1e-13)break}
+  return h}
+function betai(a,b,x){if(x<=0)return 0;if(x>=1)return 1;
+  if(Math.min(a,b)>2e4){const m=a/(a+b),sd=Math.sqrt(a*b/((a+b)**2*(a+b+1))),z=(x-m)/sd;return 0.5*erfc(-z/Math.SQRT2)}
+  const bt=Math.exp(lgama(a+b)-lgama(a)-lgama(b)+a*Math.log(x)+b*Math.log(1-x));
+  return x<(a+1)/(a+b+2)?bt*betacf(a,b,x)/a:1-bt*betacf(b,a,1-x)/b}
+function erfc(x){const z=Math.abs(x),t=1/(1+z/2),r=t*Math.exp(-z*z-1.26551223+t*(1.00002368+t*(.37409196+t*(.09678418+t*(-.18628806+t*(.27886807+t*(-1.13520398+t*(1.48851587+t*(-.82215223+t*.17087277)))))))));return x>=0?r:2-r}
+// P(θ > ref) pela Beta posterior da área: Beta(y+α, n−y+β)
+function probAcima(y,n,fit,ref){if(!fit||fit.status!=="ok"||!(n>0)||!(ref>0))return null;return 1-betai(y+fit.alpha,n-y+fit.beta,ref)}
+// intervalo de credibilidade do modelo (quantis da Beta posterior), por bisseção; não é margem de erro oficial
+function intervalo(y,n,fit,nivel=0.90){if(!fit||fit.status!=="ok"||!(n>0))return null;const a=y+fit.alpha,b=n-y+fit.beta;
+  const q=p=>{let lo=0,hi=1;for(let i=0;i<60;i++){const mid=(lo+hi)/2;betai(a,b,mid)<p?lo=mid:hi=mid}return(lo+hi)/2};
+  return[q((1-nivel)/2),q(1-(1-nivel)/2)]}
+/* classificação contra a referência exibida: x = fatia ajustada; pAcima = P(θ > referência) pelo modelo.
+   Forte: x ≥ ref × (1+limiar) e pAcima ≥ confiança. Fraco: x ≤ ref × (1−limiar) e pAcima ≤ 1−confiança.
+   Sem pAcima (testes de borda) vale só o limiar. */
+function classifica(x,ref,cfg=MODELO,pAcima=null){
   if(x==null||!Number.isFinite(x)||!(ref>0))return"sem";
-  const q=x/ref,eps=1e-9;return q>=1+cfg.limiar-eps?"forte":q<=1-cfg.limiar+eps?"fraco":"inter"}
+  const q=x/ref,eps=1e-9,temP=pAcima!=null&&Number.isFinite(pAcima);
+  if(q>=1+cfg.limiar-eps&&(!temP||pAcima>=cfg.confianca))return"forte";
+  if(q<=1-cfg.limiar+eps&&(!temP||pAcima<=1-cfg.confianca))return"fraco";
+  return"inter"}
 // heterogeneidade (manual, seção 4): sqrt[Σ n_i (p_i − p_agr)² / Σ n_i], em fração (×100 = p.p.)
 function heterogeneidade(us){const com=us.filter(u=>u.n>0),T=com.reduce((t,u)=>t+u.n,0);if(!T)return null;
   const p=com.reduce((t,u)=>t+u.y,0)/T;return Math.sqrt(com.reduce((t,u)=>t+u.n*(u.y/u.n-p)**2,0)/T)}
@@ -787,16 +809,18 @@ function modeloDe(gs,area,nivel){
 function avalia(gs,ref,area,nivel){
   const T=gs.reduce((t,g)=>t+g.val,0),V=gs.reduce((t,g)=>t+g.v,0),fit=modeloDe(gs,area,nivel);
   for(const g of gs){g.peso=V?g.v/V:0;g.eleit=T?g.val/T:0;g.ref=ref;g.fit=fit;
-    const a=fatiaAjustada(g.v,g.val,fit);g.adj=a==null?NaN:a;
-    g.cat=!g.val?"sem":fit.status==="ok"?classifica(g.adj,ref):"semaj"}
+    const a=fatiaAjustada(g.v,g.val,fit);g.adj=a==null?NaN:a;g.pa=probAcima(g.v,g.val,fit,ref);
+    g.cat=!g.val?"sem":fit.status==="ok"?classifica(g.adj,ref,MODELO,g.pa):"semaj"}
   gs.fit=fit;return gs}
 // a mesma área contra outra referência: o ajuste não muda, só a classificação
-const reclass=(g,ref)=>({...g,ref,cat:!g.val?"sem":g.fit.status==="ok"?classifica(g.adj,ref):"semaj"});
+const reclass=(g,ref)=>{const pa=probAcima(g.v,g.val,g.fit,ref);return{...g,ref,pa,cat:!g.val?"sem":g.fit.status==="ok"?classifica(g.adj,ref,MODELO,pa):"semaj"}};
 const p2=x=>isFinite(x)?(x*100).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2})+"%":"–";
 const num=x=>Number(x).toLocaleString("pt-BR",{maximumFractionDigits:x>=100?1:x>=1?2:4});
-const regraTxt=(g)=>g.cat==="forte"?`ajustada ${p2(g.adj)} ≥ referência × 1,${LIM} (${p2(g.ref*(1+MODELO.limiar))})`:
-  g.cat==="fraco"?`ajustada ${p2(g.adj)} ≤ referência × 0,${100-LIM} (${p2(g.ref*(1-MODELO.limiar))})`:
-  g.cat==="inter"?`ajustada ${p2(g.adj)} entre ${p2(g.ref*(1-MODELO.limiar))} e ${p2(g.ref*(1+MODELO.limiar))} (menos de ${LIM}% de diferença da referência)`:
+const CONF=Math.round(MODELO.confianca*100);
+const probTxt=g=>g.pa==null?"":` · probabilidade de estar acima da referência: ${Math.round(g.pa*100)}%`;
+const regraTxt=(g)=>g.cat==="forte"?`ajustada ${p2(g.adj)} ≥ referência × 1,${LIM} (${p2(g.ref*(1+MODELO.limiar))}) e ≥ ${CONF}% de probabilidade de estar acima${probTxt(g)}`:
+  g.cat==="fraco"?`ajustada ${p2(g.adj)} ≤ referência × 0,${100-LIM} (${p2(g.ref*(1-MODELO.limiar))}) e ≥ ${CONF}% de probabilidade de estar abaixo${probTxt(g)}`:
+  g.cat==="inter"?(g.adj>=g.ref*(1+MODELO.limiar)||g.adj<=g.ref*(1-MODELO.limiar)?`ajustada ${p2(g.adj)} passou de ${LIM}% de diferença, mas com poucos votos o modelo não tem ${CONF}% de certeza de que ela é diferente da referência${probTxt(g)}`:`ajustada ${p2(g.adj)} entre ${p2(g.ref*(1-MODELO.limiar))} e ${p2(g.ref*(1+MODELO.limiar))} (menos de ${LIM}% de diferença da referência)`):
   g.cat==="semaj"?"sem classificação: o ajuste está indisponível nesta lista":"sem votos válidos: fatia não calculável";
 function modeloTxt(f){
   if(!f)return"sem modelo";
@@ -831,7 +855,7 @@ function contaTexto(g,nomeRef){
   const L=[["Fatia observada",[el("b",{},fmt.format(g.v))," votos do candidato ÷ ",el("b",{},fmt.format(g.val))," votos válidos = ",el("b",{},g.val?p2(g.p):"não calculável")]],
     ["Referência",[`fatia dele ${nomeRef}: ${p2(g.ref)} (a conta inclui esta área)`]],
     ["Diferença",[el("b",{},pp(g.p-g.ref))," (observada − referência)"]],
-    ["Fatia ajustada",ok&&g.val?[`(votos + α) ÷ (válidos + α + β) = (${fmt.format(g.v)} + ${num(f.alpha)}) ÷ (${fmt.format(g.val)} + ${num(f.alpha+f.beta)}) = `,el("b",{},p2(g.adj)),` · peso da própria área no ajuste: ${pctPeso(g.val/(g.val+f.k))}`]:[ok?"não calculável (sem votos válidos)":`indisponível: ${f?f.motivo:"sem modelo"}.`]],
+    ["Fatia ajustada",ok&&g.val?[`(votos + α) ÷ (válidos + α + β) = (${fmt.format(g.v)} + ${num(f.alpha)}) ÷ (${fmt.format(g.val)} + ${num(f.alpha+f.beta)}) = `,el("b",{},p2(g.adj)),` · peso da própria área no ajuste: ${pctPeso(g.val/(g.val+f.k))}`,...(()=>{const iv=intervalo(g.v,g.val,f);return iv?[` · intervalo de 90% do modelo: ${p2(iv[0])} a ${p2(iv[1])} (não é margem de erro oficial)`]:[]})()]:[ok?"não calculável (sem votos válidos)":`indisponível: ${f?f.motivo:"sem modelo"}.`]],
     ["Indicador",[el("b",{},c.s+" "+c.t),": "+regraTxt(g)]],
     ["Peso",[`${pctPeso(g.peso)} dos votos dele e ${pctPeso(g.eleit)} dos votos válidos da área aberta`]]];
   const po=posicao(g),cp=comparec(g);
@@ -971,9 +995,9 @@ function tabela(){
   else{
     const deA=prof?prepos(S.caminho.at(-1)).replace(/^em /,"de ").replace(/^no /,"do ").replace(/^na /,"da "):"do Ceará", emA=prof?prepos(S.caminho.at(-1)):"no Ceará";
     const refTxt=`${pct(ref)} dos votos válidos ${S.ref==="pai"?emA:"no Ceará"}`;
-    const oque={forte:`a fatia ajustada dele ficou ${LIM}% ou mais ACIMA da referência (${refTxt}).`,
-      inter:`a fatia ajustada dele ficou PERTO da referência (${refTxt}): menos de ${LIM}% acima ou abaixo.`,
-      fraco:`a fatia ajustada dele ficou ${LIM}% ou mais ABAIXO da referência (${refTxt}).`};
+    const oque={forte:`a fatia ajustada dele ficou ${LIM}% ou mais ACIMA da referência (${refTxt}), com pelo menos ${CONF}% de probabilidade pelo modelo.`,
+      inter:`a fatia ajustada dele ficou PERTO da referência (${refTxt}): menos de ${LIM}% acima ou abaixo, ou com poucos votos para o modelo ter ${CONF}% de certeza.`,
+      fraco:`a fatia ajustada dele ficou ${LIM}% ou mais ABAIXO da referência (${refTxt}), com pelo menos ${CONF}% de probabilidade pelo modelo.`};
     const nomeC=titulo(info(S.cand).nome), areaA=prof?S.caminho.at(-1).nome:"Ceará", totA=gs.reduce((t,g)=>t+g.val,0);
     const barra=(rot,v,cor,d)=>el("div",{class:"rs-bar"},el("span",{title:rot},rot),el("i",{},el("em",{style:`width:${Math.min(100,v*100)}%;background:${cor}`})),el("b",{},pctPeso(v)),d);
     const lugares=(n)=>`${fem?(n===1?"desta":"destas"):(n===1?"deste":"destes")} ${n===1?SING[tipo]:fmt.format(n)+" "+PLURAL[tipo]}`;
@@ -1049,7 +1073,7 @@ function distribuicao(gs,ref,tipo,nomeRef,donde){
   if(N<2){$("#dist-k").replaceChildren();$("#dist-g").replaceChildren(el("p",{class:"hist-l"},"Poucas áreas para mostrar uma distribuição."));return}
   const het=heterogeneidade(com.map(g=>({y:g.v,n:g.val}))),md=quantil(ps,.5),q1=quantil(ps,.25),q3=quantil(ps,.75);
   const k=(r,v,s)=>el("div",{},el("span",{},r),el("b",{},v),s?el("small",{},s):null);
-  $("#dist-k").replaceChildren(k("Mediana",pct(md),`metade das ${PLURAL[tipo]} abaixo`),k("Metade do meio",`${pct(q1)} a ${pct(q3)}`,"do 1º ao 3º quartil"),
+  $("#dist-k").replaceChildren(k("Mediana",pct(md),`metade ${["regiao","zona","secao"].includes(tipo)?"das":"dos"} ${PLURAL[tipo]} abaixo`),k("Metade do meio",`${pct(q1)} a ${pct(q3)}`,"do 1º ao 3º quartil"),
     k("Dispersão",(het*100).toLocaleString("pt-BR",{minimumFractionDigits:1,maximumFractionDigits:1})+" p.p.","desvio ponderado pelos válidos"),k("Referência",pct(ref),nomeRef));
   // histograma: até 24 faixas de largura "redonda"
   const lo=Math.min(...ps),hi=Math.max(...ps),span=Math.max(hi-lo,1e-4),passos=[.001,.002,.0025,.005,.01,.02,.025,.05,.1];
@@ -1075,7 +1099,7 @@ function baixaCSV(){
     `# Área aberta: ${area} · Linhas: ${PLURAL[X.tipo]} ${X.donde} · Referência: fatia ${X.nomeRef} = ${n4(X.ref)}`,
     `# Fonte: TSE, Portal de Dados Abertos (votação por seção${S.geracao?`, arquivo gerado em ${S.geracao}`:""}; eleitorado por local de votação). Exportado em ${new Date().toLocaleString("pt-BR")}.`,
     `# Modelo ${MODELO.versao} (${MODELO.data}): ${ok?`Beta-Binomial por máxima verossimilhança; alfa=${n4(f.alpha)}; beta=${n4(f.beta)}; unidades=${f.unidades}; validos=${f.totalN}`:`ajuste indisponível (${f.motivo})`}.`,
-    `# fatia_ajustada é estimativa do modelo, não resultado oficial. Forte/Fraco: ajustada ${LIM}% acima/abaixo da referência. Bairro = bairro do local de votação. Não indica preferência individual nem previsão.`];
+    `# fatia_ajustada é estimativa do modelo, não resultado oficial. Forte/Fraco: ajustada ${LIM}% acima/abaixo da referência e ${CONF}% de probabilidade pelo modelo. Bairro = bairro do local de votação. Não indica preferência individual nem previsão.`];
   const head=["posicao","area","detalhe","votos_candidato","votos_validos","fatia_observada","fatia_ajustada","referencia","diferenca_pp","indicador","peso_votos_candidato","status_ajuste"];
   const rows=X.linhas.map(g=>[g.rank??"",q(g.nome),q(g.sub),g.v,g.val,g.val?n4(g.p):"",n4(g.adj),n4(g.ref),g.val?n4((g.p-g.ref)*100):"",q(CAT[g.cat].t),n4(g.peso),ok?"ok":"indisponivel"]);
   const txt="\ufeff"+[...cab,head.join(";"),...rows.map(r=>r.join(";"))].join("\r\n");

@@ -9,7 +9,7 @@ const pagina = process.argv[2] || new URL("../desempenho/index.html", import.met
 const html = fs.readFileSync(pagina, "utf8");
 const bloco = html.match(/\/\* MODELO-INICIO[\s\S]*?\/\* MODELO-FIM \*\//);
 if (!bloco) throw new Error(`Bloco do modelo não encontrado em ${pagina}`);
-const M = new Function(bloco[0] + `;return{MODELO,lgama,unidadeValida,validaUnidades,parametrosValidos,fatiaObs,fatiaAjustada,ajustaBB,classifica,heterogeneidade,quantil,concilia,agrupaPorBairro,chaveModelo};`)();
+const M = new Function(bloco[0] + `;return{MODELO,lgama,unidadeValida,validaUnidades,parametrosValidos,fatiaObs,fatiaAjustada,ajustaBB,classifica,heterogeneidade,quantil,concilia,agrupaPorBairro,chaveModelo,betai,probAcima,intervalo};`)();
 
 const fitFixo = (alpha, beta) => ({ status: "ok", alpha, beta });
 const perto = (a, b, tol = 1e-12) => Math.abs(a - b) <= tol;
@@ -113,5 +113,31 @@ t("X03", "heterogeneidade = desvio ponderado (p.p.)", () => {
   assert.ok(perto(h, 0.1, 1e-12));
 });
 
+t("X04", "beta incompleta e intervalo do modelo", () => {
+  assert.ok(perto(M.betai(2, 3, 0.5), 11 / 16, 1e-10));
+  assert.ok(perto(M.betai(0.5, 0.5, 0.5), 0.5, 1e-10));
+  // a aproximação normal (a, b enormes) emenda com as frações contínuas
+  assert.ok(Math.abs(M.betai(19999, 20001, 0.501) - M.betai(20001, 20001, 0.501)) < 0.02);
+  const iv = M.intervalo(0, 0, { status: "ok", alpha: 1, beta: 1 });
+  assert.equal(iv, null);
+  const iv2 = M.intervalo(0, 1, { status: "ok", alpha: 0.5, beta: 0.5 }); // Beta(0.5, 1.5)
+  assert.ok(iv2[0] < iv2[1] && iv2[0] >= 0 && iv2[1] <= 1);
+  const u = M.intervalo(0, 1, { status: "ok", alpha: 1, beta: 0 + 1e-300 }); // não trava
+  assert.ok(Array.isArray(u));
+});
+t("X05", "poucos votos não viram Forte/Fraco só pelo limite de 10%", () => {
+  const fit = { status: "ok", alpha: 0.6721, beta: 586.4 }, ref = 0.0011; // deputado com 0,11% no município
+  // 1 voto numa seção de 160 (esperado ≈ 0,18): passa dos 10%, mas a probabilidade (≈ 71%) não chega a 90%
+  const pa1 = M.probAcima(1, 160, fit, ref), adj1 = M.fatiaAjustada(1, 160, fit);
+  assert.ok(pa1 > 0.6 && pa1 < 0.8, `pa1=${pa1}`);
+  assert.equal(M.classifica(adj1, ref, M.MODELO, pa1), "inter");
+  // 2 votos em 189 (esperado ≈ 0,2): o modelo dá ≈ 91% → Forte é sustentado pelos dados
+  assert.equal(M.classifica(M.fatiaAjustada(2, 189, fit), ref, M.MODELO, M.probAcima(2, 189, fit, ref)), "forte");
+  const pa0 = M.probAcima(0, 160, fit, ref), adj0 = M.fatiaAjustada(0, 160, fit);
+  assert.equal(M.classifica(adj0, ref, M.MODELO, pa0), "inter");
+  // área grande e claramente acima continua Forte
+  const f2 = { status: "ok", alpha: 70.55, beta: 60.83 };
+  assert.equal(M.classifica(M.fatiaAjustada(7376, 11802, f2), 0.535, M.MODELO, M.probAcima(7376, 11802, f2, 0.535)), "forte");
+});
 console.log(`\n${ok} ok, ${falhas} falha(s) · ${pagina.split("/").slice(-2).join("/")}`);
 process.exit(falhas ? 1 : 0);
