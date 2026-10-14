@@ -183,6 +183,9 @@ table.tb{width:100%;border-collapse:collapse;font-size:14px}
 .tb-resumo button b{display:block;font-size:13px;color:var(--ink)}
 .tb-resumo button[aria-pressed="true"]{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
 .tb-resumo button.forte b{color:var(--accent)}.tb-resumo button.fraco b{color:var(--red)}
+.ctx{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:9px 12px;margin:0 0 12px;font-size:13px;color:var(--ink-2)}
+.ctx .ind{cursor:default}
+.ctx b{color:var(--ink)}
 #como .fontes{font-size:12px;color:var(--ink-3)}
 #como .ind{cursor:default}
 .tb td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
@@ -309,6 +312,7 @@ a.voltar:hover{background:rgba(255,255,255,.1)}
       </div></div>
     </div>
     <nav class="trilha" id="ff-trilha" aria-label="Área aberta"></nav>
+    <div class="ctx" id="ff-ctx" hidden></div>
     <div class="grade">
       <section class="card tabela" aria-label="Ranking das áreas">
         <div class="tb-top">
@@ -344,7 +348,8 @@ a.voltar:hover{background:rgba(255,255,255,.1)}
         <p><b>Referência</b> é a fatia dele na área aberta (botão <b>Análise</b>, o padrão) ou no Ceará inteiro (botão <b>vs. Ceará</b>). A diferença para a referência é dada em <b>pontos percentuais (p.p.)</b>: 60% contra 52% = +8,0 p.p.</p>
         <p><b>Por que não usar só a fatia:</b> numa seção com 20 votos válidos, 10 votos já são 50%; com 1 voto a menos, 45%. Áreas pequenas pulam para cima e para baixo por acaso. Por isso o indicador usa uma <b>fatia ajustada pelo tamanho</b>: quanto menor a área, mais a fatia dela é puxada para perto da referência, até haver votos suficientes para dizer que ela é diferente (método de Bayes empírico, o mesmo usado para mapear taxas em áreas pequenas). Áreas grandes quase não mudam.</p>
         <p class="ex" id="exemplo"></p>
-        <p><span class="ind forte">▲ Forte</span> fatia ajustada 10% ou mais acima da referência. <span class="ind media">● Intermediário</span> a menos de 10% dela. <span class="ind fraco">◎ Fraco, com potencial</span> 10% ou mais abaixo, numa área com eleitorado acima da média das áreas da lista: há muitos votos em jogo. <span class="ind fraco">▼ Fraco</span> 10% ou mais abaixo, numa área de eleitorado menor.</p>
+        <p><span class="ind forte">▲ Forte</span> fatia ajustada 10% ou mais acima da referência. <span class="ind media">● Intermediário</span> a menos de 10% dela. <span class="ind fraco">◎ Fraco, com potencial</span> 10% ou mais abaixo e entre as áreas fracas onde há mais votos em jogo: juntas, elas concentram metade dos votos que faltariam para ele chegar à referência em todas as áreas fracas. <span class="ind fraco">▼ Fraco</span> 10% ou mais abaixo, nas demais.</p>
+        <p><b>Visão do todo:</b> acima da tabela, a área aberta aparece com o próprio indicador dentro da área de cima e no Ceará, e com o peso dela nos votos dele. Assim uma seção "forte" dentro de um colégio que foi fraco no geral não engana.</p>
         <p>As faixas no topo da tabela mostram quantas áreas há em cada grupo, quanto dos votos dele elas somam e quanto do eleitorado (votos válidos) elas reúnem. Toque numa faixa para ver só aquele grupo. Toque no indicador de uma linha para ver a conta completa.</p>
         <p class="fontes">Base: quociente locacional e concentração eleitoral (Avelino, Biderman e Silva, <i>Dados</i>, 2011; Silva e Davidian, <i>Brazilian Political Science Review</i>, 2013), que comparam a distribuição dos votos do candidato com a do eleitorado; tipologia de dominância de Barry Ames; suavização de taxas por Bayes empírico (Marshall, 1991). O indicador descreve o resultado; não explica as causas.</p>
       </div>
@@ -510,8 +515,8 @@ const ROT={forte:"acima da média",fraco:"abaixo da média",media:"na média"};
 /* Indicador de desempenho.
    Fatia ajustada pelo tamanho (Bayes empírico, método dos momentos de Marshall): áreas com poucos votos válidos
    são puxadas para a referência, para que 10 votos numa seção pequena não pareçam "melhor desempenho".
-   Depois: Forte (≥10% acima da referência), Intermediário, Fraco com potencial (≥10% abaixo e eleitorado
-   acima da média das áreas da lista) e Fraco (≥10% abaixo, área menor). */
+   Depois: Forte (≥10% acima da referência), Intermediário, Fraco com potencial (≥10% abaixo e entre as
+   áreas fracas que concentram metade dos votos que faltam para chegar à referência) e Fraco (as demais). */
 const CAT={forte:{s:"▲",t:"Forte",c:"forte"},inter:{s:"●",t:"Intermediário",c:"media"},pot:{s:"◎",t:"Fraco, com potencial",c:"fraco"},fraco:{s:"▼",t:"Fraco",c:"fraco"},sem:{s:"–",t:"Sem votos válidos",c:"media"}};
 const ORDEM_CAT=["forte","inter","pot","fraco","sem"];
 function avalia(gs,m){
@@ -523,20 +528,40 @@ function avalia(gs,m){
     if(!g.val||!isFinite(s2)){g.adj=g.val?g.p:NaN;g.cat=g.val&&isFinite(m)&&m>0?(r2(g.p/m)>=1.1?"forte":r2(g.p/m)<=.9?"fraco":"inter"):"sem";g.w=1;g.espaco=0;continue}
     g.w=s2/(s2+m*(1-m)/g.val);g.adj=m+g.w*(g.p-m);
     const x=r2(g.adj/m);
-    g.cat=x>=1.1?"forte":x<=.9?(g.val>=T/n?"pot":"fraco"):"inter";
+    g.cat=x>=1.1?"forte":x<=.9?"fraco":"inter";
     g.espaco=Math.max(0,Math.round((m-g.adj)*g.val));
   }
+  // "com potencial": as áreas fracas que, somadas, concentram metade dos votos que faltam para chegar à referência
+  const fr=gs.filter(g=>g.cat==="fraco").sort((a,b)=>b.espaco-a.espaco), tot=fr.reduce((t,g)=>t+g.espaco,0);
+  let ac=0;for(const g of fr){if(ac>=tot/2||!g.espaco)break;g.cat="pot";ac+=g.espaco}
   return gs;
 }
 const pp=x=>isFinite(x)?(x>=0?"+":"−")+Math.abs(x*100).toLocaleString("pt-BR",{minimumFractionDigits:1,maximumFractionDigits:1})+" p.p.":"–";
 const pctPeso=x=>!isFinite(x)?"–":x===0?"0%":x<0.001?"<0,1%":(x*100).toLocaleString("pt-BR",{maximumFractionDigits:x<0.1?1:0,minimumFractionDigits:x<0.1?1:0})+"%";
 function indicador(g,abrir){const c=CAT[g.cat];return el("button",{type:"button",class:"ind "+c.c+(g.cat==="pot"?" pot":""),title:c.t+" · toque para ver a conta","aria-label":c.t,onclick:abrir},c.s,el("span",{class:"tx"},c.t))}
+// a área aberta vista de cima: o indicador dela entre as vizinhas e no Ceará, e o peso nos votos dele
+function contexto(){
+  const box=$("#ff-ctx"),A=S.caminho.at(-1);
+  if(!A){box.hidden=true;return}
+  const cima=S.caminho.slice(0,-1);let rs=S.linhas;for(const p of cima){const f=chaveDe[p.tipo];rs=rs.filter(r=>f(r)===p.k)}
+  const pc=soma(rs).p,irmas=agrupa(rs,A.tipo);
+  const naCima=avalia(irmas.map(g=>calc({...g},pc)),pc).find(g=>g.k===A.k);
+  const noCE=avalia(irmas.map(g=>calc({...g},S.ufTot.p)),S.ufTot.p).find(g=>g.k===A.k);
+  if(!naCima||!noCE){box.hidden=true;return}
+  const ind=g=>el("span",{class:"ind "+CAT[g.cat].c+(g.cat==="pot"?" pot":"")},CAT[g.cat].s+" "+CAT[g.cat].t);
+  const nomeCima=cima.length?prepos(cima.at(-1)):"no Ceará";
+  box.replaceChildren(el("b",{},A.nome+":"),
+    ...(cima.length?[ind(naCima),` ${nomeCima}`,el("span",{style:"color:var(--ink-3)"},"·")]:[]),
+    ind(noCE)," no Ceará",el("span",{style:"color:var(--ink-3)"},"·"),
+    `${pct(naCima.p)} dos válidos daqui; teve `,el("b",{},pctPeso(naCima.v/S.ufTot.v))," dos votos dele no Ceará");
+  box.hidden=false;
+}
 function contaTexto(g,nomeRef){
   const c=CAT[g.cat], aj=Math.abs(g.adj-g.p)>=0.0005;
   return [`Aqui ele teve `,el("b",{},fmt.format(g.v)),` de ${fmt.format(g.val)} votos válidos (`,el("b",{},pct(g.p)),`). `,
     `Referência ${nomeRef}: ${pct(g.ref)} — diferença de `,el("b",{},pp(g.p-g.ref)),`. `,
     aj?`Como a área tem ${g.val<300?"poucos":"menos"} votos válidos, a fatia ajustada pelo tamanho fica em ${pct(g.adj)}. `:"",
-    `Resultado: `,el("b",{},c.s+" "+c.t),g.cat==="pot"?` (eleitorado acima da média das áreas da lista; ${fmt.format(g.espaco)} votos a mais o levariam à referência).`:g.cat==="fraco"&&g.espaco?` (${fmt.format(g.espaco)} votos a mais o levariam à referência).`:". ",
+    `Resultado: `,el("b",{},c.s+" "+c.t),g.cat==="pot"?` (está entre as áreas fracas que concentram metade dos votos que faltam; ${fmt.format(g.espaco)} votos a mais o levariam à referência).`:g.cat==="fraco"&&g.espaco?` (${fmt.format(g.espaco)} votos a mais o levariam à referência).`:". ",
     ` Peso: ${pctPeso(g.peso)} dos votos dele e ${pctPeso(g.eleit)} dos votos válidos da área aberta.`]}
 const badge=ind=>el("span",{class:"badge "+classe(ind)},ROT[classe(ind)]);
 
@@ -601,6 +626,7 @@ function tabela(){
   const dondeTxt=prof?prepos(S.caminho.at(-1)).replace(/^em /,"de ").replace(/^no /,"do ").replace(/^na /,"da "):"do Ceará";
   $("#ff-sub").textContent=`${PLURAL[tipo][0].toUpperCase()+PLURAL[tipo].slice(1)} ${dondeTxt}, do melhor para o pior desempenho. Referência: o resultado do candidato ${nomeRef} (${pct(ref)} dos válidos). O indicador considera a fatia de votos e o tamanho de cada área.${tipo!=="secao"?" Toque numa linha para abrir; toque no indicador para ver a conta.":" Toque no indicador para ver a conta."}`;
   trilha("#ff-trilha",pai);
+  contexto();
   // ranking: posição pela fatia ajustada pelo tamanho (do melhor para o pior)
   const gs=avalia(agrupa(rs,tipo).map(g=>calc(g,ref)),ref);
   const rk=gs.filter(g=>isFinite(g.adj)).sort((a,b)=>b.adj-a.adj||b.v-a.v);
@@ -650,7 +676,7 @@ function tabela(){
   const exG=[...gs].filter(g=>g.val).sort((a,b)=>b.val-a.val)[0];
   const exP=[...gs].filter(g=>g.val&&g.val<300&&Math.abs(g.p/ref-1)>=.1&&g.cat==="inter").sort((a,b)=>Math.abs(b.p-ref)-Math.abs(a.p-ref))[0];
   const ex=[];
-  if(exG)ex.push(`Exemplo: em ${exG.nome}, ${info(S.cand).nome} teve ${fmt.format(exG.v)} de ${fmt.format(exG.val)} votos válidos (${pct(exG.p)}); a referência ${nomeRefCurto} é ${pct(ref)} (${pp(exG.p-ref)}). É uma área grande, então o ajuste quase não muda a fatia: ${CAT[exG.cat].s} ${CAT[exG.cat].t}.`);
+  if(exG)ex.push(`Exemplo: em ${exG.nome}, ${info(S.cand).nome} teve ${fmt.format(exG.v)} de ${fmt.format(exG.val)} votos válidos (${pct(exG.p)}); a referência ${nomeRefCurto} é ${pct(ref)} (${pp(exG.p-ref)}). ${Math.abs(exG.adj-exG.p)<0.0005?"Com tantos votos válidos, o ajuste não muda a fatia":"Ajustada pelo tamanho, a fatia fica em "+pct(exG.adj)}: ${CAT[exG.cat].s} ${CAT[exG.cat].t}.`);
   if(exP)ex.push(` Já ${exP.nome} teve ${pct(exP.p)}, mas com só ${fmt.format(exP.val)} votos válidos; ajustada pelo tamanho, a fatia fica em ${pct(exP.adj)} e a área aparece como ${CAT[exP.cat].s} ${CAT[exP.cat].t}.`);
   $("#exemplo").textContent=ex.join("");
   mapa(rs,ref);
