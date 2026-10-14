@@ -559,7 +559,7 @@ function contexto(){
 function contaTexto(g,nomeRef){
   const c=CAT[g.cat], aj=Math.abs(g.adj-g.p)>=0.0005;
   return [`Aqui ele teve `,el("b",{},fmt.format(g.v)),` de ${fmt.format(g.val)} votos válidos (`,el("b",{},pct(g.p)),`). `,
-    `Referência ${nomeRef}: ${pct(g.ref)} — diferença de `,el("b",{},pp(g.p-g.ref)),`. `,
+    `Referência ${nomeRef}: ${pct(g.ref)}; diferença de `,el("b",{},pp(g.p-g.ref)),` `,
     aj?`Como a área tem ${g.val<300?"poucos":"menos"} votos válidos, a fatia ajustada pelo tamanho fica em ${pct(g.adj)}. `:"",
     `Resultado: `,el("b",{},c.s+" "+c.t),g.cat==="pot"?` (está entre as áreas fracas que concentram metade dos votos que faltam; ${fmt.format(g.espaco)} votos a mais o levariam à referência).`:g.cat==="fraco"&&g.espaco?` (${fmt.format(g.espaco)} votos a mais o levariam à referência).`:". ",
     ` Peso: ${pctPeso(g.peso)} dos votos dele e ${pctPeso(g.eleit)} dos votos válidos da área aberta.`]}
