@@ -818,6 +818,7 @@ function avalia(gs,ref,area,nivel){
 // a mesma área contra outra referência: o ajuste não muda, só a classificação
 const reclass=(g,ref)=>{const pa=probAcima(g.v,g.val,g.fit,ref);return{...g,ref,pa,cat:!g.val?"sem":g.fit.status==="ok"?classifica(g.adj,ref,MODELO,pa):"semaj"}};
 const p2=x=>isFinite(x)?(x*100).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2})+"%":"–";
+const n4c=x=>Number(x).toLocaleString("pt-BR",{minimumFractionDigits:4,maximumFractionDigits:4});
 const num=x=>Number(x).toLocaleString("pt-BR",{maximumFractionDigits:x>=100?1:x>=1?2:4});
 const CONF=Math.round(MODELO.confianca*100);
 const probTxt=g=>g.pa==null?"":` · probabilidade, pelo modelo, de a fatia da área estar acima da referência: ${Math.round(g.pa*100)}%`;
@@ -828,7 +829,7 @@ const regraTxt=(g)=>g.cat==="forte"?`ajustada ${p2(g.adj)} ≥ referência × 1,
 function modeloTxt(f){
   if(!f)return"sem modelo";
   if(f.status!=="ok")return`ajuste indisponível nesta lista: ${f.motivo}.`;
-  return`Beta-Binomial ${MODELO.versao} (${MODELO.data}), por máxima verossimilhança com ${fmt.format(f.unidades)} áreas desta lista (${fmt.format(f.totalN)} votos válidos): α = ${num(f.alpha)}, β = ${num(f.beta)}; padrão m = ${p2(f.m)}; força k = α + β = ${num(f.k)} votos; convergiu em ${f.iter} passos.${f.avisos.length?" Aviso: "+f.avisos.join("; ")+".":""}`}
+  return`Beta-Binomial ${MODELO.versao} (${MODELO.data}), por máxima verossimilhança com ${fmt.format(f.unidades)} áreas desta lista (${fmt.format(f.totalN)} votos válidos): α = ${n4c(f.alpha)}, β = ${n4c(f.beta)}; padrão m = ${p2(f.m)}; força k = α + β = ${num(f.k)} votos; convergiu em ${f.iter} passos.${f.avisos.length?" Aviso: "+f.avisos.join("; ")+".":""}`}
 const pp=x=>isFinite(x)?(x>=0?"+":"−")+Math.abs(x*100).toLocaleString("pt-BR",{minimumFractionDigits:1,maximumFractionDigits:1})+" p.p.":"–";
 const pctPeso=x=>!isFinite(x)?"–":x===0?"0%":x<0.0005?"<0,1%":(x*100).toLocaleString("pt-BR",{maximumFractionDigits:1,minimumFractionDigits:1})+"%"; // sempre 1 casa: as partes somam o total
 function indicador(g,abrir){const c=CAT[g.cat];return el("button",{type:"button",class:"ind "+c.c,title:c.t+" · toque para ver como foi calculado","aria-label":c.t+": ver como foi calculado",onclick:abrir},c.s,el("span",{class:"tx"},c.k))}
@@ -857,8 +858,9 @@ function contaTexto(g,nomeRef){
   const c=CAT[g.cat],f=g.fit,ok=f&&f.status==="ok";
   const L=[["Fatia observada",[el("b",{},fmt.format(g.v))," votos do candidato ÷ ",el("b",{},fmt.format(g.val))," votos válidos = ",el("b",{},g.val?p2(g.p):"não calculável")]],
     ["Referência",[`fatia dele ${nomeRef}: ${p2(g.ref)} (a conta inclui esta área)`]],
-    ["Diferença",[el("b",{},pp(g.p-g.ref))," (observada − referência)"]],
-    ["Fatia ajustada",ok&&g.val?[`(votos + α) ÷ (válidos + α + β) = (${fmt.format(g.v)} + ${num(f.alpha)}) ÷ (${fmt.format(g.val)} + ${num(f.alpha+f.beta)}) = `,el("b",{},p2(g.adj)),` · peso da própria área no ajuste: ${pctPeso(g.val/(g.val+f.k))}`,...(()=>{const iv=intervalo(g.v,g.val,f);return iv?[` · intervalo de 90% do modelo: ${p2(iv[0])} a ${p2(iv[1])} (não é margem de erro oficial)`]:[]})()]:[ok?"não calculável (sem votos válidos)":`indisponível: ${f?f.motivo:"sem modelo"}.`]],
+    ["Diferença observada",[el("b",{},pp(g.p-g.ref))," (observada − referência)"]],
+    ["Fatia ajustada",ok&&g.val?[`(votos + α) ÷ (válidos + α + β) = (${fmt.format(g.v)} + ${n4c(f.alpha)}) ÷ (${fmt.format(g.val)} + ${n4c(f.alpha)} + ${n4c(f.beta)}) = `,el("b",{},p2(g.adj)),` · peso da própria área no ajuste: ${pctPeso(g.val/(g.val+f.k))}`,...(()=>{const iv=intervalo(g.v,g.val,f);return iv?[` · intervalo de 90% do modelo: ${p2(iv[0])} a ${p2(iv[1])} (não é margem de erro oficial)`]:[]})()]:[ok?"não calculável (sem votos válidos)":`indisponível: ${f?f.motivo:"sem modelo"}.`]],
+    ...(ok&&g.val?[["Diferença ajustada",[el("b",{},pp(g.adj-g.ref)),` (ajustada − referência = ${p2(g.adj)} − ${p2(g.ref)})`]]]:[]),
     ["Indicador",[el("b",{},c.s+" "+c.t),": "+regraTxt(g)]],
     ["Peso",[`${pctPeso(g.peso)} dos votos dele e ${pctPeso(g.eleit)} dos votos válidos da área aberta`]]];
   const po=posicao(g),cp=comparec(g);
