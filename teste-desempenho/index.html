@@ -829,7 +829,7 @@ const regraTxt=(g)=>g.cat==="forte"?`ajustada ${p2(g.adj)} ≥ referência × 1,
 function modeloTxt(f){
   if(!f)return"sem modelo";
   if(f.status!=="ok")return`ajuste indisponível neste nível da área aberta: ${f.motivo}.`;
-  return`Beta-Binomial ${MODELO.versao} (${MODELO.data}), por máxima verossimilhança com todas as ${fmt.format(f.unidades)} áreas deste nível na área aberta (antes de qualquer busca ou filtro da tabela) (${fmt.format(f.totalN)} votos válidos): α = ${n4c(f.alpha)}, β = ${n4c(f.beta)}; padrão m = ${p2(f.m)}; força k = α + β = ${num(f.k)} votos; convergiu em ${f.iter} passos.${f.avisos.length?" Aviso: "+f.avisos.join("; ")+".":""}`}
+  return`Beta-Binomial ${MODELO.versao} (${MODELO.data}), por máxima verossimilhança com todas as ${fmt.format(f.unidades)} áreas deste nível na área aberta, somando ${fmt.format(f.totalN)} votos válidos, antes de qualquer busca ou filtro da tabela: α = ${n4c(f.alpha)}, β = ${n4c(f.beta)}; padrão m = ${p2(f.m)}; força k = α + β = ${num(f.k)} votos; convergiu em ${f.iter} passos.${f.avisos.length?" Aviso: "+f.avisos.join("; ")+".":""}`}
 const pp=x=>isFinite(x)?(x>=0?"+":"−")+Math.abs(x*100).toLocaleString("pt-BR",{minimumFractionDigits:1,maximumFractionDigits:1})+" p.p.":"–";
 const pctPeso=x=>!isFinite(x)?"–":x===0?"0%":x<0.0005?"<0,1%":(x*100).toLocaleString("pt-BR",{maximumFractionDigits:1,minimumFractionDigits:1})+"%"; // sempre 1 casa: as partes somam o total
 function indicador(g,abrir){const c=CAT[g.cat];return el("button",{type:"button",class:"ind "+c.c,title:c.t+" · toque para ver como foi calculado","aria-label":c.t+": ver como foi calculado",onclick:abrir},c.s,el("span",{class:"tx"},c.k))}
