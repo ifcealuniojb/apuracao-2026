@@ -1,0 +1,128 @@
+name: Site - trocar versão (publicar ou voltar)
+
+# Padrão de publicação do projeto (claude/padrao-publicacao.md). Publicar e voltar são o MESMO botão, sem programar:
+# Actions → "Site - trocar versão" → Run workflow → escolher versão e destino → Run workflow.
+#
+# O que ele faz: copia uma versão CONGELADA (pasta versoes/<página>/) por cima da página escolhida,
+# ou apaga o endereço de teste daquela página.
+# Travas:
+#   - mexe em UM arquivo só (o da página escolhida); se mudar qualquer outro, para sem enviar;
+#   - não toca nas outras páginas, no Worker (API) nem no banco D1 (os dados nunca são regravados por aqui);
+#   - um clique por vez (fila); se a versão já estiver lá, não envia nada;
+#   - no fim confere no ar (também quando não havia nada a enviar). Se não conseguir confirmar, termina em VERMELHO.
+# Só quem tem permissão de escrita no repositório consegue rodar.
+#
+# Nova versão = novo arquivo em versoes/<página>/ + nova linha em "options" (agrupar por página, a mais nova primeiro).
+# Versões congeladas nunca são editadas.
+
+on:
+  workflow_dispatch:
+    inputs:
+      versao:
+        description: "Qual versão (para apagar o teste, escolha qualquer versão da página)"
+        type: choice
+        options:
+          - "mapa-votos/v2-bb-mle-1 · Mapa de Votos, manual de diagnóstico"
+          - "mapa-votos/v1-2026-10-14 · Mapa de Votos, indicador de 14/10 (no ar desde 14/10)"
+          - "apuracao/v1-2026-10-14-1430 · Apuração, versão 2026-10-14 14h30 (no ar desde 14/10)"
+      destino:
+        description: "Onde colocar"
+        type: choice
+        default: "teste (endereço /teste-…/, não divulgado)"
+        options:
+          - "teste (endereço /teste-…/, não divulgado)"
+          - "site (endereço oficial da página)"
+          - "apagar o endereço de teste da página"
+
+concurrency: { group: site-trocar-versao, cancel-in-progress: false }
+
+permissions:
+  contents: write
+
+env:
+  SITE: https://ifcealuniojb.github.io/apuracao-2026
+
+jobs:
+  trocar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Trocar a versão
+        id: t
+        env:
+          VERSAO: ${{ inputs.versao }}
+          DESTINO: ${{ inputs.destino }}
+        run: |
+          set -euo pipefail
+          ID="${VERSAO%% *}"            # ex.: mapa-votos/v2-bb-mle-1
+          PAGINA="${ID%%/*}"            # ex.: mapa-votos
+          ORIGEM="versoes/$ID.html"
+          # Página → pasta no site e pasta de teste ("" = raiz do site)
+          case "$PAGINA" in
+            mapa-votos) PASTA_SITE="desempenho"; PASTA_TESTE="teste-desempenho" ;;
+            apuracao)   PASTA_SITE="apuracao";   PASTA_TESTE="teste-apuracao" ;;
+            *) echo "::error title=Página::página desconhecida: $PAGINA"; exit 1 ;;
+          esac
+          case "$DESTINO" in
+            site*)   PASTA="$PASTA_SITE";  ACAO=copiar ;;
+            teste*)  PASTA="$PASTA_TESTE"; ACAO=copiar ;;
+            apagar*) PASTA="$PASTA_TESTE"; ACAO=apagar ;;
+            *) echo "::error title=Destino::destino desconhecido: $DESTINO"; exit 1 ;;
+          esac
+          ALVO="${PASTA:+$PASTA/}index.html"
+          URL="$SITE/${PASTA:+$PASTA/}"
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+          if [ "$ACAO" = apagar ]; then
+            case "$PASTA" in
+              teste-*) ;;
+              *) echo "::error title=Parado::só apago pasta de teste (teste-*), não '$PASTA'"; exit 1 ;;
+            esac
+            if [ ! -f "$ALVO" ]; then
+              echo "::notice title=Nada a fazer::$ALVO já não existe"
+              echo "sha=apagado" >> "$GITHUB_OUTPUT"; exit 0
+            fi
+            git rm -q -- "$ALVO"
+            echo "sha=apagado" >> "$GITHUB_OUTPUT"
+            MSG="Versão: apaga o teste $ALVO (botão trocar versão, por $GITHUB_ACTOR)"
+          else
+            [ -f "$ORIGEM" ] || { echo "::error title=Versão::não encontrei $ORIGEM"; exit 1; }
+            if [ -n "$PASTA" ]; then mkdir -p "$PASTA"; fi
+            cp "$ORIGEM" "$ALVO"
+            echo "sha=$(sha256sum "$ALVO" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+            git add -- "$ALVO"
+            if git diff --cached --quiet; then
+              echo "::notice title=Nada a enviar::$ID já é a versão em $ALVO (vou só conferir no ar)"
+              exit 0
+            fi
+            MSG="Versão: $ID em ${PASTA:-raiz}/ (botão trocar versão, por $GITHUB_ACTOR)"
+          fi
+          MUD="$(git diff --cached --name-only)"
+          if [ "$MUD" != "$ALVO" ]; then
+            echo "::error title=Parado::só $ALVO podia mudar, mas mudou: $MUD"
+            exit 1
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "$MSG"
+          git push
+          echo "::notice title=Enviado::$MSG. O GitHub Pages costuma publicar em 1 a 3 minutos."
+
+      - name: Conferir no ar
+        env:
+          URL: ${{ steps.t.outputs.url }}
+          SHA: ${{ steps.t.outputs.sha }}
+        run: |
+          for _ in $(seq 1 48); do
+            if [ "$SHA" = apagado ]; then
+              C=$(curl -s -o /dev/null -w '%{http_code}' "$URL?conferencia=$(date +%s)" || true)
+              [ "$C" = 404 ] && { echo "::notice title=Conferido::$URL não existe mais (404)"; exit 0; }
+            else
+              G=$(curl -fsSL -H 'Cache-Control: no-cache' "$URL?conferencia=$(date +%s)" 2>/dev/null | sha256sum | cut -d' ' -f1 || true)
+              [ "$G" = "$SHA" ] && { echo "::notice title=No ar::conferido: $URL está servindo a versão escolhida"; exit 0; }
+            fi
+            sleep 15
+          done
+          echo "::error title=Não confirmado::em 12 minutos $URL ainda não mostrava o resultado escolhido. Até o GitHub Pages publicar, o que estava antes continua no ar. Veja Actions → pages build and deployment; rodar este botão de novo só confere."
+          exit 1
