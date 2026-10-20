@@ -170,14 +170,54 @@ table.tb{width:100%;border-collapse:collapse;font-size:14px}
 .tb thead button[aria-sort]{color:var(--ink)}
 .tb thead button[aria-sort="ascending"]::after{content:" ▲";font-size:9px}
 .tb thead button[aria-sort="descending"]::after{content:" ▼";font-size:9px}
-.tb .c-n{width:42px}.tb .c-d{width:124px}.tb .c-p{width:70px}.tb .c-v{width:90px;white-space:nowrap}.tb .c-w{width:62px}
+.tb .c-n{width:36px}.tb .c-d{width:76px}.tb .c-p{width:72px}.tb .c-j{width:72px}.tb td.c-j{font-weight:700;color:var(--ink-2)}.tb .c-v{width:90px;white-space:nowrap}.tb .c-w{width:62px}
 .tb .c-p button,.tb .c-v button,.tb .c-w button,.tb td.c-p,.tb td.c-v,.tb .c-o{width:80px}.tb .c-o button,.tb td.c-o{text-align:right}.tb td.c-o b{display:block;font-weight:800}.tb td.c-o small{color:var(--ink-3);font-size:11.5px}
 .tb td.c-w{text-align:right}
 .ind{display:inline-flex;align-items:center;gap:5px;font-weight:800;font-size:12.5px;border-radius:999px;padding:3px 9px;white-space:nowrap;border:0;font-family:inherit;cursor:pointer;line-height:1.3}
 .ind.forte{background:var(--accent-soft);color:var(--accent)}
 .ind.media{background:var(--gray-soft);color:var(--ink-2)}
+.ind.inc{background:transparent;box-shadow:inset 0 0 0 1.5px var(--ink-3);color:var(--ink-2)}
 .ind.fraco{background:var(--red-soft);color:var(--red)}
-.ind.pot{box-shadow:inset 0 0 0 1.5px var(--red)}
+.resumo-txt{margin:0 16px 16px;font-size:14px;color:var(--ink-2);line-height:1.5}
+.resumo-txt b{color:var(--ink)}
+.tb-modelo{margin:0 0 12px;font-size:12.5px;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:9px 12px;line-height:1.45}
+.tb-modelo.ind-off{background:var(--gold-soft);border-color:color-mix(in srgb,var(--gold) 40%,transparent);color:var(--ink)}
+.tb-modelo b{color:var(--ink)}
+.tb-modelo details.md{display:inline}.tb-modelo details.md summary{display:inline;cursor:pointer;color:var(--blue);font-weight:700}.tb-modelo details.md[open] summary{display:block}.tb-modelo details.md p{margin:6px 0 0}
+.conta .conta-t{display:block;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px}
+.conta dl{display:grid;grid-template-columns:max-content 1fr;gap:4px 12px;margin:0}
+.conta dt{font-weight:700;color:var(--ink)}
+.conta dd{margin:0;min-width:0;overflow-wrap:anywhere}
+@media (max-width:520px){.conta dl{grid-template-columns:1fr}.conta dd{margin-bottom:6px}}
+.tb-csv{all:unset;cursor:pointer;font-size:12.5px;font-weight:700;color:var(--blue);padding:4px 2px}
+.tb-csv:hover{text-decoration:underline}
+.tb-csv:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+.duas-b{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:14px;margin-top:14px}
+.dist,.qual{padding:14px 16px;min-width:0}
+.dist h4,.qual h4{margin:0 0 2px;font-size:16px;font-weight:800}
+.dist .sub,.qual .sub{margin:0 0 10px;color:var(--ink-3);font-size:12.5px}
+.dist-k{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:8px;margin-bottom:12px}
+.dist-k div{background:var(--surface-2);border-radius:10px;padding:8px 10px;min-width:0}
+.dist-k span{display:block;font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3)}
+.dist-k b{font-size:17px;font-weight:800}
+.dist-k small{display:block;font-size:11.5px;color:var(--ink-3)}
+.hist{position:relative;height:130px;display:flex;align-items:flex-end;gap:2px;border-bottom:1px solid var(--line);margin-top:16px}
+.hist .hb{flex:1;min-width:0;height:100%;display:flex;align-items:flex-end;cursor:pointer}
+.hist .hb i{display:block;width:100%;background:color-mix(in srgb,var(--ink-3) 55%,transparent);border-radius:4px 4px 0 0;min-height:1px}
+.hist .hb:hover i,.hist .hb[aria-pressed="true"] i{background:var(--ink-2)}
+.hist .ref{position:absolute;top:-14px;bottom:0;border-left:2px dashed var(--ink);pointer-events:none}
+.hist .ref span{position:absolute;top:-4px;left:4px;font-size:11px;font-weight:800;color:var(--ink);white-space:nowrap}
+.hist .ref.dir span{left:auto;right:4px}
+.hist-x{display:flex;justify-content:space-between;font-size:11.5px;color:var(--ink-3);margin-top:4px}
+.hist-l{font-size:12.5px;color:var(--ink-2);margin-top:8px;min-height:1.4em}
+.qual ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;font-size:13px;color:var(--ink-2)}
+.qual li{display:flex;gap:8px;align-items:flex-start}
+.qual li .st{flex:none;font-weight:800;border-radius:999px;font-size:11.5px;padding:2px 8px;white-space:nowrap}
+.qual li .st.ok{background:var(--accent-soft);color:var(--accent)}
+.qual li .st.av{background:var(--gold-soft);color:var(--gold)}
+.qual li .st.er{background:var(--red-soft);color:var(--red)}
+.qual li .st.pd{background:var(--gray-soft);color:var(--ink-2)}
+.qual li b{color:var(--ink)}
 .tb .c-o{width:80px}.tb .c-o button,.tb td.c-o{text-align:right}.tb td.c-o b{display:block;font-weight:800}.tb td.c-o small{color:var(--ink-3);font-size:11.5px}
 .tb td.c-w{color:var(--ink-2);font-weight:700;font-size:13px}
 .tb tr.det td{background:var(--surface-2)!important;font-size:13px;color:var(--ink-2);line-height:1.5;padding:10px 14px 12px}
@@ -238,7 +278,7 @@ table.tb{width:100%;border-collapse:collapse;font-size:14px}
 .mapa-card{display:flex;flex-direction:column;height:700px}
 .mapa-card #mapa{flex:1 1 auto;min-height:0;height:auto!important}
 @media (max-width:900px){.tabela{height:min(70vh,620px)}.mapa-card{height:440px}}
-@media (max-width:640px){.tb .c-v,.tb .c-w,.tb .c-o{display:none}.tb td.c-a small.mob{display:block}.tb .c-d{width:112px}.tb .c-p{width:70px}.tb .c-n{width:38px}.tb td,.tb thead button{padding-left:6px;padding-right:6px}.ind .tx{display:none}.ind{font-size:14px;padding:4px 10px}}
+@media (max-width:640px){.tb .c-v,.tb .c-w,.tb .c-o,.tb .c-j{display:none}.tb td.c-a small.mob{display:block}.tb .c-d{width:112px}.tb .c-p{width:70px}.tb .c-n{width:38px}.tb td,.tb thead button{padding-left:6px;padding-right:6px}.ind .tx{display:none}.ind{font-size:14px;padding:4px 10px}}
 @media (max-width:900px){.grade{grid-template-columns:minmax(0,1fr)}}
 .lista{overflow:hidden}
 .lista .cab,.lista .ln{display:grid;grid-template-columns:minmax(0,1fr) 92px 128px;gap:10px;align-items:center;padding:10px 14px}
@@ -291,6 +331,10 @@ footer b{color:#fff}
 a.voltar{display:inline-flex;align-items:center;gap:6px;flex:none;color:#fff;text-decoration:none;font-weight:700;font-size:13px;line-height:1;border:1px solid rgba(255,255,255,.28);border-radius:10px;padding:8px 11px}
 a.voltar:hover{background:rgba(255,255,255,.1)}
 @media (max-width:460px){a.voltar span{display:none}a.voltar{padding:8px}}
+/* com as colunas observada e ajustada lado a lado: indicador só com o símbolo (a legenda e o toque explicam) */
+.tb .ind .tx{display:none}.tb .ind{font-size:14px;padding:4px 10px}
+.tb thead button{padding:9px 6px;letter-spacing:.03em;font-size:10.5px}.tb td{padding-left:6px;padding-right:6px}
+.tb .c-v{width:84px}.tb .c-w{width:58px}.tb .c-o{width:74px}
 </style>
 </head>
 <body>
@@ -298,7 +342,7 @@ a.voltar:hover{background:rgba(255,255,255,.1)}
   <a class="voltar" href="../" aria-label="Voltar para a página inicial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 18l-6-6 6-6"/></svg><span>Início</span></a>
   <a class="home" href="../" title="Voltar ao início (Apuração e Mapa de Votos)"><div class="logo" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></div>
   <div class="brand"><h1>Mapa de Votos <span>2026</span> <em class="uf">- Ceará</em></h1></div></a>
-  <div class="src"><b>Dados oficiais do TSE</b>Ceará · 1º turno</div>
+  <div class="src"><b>Dados oficiais do TSE</b>Eleições 2026 · Ceará · 1º turno</div>
 </div></header>
 
 <div class="wrap">
@@ -329,6 +373,7 @@ a.voltar:hover{background:rgba(255,255,255,.1)}
         <span class="badge ouro" id="f-situ" hidden></span>
       </div>
       <div class="kpis" id="kpis"></div>
+      <p class="resumo-txt" id="resumo-txt"></p>
       <div id="cadeiras"></div>
     </section>
 
@@ -342,22 +387,25 @@ a.voltar:hover{background:rgba(255,255,255,.1)}
     </div>
     <nav class="trilha" id="ff-trilha" aria-label="Área aberta"></nav>
     <div class="ctx" id="ff-ctx" hidden></div>
+    <div class="tb-modelo" id="tb-modelo" role="status"></div>
     <div class="tb-resumo" id="tb-resumo" role="group" aria-label="Grupos de desempenho"></div>
     <div class="grade">
       <section class="card tabela" aria-label="Ranking das áreas">
         <div class="tb-top">
           <label class="tb-busca"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="tb-q" type="search" autocomplete="off" placeholder="Buscar"></label>
           <span class="tb-conta" id="tb-conta"></span>
+          <button type="button" class="tb-csv" id="tb-csv" title="Baixar a tabela com fonte, data e versão do modelo">Baixar CSV</button>
         </div>
         <div class="tb-rola" id="tb-rola">
           <table class="tb">
             <thead><tr>
               <th class="c-n"><button type="button" data-o="rank">#</button></th>
               <th class="c-a"><button type="button" data-o="nome">Área</button></th>
-              <th class="c-d"><button type="button" data-o="rank" title="Indicador de desempenho: considera a fatia de votos e o tamanho da área">Desempenho</button></th>
-              <th class="c-p"><button type="button" data-o="p" title="Porcentagem dos votos válidos da área que foram para o candidato">Fatia</button></th>
+              <th class="c-d"><button type="button" data-o="rank" title="Indicador: fatia ajustada comparada com a referência. Toque no indicador de uma linha para ver como foi calculado.">Indicador</button></th>
+              <th class="c-p"><button type="button" data-o="p" title="Fatia observada: votos do candidato ÷ votos válidos da área (resultado oficial)">Observada</button></th>
+              <th class="c-j"><button type="button" data-o="adj" title="Fatia ajustada pelo tamanho (estimativa do modelo, não é resultado oficial)">Ajustada</button></th>
               <th class="c-v"><button type="button" data-o="v">Votos</button></th>
-              <th class="c-o" hidden><button type="button" data-o="pos" title="Posição do candidato na área entre os mais votados do cargo">Posição</button></th>
+              <th class="c-o" hidden><button type="button" data-o="pos" title="Colocação do candidato na área entre todos os candidatos do cargo">Posição</button></th>
               <th class="c-w"><button type="button" data-o="peso" title="Quanto dos votos do candidato na área aberta vieram daqui">Peso</button></th>
             </tr></thead>
             <tbody id="tb-corpo"></tbody>
@@ -368,22 +416,38 @@ a.voltar:hover{background:rgba(255,255,255,.1)}
       </section>
       <section class="card mapa-card">
         <div id="mapa" role="region" aria-label="Mapa dos locais de votação"></div>
-        <div class="leg"><span><i style="background:var(--accent)"></i>▲ Forte</span><span><i style="background:var(--ink-3)"></i>● Intermediário</span><span><i style="background:var(--red);box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--red)"></i>◎ Fraco · muitos votos em jogo</span><span><i style="background:var(--red)"></i>▼ Fraco</span><span id="leg-nivel">Círculo maior = mais votos</span></div>
+        <div class="leg"><span><i style="background:var(--accent)"></i>▲ Forte</span><span><i style="background:var(--ink-3)"></i>● Intermediário</span><span><i style="background:var(--red)"></i>▼ Fraco</span><span>◌ Intermediário inconclusivo (passou de 10%, sem 90% de probabilidade)</span><span><i style="background:var(--ink-3);opacity:.5"></i>○ Sem ajuste</span><span id="leg-nivel">Círculo maior = mais votos</span></div>
+      </section>
+    </div>
+
+    <div class="duas-b">
+      <section class="card dist" aria-label="Distribuição entre as áreas">
+        <h4>Distribuição entre as áreas</h4>
+        <p class="sub" id="dist-sub"></p>
+        <div class="dist-k" id="dist-k"></div>
+        <div id="dist-g"></div>
+      </section>
+      <section class="card qual" aria-label="Qualidade e cobertura dos dados">
+        <h4>Qualidade e cobertura dos dados</h4>
+        <p class="sub">Conferência da base usada nesta página com os totais oficiais do TSE.</p>
+        <ul id="qual-l"></ul>
       </section>
     </div>
 
     <details class="card" id="como">
-      <summary>Como ler: o indicador de desempenho</summary>
+      <summary>Como ler: metodologia do indicador</summary>
       <div class="corpo">
-        <p><b>Fatia</b> é a porcentagem dos votos válidos daquela área que foram para o candidato. <b>Peso</b> é quanto dos votos dele na área aberta vieram daquela linha (a coluna soma 100%).</p>
-        <p><b>Referência</b> é a fatia dele na área aberta (botão <b>Comparar com: Área aberta</b>, o padrão) ou no Ceará inteiro (botão <b>Ceará</b>). A diferença para a referência é dada em <b>pontos percentuais (p.p.)</b>: 60% contra 52% = +8,0 p.p.</p>
-        <p><b>Por que não usar só a fatia:</b> numa seção com 20 votos válidos, 10 votos já são 50%; com 1 voto a menos, 45%. Áreas pequenas pulam para cima e para baixo por acaso. Por isso o indicador usa uma <b>fatia ajustada pelo tamanho</b>: quanto menor a área, mais a fatia dela é puxada para perto da referência, até haver votos suficientes para dizer que ela é diferente (método de Bayes empírico, o mesmo usado para mapear taxas em áreas pequenas). Áreas grandes quase não mudam.</p>
+        <p><b>Fatia observada</b> = votos do candidato ÷ votos válidos do cargo na área (resultado oficial, nunca alterado). Área sem votos válidos: "não calculável", nunca 0%. <b>Peso</b> = votos dele na linha ÷ votos dele na área aberta (a coluna soma 100%).</p>
+        <p><b>Referência</b> é a fatia dele na área aberta (botão <b>Comparar com: Área aberta</b>, o padrão) ou no Ceará inteiro (botão <b>Ceará</b>). Nos dois casos a conta da referência <b>inclui</b> a própria área. A diferença é dada em <b>pontos percentuais (p.p.)</b>: 60% contra 52% = +8,0 p.p.</p>
+        <p><b>Por que existe a fatia ajustada:</b> uma seção com 8 votos em 10 tem 80%; outra com 800 em 1.000 também. A primeira muda muito com poucos votos. A <b>fatia ajustada</b> combina o resultado da área com o padrão das áreas da mesma lista: quanto menos votos válidos, mais ela se aproxima do padrão; quanto mais votos, mais vale o resultado da própria área. Ela é uma <b>estimativa do modelo</b>, não um resultado oficial, e aparece em coluna separada.</p>
+        <p><b>O modelo:</b> Beta-Binomial (y<sub>i</sub> | θ<sub>i</sub> ~ Binomial(n<sub>i</sub>, θ<sub>i</sub>), θ<sub>i</sub> ~ Beta(α, β)). α e β são estimados por <b>máxima verossimilhança marginal</b> com todas as áreas do nível escolhido dentro da área aberta, antes de qualquer busca ou filtro da tabela (mesmo cargo, turno e candidato; só áreas com votos válidos). Fatia ajustada = (votos + α) ÷ (válidos + α + β). O padrão do modelo (m = α ÷ (α+β)) vem dos dados da lista e não muda quando você troca o botão "Comparar com". A conta de cada linha mostra α, β e a versão.</p>
+        <p><b>Quando o ajuste fica indisponível:</b> menos de 5 áreas com votos válidos, candidato sem votos (ou com todos) na lista, otimização que não converge, ou diferenças entre as áreas do tamanho esperado só pelo acaso. Nesses casos nenhum parâmetro substituto é usado: a tabela mostra só a fatia observada e o indicador fica "○ Sem ajuste".</p>
         <p class="ex" id="exemplo"></p>
-        <p><span class="ind forte">▲ Forte</span> fatia ajustada 10% ou mais acima da referência. <span class="ind media">● Intermediário</span> a menos de 10% dela. <span class="ind fraco">◎ Fraco · muitos votos em jogo</span> 10% ou mais abaixo e entre as áreas fracas onde mais votos faltaram: juntas, elas concentram metade dos votos que faltaram para ele chegar à referência em todas as áreas fracas. É uma medida de tamanho, não uma previsão de que o voto vá mudar. <span class="ind fraco">▼ Fraco</span> 10% ou mais abaixo, nas demais.</p>
-        <p><b>Visão do todo:</b> acima da tabela, a área aberta aparece com o próprio indicador dentro da área de cima e no Ceará, e com o peso dela nos votos dele. Assim uma seção "forte" dentro de um colégio que foi fraco no geral não engana.</p>
-        <p>Os quadros acima da tabela mostram, para cada grupo, duas barras: <b>"Votos no/na [área aberta]"</b> é o tamanho do grupo (quanto de todos os votos válidos da área aberta é dado ali, somando todos os candidatos); <b>"Votos de [candidato]"</b> é quanto dos votos dele na área aberta saiu dali. Se ele fosse igual em todo lugar, as duas barras teriam o mesmo tamanho. Ex.: no Cariri, os 9 municípios fortes do Elmano têm 17% dos votos do Cariri, mas deram 20% dos votos dele no Cariri. Toque numa faixa para ver só aquele grupo. Toque no indicador de uma linha para ver a conta completa.</p>
-        <p class="fontes" id="cobertura"></p>
-        <p class="fontes">Base: quociente locacional e concentração eleitoral (Avelino, Biderman e Silva, <i>Dados</i>, 2011; Silva e Davidian, <i>Brazilian Political Science Review</i>, 2013), que comparam a distribuição dos votos do candidato com a do eleitorado; tipologia de dominância de Barry Ames; suavização de taxas por Bayes empírico (Marshall, 1991). O indicador descreve o resultado; não explica as causas.</p>
+        <p><span class="ind forte">▲ Forte</span> fatia ajustada pelo menos 10% acima da referência (ex.: referência 40% → 44% ou mais) <b>e</b>, como condição separada, o modelo dá pelo menos 90% de probabilidade de a fatia da área estar <b>acima da referência</b> (é a probabilidade de passar da referência, não de passar dos 10%). <span class="ind fraco">▼ Fraco</span> o espelho: pelo menos 10% abaixo (40% → 36% ou menos) e, separadamente, 90% de probabilidade de estar abaixo da referência. <span class="ind media">● Intermediário</span> tem dois motivos, mostrados separadamente: <b>próximo da referência</b> (ajustada a menos de 10% dela) ou <span class="ind inc">◌ inconclusivo</span> (passou de 10%, mas o modelo não chega a 90% de probabilidade de a área estar daquele lado da referência, em geral por ter poucos votos; ex.: um candidato com 0,1% do município e 1 voto numa seção).<span class="ind media">○ Sem ajuste</span> o modelo não pôde ser estimado neste nível da área aberta. Regra da versão bb-mle-1; mudar o limite gera nova versão.</p>
+        <p><b>Visão do todo:</b> acima da tabela, a área aberta aparece com o próprio indicador entre as áreas vizinhas e contra o Ceará, e com o peso dela nos votos dele. Assim uma seção "forte" dentro de um colégio que foi fraco no geral não engana.</p>
+        <p>Os quadros acima da tabela mostram, para cada grupo, duas barras: <b>"Votos no/na [área aberta]"</b> é o tamanho do grupo (quanto de todos os votos válidos da área aberta é dado ali, somando todos os candidatos); <b>"Votos de [candidato]"</b> é quanto dos votos dele na área aberta saiu dali. Se ele fosse igual em todo lugar, as duas barras teriam o mesmo tamanho.</p>
+        <p><b>Limites:</b> o resultado é agregado por seção. Ele descreve o território eleitoral; não mostra a preferência de nenhum eleitor, não explica causas e não é previsão. O bairro é o do local de votação, não o da residência. As diferenças entre áreas são descritivas, não causais.</p>
+        <p class="fontes">Base: quociente locacional e concentração eleitoral (Avelino, Biderman e Silva, <i>Dados</i>, 2011; Silva e Davidian, <i>Brazilian Political Science Review</i>, 2013); tipologia de dominância de Barry Ames; modelo Beta-Binomial com estimação por máxima verossimilhança (Griffiths, <i>Biometrics</i>, 1973); manual "Diagnóstico Eleitoral 2026" (v1.0, 14/10/2026).</p>
       </div>
     </details>
 
@@ -393,7 +457,7 @@ a.voltar:hover{background:rgba(255,255,255,.1)}
 <footer><div class="wrap">
   <p id="fonte"><b>Fonte:</b> Tribunal Superior Eleitoral (TSE): votação por seção eleitoral e eleitorado por local de votação (Portal de Dados Abertos); nomes, partidos, situação e fotos do ambiente oficial de resultados.</p>
   <p><a href="../" style="color:#fff">Início</a> · <a href="../apuracao/" style="color:#fff">Apuração 2026</a></p>
-  <p>Regiões de planejamento: IPECE (Governo do Ceará). Mapa: © colaboradores do OpenStreetMap. O bairro é o do local de votação informado ao TSE, não o endereço do eleitor.</p>
+  <p>Indicador: modelo bb-mle-1 (14/10/2026). Regiões de planejamento: IPECE (Governo do Ceará). Mapa: © colaboradores do OpenStreetMap. O bairro é o do local de votação informado ao TSE, não o endereço do eleitor.</p>
 </div></footer>
 <div class="carreg" id="carreg" hidden>Carregando…</div>
 
@@ -404,7 +468,6 @@ const ANO=2026, TURNO=1, UF="CE", TSE="https://resultados.tse.jus.br/oficial/ele
 const $=s=>document.querySelector(s);
 const fmt=new Intl.NumberFormat("pt-BR");
 const pct=x=>isFinite(x)?(x*100).toLocaleString("pt-BR",{minimumFractionDigits:x<0.01&&x>0?2:1,maximumFractionDigits:x<0.01&&x>0?2:1})+"%":"–";
-const r2=x=>Math.round(x*100)/100;
 const norm=s=>String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toUpperCase().replace(/\s+/g," ").trim();
 const el=(t,a={},...f)=>{const e=document.createElement(t);for(const[k,v]of Object.entries(a)){if(k==="class")e.className=v;else if(k==="style")e.style.cssText=v;else if(k.startsWith("on"))e.addEventListener(k.slice(2),v);else e.setAttribute(k,v)}for(const x of f)if(x!=null&&x!==false)e.append(x instanceof Node?x:document.createTextNode(x));return e};
 const titulo=s=>String(s||"").toLowerCase().replace(/(^|[\s\-/(])([a-zà-ú])/g,(m,a,b)=>a+b.toUpperCase()).replace(/\b(De|Da|Do|Das|Dos|E)\b/g,w=>w.toLowerCase());
@@ -427,7 +490,7 @@ async function dadosTSE(cargo){
   try{
     const r=await fetch(`${TSE}/${ele}/dados/${ab}/${ab}-c${c}-e00${ele}-u.json`).then(r=>r.json());
     const carg=r.carg?.[0]||{};
-    out._qe=toInt(carg.qe);
+    out._qe=toInt(carg.qe);out._nv=toInt(carg.nv)||1;
     for(const a of carg.agr||[]){
       // mesmas contas do site de apuração: votos da agremiação = nominais + legenda válidos (tvtn + tvtl)
       const ag={nm:a.nm||(a.par?.[0]?.sg)||"",tp:a.tp,vag:a.vag!=null&&a.vag!==""?toInt(a.vag):null,sgs:(a.par||[]).map(p=>p.sg).join("/"),
@@ -441,6 +504,20 @@ async function dadosTSE(cargo){
   }catch(e){/* sem enriquecimento: usa os nomes do arquivo de seções */}
   return S.tse[cargo]=out;
 }
+/* totais oficiais do cargo no Ceará (EA20 do Ceará), só para conferir a base por seção (manual, T07) */
+S.ofic={};
+function oficialCE(cargo){
+  if(S.ofic[cargo])return Promise.resolve(S.ofic[cargo]);
+  const ele=cargo===1?"6257":"6259", c=String(cargo).padStart(4,"0");
+  return S.ofic[cargo]=fetch(`${TSE}/${ele}/dados/ce/ce-c${c}-e00${ele}-u.json`).then(r=>{if(!r.ok)throw new Error("erro "+r.status);return r.json()}).then(r=>{
+    const carg=r.carg?.[0]||{},votos={};let validos=0;
+    for(const a of carg.agr||[])for(const p of a.par||[]){
+      const leg=p.tvtl!=null?toInt(p.tvtl):toInt(p.tval);
+      if(cargo>=6){votos[p.n]=leg;validos+=(p.tvtn!=null?toInt(p.tvtn):toInt(p.tvan))+leg}
+      for(const k of p.cand||[]){const v=toInt(k.vap);votos[k.n]=v;if(cargo<6&&/^v[áa]lido/i.test(k.dvt||"V\u00e1lido"))validos+=v}}
+    return S.ofic[cargo]={ok:true,votos,validos};
+  }).catch(e=>S.ofic[cargo]={ok:false,erro:String(e.message||e)});
+}
 function info(c){const t=(S.tse[c.cargo]||{})[c.nr]||{};const leg=String(c.nr).length===2&&c.cargo>=6;
   return{nome:leg?`Legenda ${t.sg||c.nome}`:(t.nmu||c.nome),sg:t.sg||"",st:t.st||"",foto:leg?null:(t.foto||null),completo:c.nome,leg}}
 
@@ -451,6 +528,7 @@ async function inicio(){
   S.reg=reg.municipio_regiao||{};
   S.cands=cs.filter(c=>c.nr!==95&&c.nr!==96);
   const st=status.find(s=>s.chave===`carga/${ANO}/${TURNO}/${UF}`);
+  S.geracao=st?st.geracao_tse:null;
   if(st)$("#fonte").replaceChildren(el("b",{},"Fonte: "),`Tribunal Superior Eleitoral (TSE). Votação por seção eleitoral (arquivo gerado em ${st.geracao_tse}) e eleitorado por local de votação, do Portal de Dados Abertos; nomes, partidos, situação e fotos do ambiente oficial de resultados.`);
   const cargos=[...new Set(S.cands.map(c=>c.cargo))].sort((a,b)=>a-b);
   $("#cargo").replaceChildren(...cargos.map(c=>el("option",{value:c},CARGOS[c]||c)));
@@ -460,7 +538,7 @@ async function inicio(){
   if(q.get("area"))try{S.caminho=JSON.parse(q.get("area"))}catch{}
   S.ffCam=S.caminho.map(p=>p.k).join("/");S.ffNivel=FF.includes(q.get("nivel"))?q.get("nivel"):proximo();
   if(q.get("ref")==="uf")S.ref="uf";
-  {const o=/^(rank|nome|p|v|peso|pos)(-?)$/.exec(q.get("ord")||"");if(o)S.tb={col:o[1],dir:o[2]?-1:1}}
+  {const o=/^(rank|nome|p|adj|v|peso|pos)(-?)$/.exec(q.get("ord")||"");if(o)S.tb={col:o[1],dir:o[2]?-1:1}}
   if(CAT[q.get("grupo")])S.tbCat=q.get("grupo");
   if(q.get("busca")){S.tbQ=q.get("busca").slice(0,60);$("#tb-q").value=S.tbQ}
   await trocaCargo(q.get("n"));
@@ -468,6 +546,7 @@ async function inicio(){
 async function trocaCargo(nr){
   const cargo=+$("#cargo").value;
   await Promise.all([dadosTSE(cargo),S.T[cargo]?null:bloco("t/"+cargo).then(t=>S.T[cargo]=t)]);
+  oficialCE(cargo).then(()=>{if(S.cand&&S.cand.cargo===cargo)qualidade()});
   const lista=S.cands.filter(c=>c.cargo===cargo);
   const c=lista.find(c=>String(c.nr)===String(nr))||lista[0];
   await escolhe(c);
@@ -476,7 +555,7 @@ let contouConsulta=false;
 S.rivCache={};
 async function carregaRivais(c){
   if(![1,3,5].includes(c.cargo))return;
-  const outros=S.cands.filter(x=>x.cargo===c.cargo&&x.nr!==c.nr).sort((a,b)=>b.total-a.total).slice(0,5);
+  const outros=S.cands.filter(x=>x.cargo===c.cargo&&x.nr!==c.nr).sort((a,b)=>b.total-a.total).slice(0,30); // todos (Presidente, Governador e Senador têm poucos candidatos)
   try{
     const bs=await Promise.all(outros.map(x=>S.rivCache[x.cargo+"/"+x.nr]||(S.rivCache[x.cargo+"/"+x.nr]=bloco(`c/${x.cargo}/${x.nr}`))));
     if(S.cand!==c)return;
@@ -535,13 +614,15 @@ function posicao(g){if(!g.rv||!S.riv)return null;const os=S.riv.map((c,i)=>({c,v
   const acima=os.filter(o=>o.v>g.v),pos=acima.length+1;
   if(pos===1){const s2=os[0];return{pos,txt:s2?`à frente de ${s2.c.nome} por ${fmt.format(g.v-s2.v)} votos`:"",outro:s2}}
   const p1=os[0];return{pos,txt:`atrás de ${p1.c.nome} por ${fmt.format(p1.v-g.v)} votos`,outro:p1}}
-const comparec=g=>g.aptos?{c:g.tot/g.aptos,bn:g.tot?(g.tot-g.val)/g.tot:NaN}:null;
+// escolhas por eleitor: Senado 2026 elege 2 por estado, então cada eleitor faz 2 escolhas (TSE)
+const escolhas=()=>S.cand&&S.cand.cargo===5?Math.max(1,(S.tse[5]||{})._nv||2):1;
+const comparec=g=>{if(!g.aptos)return null;const e=escolhas(),eleit=g.tot/e;return{c:eleit/g.aptos,bn:g.tot?(g.tot-g.val)/g.tot:NaN,e,eleit}};
+const unVoto=cp=>cp.e>1?"das escolhas":"dos votos";
 
 /* ---------- níveis ---------- */
 const chaveDe={regiao:r=>r.reg,municipio:r=>String(r.mun),bairro:r=>r.mun+"|"+r.bairro,zona:r=>r.mun+"|Z"+r.zona,local:r=>r.mun+"|"+r.zona+"|"+r.nrl,secao:r=>r.mun+"|"+r.zona+"|"+r.sec};
 const nomeDe={regiao:r=>r.reg,municipio:r=>S.muns[r.mun],bairro:r=>r.bairro,zona:r=>"Zona "+r.zona,local:r=>r.local,secao:r=>"Seção "+r.sec};
 const subDe={regiao:()=>"",municipio:r=>r.reg,bairro:r=>S.muns[r.mun],zona:r=>S.muns[r.mun],local:r=>`${r.bairro} · ${S.muns[r.mun]}`,secao:r=>`${r.local} · Zona ${r.zona}`};
-const PISO={regiao:0,municipio:300,bairro:300,zona:300,local:200,secao:80};
 const FF=["regiao","municipio","bairro","zona","local","secao"];
 const ORDEM_N={regiao:0,municipio:1,bairro:2,zona:2,local:3,secao:4};
 const PLURAL={regiao:"regiões",municipio:"municípios",bairro:"bairros",zona:"zonas",local:"locais de votação",secao:"seções"};
@@ -559,13 +640,11 @@ function prepos(p){if(p.tipo==="zona")return"na "+p.nome;if(p.tipo!=="regiao")re
 function navega(ancora,muda){const a=ancora.getBoundingClientRect().top;muda();desenha();const b=ancora.getBoundingClientRect().top;if(Math.abs(b-a)>1)window.scrollBy({top:b-a,left:0,behavior:"instant"})}
 function trilha(sel,pai){const tr=[],itens=[{nome:"Ceará"},...S.caminho];
   itens.forEach((p,i)=>{if(i)tr.push(el("span",{class:"sep"},"›"));const ult=i===itens.length-1;
-    tr.push(ult?el("span",{class:"at"},`${p.nome}: ${fmt.format(pai.v)} votos (média de ${pct(pai.p)} dos votos válidos)`):el("button",{type:"button",onclick:()=>navega($(sel),()=>{S.caminho=S.caminho.slice(0,i)})},p.nome))});
+    tr.push(ult?el("span",{class:"at"},`${p.nome}: ${fmt.format(pai.v)} votos (${pct(pai.p)} dos votos válidos)`):el("button",{type:"button",onclick:()=>navega($(sel),()=>{S.caminho=S.caminho.slice(0,i)})},p.nome))});
   $(sel).replaceChildren(...tr)}
 function linhasDoCaminho(){let rs=S.linhas;for(const p of S.caminho){const f=chaveDe[p.tipo];rs=rs.filter(r=>f(r)===p.k)}return rs}
 function agrupa(rs,tipo){const f=chaveDe[tipo],m=new Map();for(const r of rs){const k=f(r);let g=m.get(k);if(!g){g={k,tipo,nome:nomeDe[tipo](r),sub:subDe[tipo](r),rs:[]};m.set(k,g)}g.rs.push(r)}return[...m.values()].map(g=>Object.assign(g,soma(g.rs)))}
-function calc(g,ref){g.ref=ref;g.ind=ref?g.p/ref:NaN;g.falt=Math.max(0,Math.round(ref*g.val-g.v));return g}
-function classe(ind){if(!isFinite(ind))return"media";const x=r2(ind);return x>=1.1?"forte":x<=0.9?"fraco":"media"}
-function difTexto(ind){if(!isFinite(ind))return"–";const d=Math.round((ind-1)*100);if(classe(ind)==="media")return d===0?"na média":`na média (${d>0?"+":"−"}${Math.abs(d)}%)`;return(d>0?"+":"−")+Math.abs(d)+"% "+(d>0?"acima":"abaixo")}
+function calc(g,ref){g.ref=ref;g.ind=ref?g.p/ref:NaN;return g}
 /* "i" com explicação: aparece ao passar o mouse, ao focar ou ao tocar */
 function dica(...paras){return el("span",{class:"i",tabindex:"0",role:"img","aria-label":"Explicação: "+paras.join(" "),"data-dica":JSON.stringify(paras)},"i")}
 (()=>{let box=null,dono=null;
@@ -580,62 +659,217 @@ function dica(...paras){return el("span",{class:"i",tabindex:"0",role:"img","ari
   document.addEventListener("click",e=>{const t=e.target.closest?.(".i");if(t){e.stopPropagation();e.preventDefault();dono===t&&e.pointerType!=="mouse"?some():mostra(t)}else some()},true);
   addEventListener("scroll",some,{passive:true,capture:true});addEventListener("resize",some);
 })();
-const ROT={forte:"acima da média",fraco:"abaixo da média",media:"na média"};
-/* Indicador de desempenho.
-   Fatia ajustada pelo tamanho (Bayes empírico, método dos momentos de Marshall): áreas com poucos votos válidos
-   são puxadas para a referência, para que 10 votos numa seção pequena não pareçam "melhor desempenho".
-   Depois: Forte (≥10% acima da referência), Intermediário, Fraco com muitos votos em jogo (≥10% abaixo e entre as
-   áreas fracas que concentram metade dos votos que faltam para chegar à referência) e Fraco (as demais). */
-const CAT={forte:{s:"▲",t:"Forte",c:"forte",k:"Forte"},inter:{s:"●",t:"Intermediário",c:"media",k:"Intermediário"},pot:{s:"◎",t:"Fraco · muitos votos em jogo",c:"fraco",k:"Fraco"},fraco:{s:"▼",t:"Fraco",c:"fraco",k:"Fraco"},sem:{s:"–",t:"Sem votos válidos",c:"media",k:"Sem dados"}};
-const ORDEM_CAT=["forte","inter","pot","fraco","sem"];
-function avalia(gs,m){
-  const T=gs.reduce((t,g)=>t+g.val,0),V=gs.reduce((t,g)=>t+g.v,0),com=gs.filter(g=>g.val>0),n=com.length||1;
-  let s2=NaN;
-  if(m>0&&m<1&&T>0){s2=com.reduce((t,g)=>t+g.val*(g.p-m)**2,0)/T-m*(1-m)/(T/n);if(!(s2>1e-9))s2=1e-9}
-  for(const g of gs){
-    g.peso=V?g.v/V:0;g.eleit=T?g.val/T:0;g.ref=m;
-    if(!g.val||!isFinite(s2)){g.adj=g.val?g.p:NaN;g.cat=g.val&&isFinite(m)&&m>0?(r2(g.p/m)>=1.1?"forte":r2(g.p/m)<=.9?"fraco":"inter"):"sem";g.w=1;g.espaco=0;continue}
-    g.w=s2/(s2+m*(1-m)/g.val);g.adj=m+g.w*(g.p-m);
-    const x=r2(g.adj/m);
-    g.cat=x>=1.1?"forte":x<=.9?"fraco":"inter";
-    g.espaco=Math.max(0,Math.round(m*g.val-g.v)); // pela fatia observada: votos que faltaram para chegar à referência
+/* MODELO-INICIO ---------------------------------------------------------------
+   Modelo do indicador de desempenho (Mapa de Votos). Sem DOM: testado fora da página
+   (testes/modelo.test.mjs extrai este bloco e roda os casos T01–T10 do manual).
+
+   Hipótese de trabalho (manual "Diagnóstico Eleitoral", seções 6 e 7):
+     y_i | θ_i ~ Binomial(n_i, θ_i),  θ_i ~ Beta(α, β),  α > 0, β > 0
+   α e β são estimados por máxima verossimilhança marginal Beta-Binomial sobre as
+   unidades do grupo de referência (as áreas mostradas na tabela, com n > 0):
+     L(α,β) = Σ_i [ log B(y_i+α, n_i−y_i+β) − log B(α,β) ]
+   otimizada em (logit m, log k), com m = α/(α+β) e k = α+β (positividade garantida).
+   Fatia ajustada = (y+α)/(n+α+β). O ponto de partida do modelo (m) vem dos dados do
+   grupo; ele NÃO é a referência exibida ("Comparar com"), que só serve para classificar.
+   Se o grupo não permite estimar (poucas unidades, sem votos, sem convergência ou sem
+   variação além do acaso), o ajuste fica "indisponível": nenhum parâmetro substituto
+   é inventado e a página mostra só a fatia observada.
+------------------------------------------------------------------------------- */
+const MODELO={
+  versao:"bb-mle-1",
+  data:"14/10/2026",
+  // regras versionadas (mudar qualquer uma = nova versão)
+  limiar:0.10,        // Forte: ajustada ≥ referência × 1,10; Fraco: ≤ referência × 0,90
+  confianca:0.90,     // e o modelo precisa dar ≥ 90% de probabilidade de a área estar acima (Forte) ou abaixo (Fraco) da referência
+  minUnidades:5,      // mínimo de unidades com votos válidos para estimar α e β (simulação em testes/simulacao.mjs: a partir de 4 a ajustada já erra menos que a observada)
+  kMin:1e-2, kMax:1e7,// limites de k = α+β na otimização; ótimo colado em kMax = sem variação além do acaso
+  maxIter:600, tol:1e-10
+};
+// log-gama (Lanczos, g=7, 9 termos): precisão ~1e-15
+const LG_C=[0.99999999999980993,676.5203681218851,-1259.1392167224028,771.32342877765313,-176.61502916214059,12.507343278686905,-0.13857109526572012,9.9843695780195716e-6,1.5056327351493116e-7];
+function lgama(x){
+  if(x<0.5)return Math.log(Math.PI/Math.abs(Math.sin(Math.PI*x)))-lgama(1-x);
+  x-=1;let a=LG_C[0];const t=x+7.5;for(let i=1;i<9;i++)a+=LG_C[i]/(x+i);
+  return 0.5*Math.log(2*Math.PI)+(x+0.5)*Math.log(t)-t+Math.log(a)}
+const lbeta=(a,b)=>lgama(a)+lgama(b)-lgama(a+b);
+// T04: dado inválido é rejeitado (nunca entra no ajuste nem na tabela)
+function unidadeValida(y,n){return Number.isInteger(y)&&Number.isInteger(n)&&n>=0&&y>=0&&y<=n}
+function validaUnidades(us){const ruins=us.filter(u=>!unidadeValida(u.y,u.n));if(ruins.length)throw new Error(`Dado inválido em ${ruins.length} unidade(s): votos do candidato fora de 0..votos válidos.`);return us}
+// T05: parâmetros fora do domínio são rejeitados
+function parametrosValidos(a,b){return Number.isFinite(a)&&Number.isFinite(b)&&a>0&&b>0}
+// fatia observada (T03: n=0 → null, nunca 0%)
+const fatiaObs=(y,n)=>n>0?y/n:null;
+// fatia ajustada: só com modelo válido e n>0
+function fatiaAjustada(y,n,fit){
+  if(!fit||fit.status!=="ok"||!(n>0))return null;
+  if(!parametrosValidos(fit.alpha,fit.beta))throw new Error("Parâmetros do modelo inválidos (α e β precisam ser > 0).");
+  return(y+fit.alpha)/(n+fit.alpha+fit.beta)}
+// log-verossimilhança marginal (sem o termo combinatório, que não depende de α, β)
+function logVeross(ys,ns,a,b){let s=0;const c=lbeta(a,b);for(let i=0;i<ys.length;i++)s+=lgama(ys[i]+a)+lgama(ns[i]-ys[i]+b)-lgama(ns[i]+a+b)-c;return s}
+// Nelder-Mead em 2 dimensões (minimiza f)
+function nelderMead(f,x0,passo,maxIter,tol){
+  let S=[x0,[x0[0]+passo[0],x0[1]],[x0[0],x0[1]+passo[1]]].map(x=>({x,f:f(x)}));let it=0;
+  const comb=(a,ca,b,cb)=>[a[0]*ca+b[0]*cb,a[1]*ca+b[1]*cb];
+  for(;it<maxIter;it++){
+    S.sort((p,q)=>p.f-q.f);
+    const span=Math.max(Math.abs(S[2].f-S[0].f)),diam=Math.max(...S.slice(1).map(p=>Math.hypot(p.x[0]-S[0].x[0],p.x[1]-S[0].x[1])));
+    if(span<=tol*(1+Math.abs(S[0].f))&&diam<1e-7)break;
+    const c=comb(S[0].x,.5,S[1].x,.5),w=S[2];
+    const r=comb(c,2,w.x,-1),fr=f(r);
+    if(fr<S[0].f){const e=comb(c,3,w.x,-2),fe=f(e);S[2]=fe<fr?{x:e,f:fe}:{x:r,f:fr}}
+    else if(fr<S[1].f)S[2]={x:r,f:fr};
+    else{const k=fr<w.f?comb(c,.5,r,.5):comb(c,.5,w.x,.5),fk=f(k);
+      if(fk<Math.min(fr,w.f))S[2]={x:k,f:fk};
+      else{for(let i=1;i<3;i++){const x=comb(S[0].x,.5,S[i].x,.5);S[i]={x,f:f(x)}}}}
   }
-  // "muitos votos em jogo": as áreas fracas que, somadas, concentram metade dos votos que faltam para chegar à referência
-  const fr=gs.filter(g=>g.cat==="fraco").sort((a,b)=>b.espaco-a.espaco), tot=fr.reduce((t,g)=>t+g.espaco,0);
-  let ac=0;for(const g of fr){if(ac>=tot/2||!g.espaco)break;g.cat="pot";ac+=g.espaco}
-  return gs;
-}
+  S.sort((p,q)=>p.f-q.f);return{x:S[0].x,f:S[0].f,iter:it,convergiu:it<maxIter}}
+/* Ajuste Beta-Binomial por máxima verossimilhança marginal.
+   us: [{y,n}] (unidades do grupo). Retorna o registro do modelo (manual, seção 7). */
+function ajustaBB(us,cfg=MODELO){
+  validaUnidades(us);
+  const com=us.filter(u=>u.n>0),N=com.length,Y=com.reduce((t,u)=>t+u.y,0),T=com.reduce((t,u)=>t+u.n,0);
+  const reg={versao:cfg.versao,status:"indisponivel",motivo:"",unidades:N,totalN:T,totalY:Y,alpha:null,beta:null,m:null,k:null,iter:0,convergiu:false,logL:null,avisos:[]};
+  if(N<cfg.minUnidades){reg.motivo=`só ${N} ${N===1?"área":"áreas"} com votos válidos (mínimo ${cfg.minUnidades})`;return reg}
+  if(Y===0){reg.motivo="o candidato não teve votos nestas áreas";return reg}
+  if(Y===T){reg.motivo="o candidato teve todos os votos válidos destas áreas";return reg}
+  const ys=Float64Array.from(com,u=>u.y),ns=Float64Array.from(com,u=>u.n);
+  const lkMin=Math.log(cfg.kMin),lkMax=Math.log(cfg.kMax);
+  // ponto de partida: média agregada e k pelo método dos momentos (só para começar a busca)
+  const m0=Y/T;let v=0;for(let i=0;i<N;i++)v+=ns[i]*(ys[i]/ns[i]-m0)**2;v/=T;
+  const bin=m0*(1-m0)*N/T,k0=v>bin*1.01?Math.min(cfg.kMax/10,Math.max(1,(m0*(1-m0)-v)/Math.max(v-bin,1e-12))):cfg.kMax/10;
+  const f=([t,lk])=>{if(lk<lkMin||lk>lkMax||!Number.isFinite(t)||Math.abs(t)>30)return 1e300;
+    const m=1/(1+Math.exp(-t)),k=Math.exp(lk),a=m*k,b=(1-m)*k;if(!(a>0&&b>0))return 1e300;return-logVeross(ys,ns,a,b)};
+  const t0=Math.log(m0/(1-m0)),lk0=Math.log(Math.max(cfg.kMin*10,Math.min(k0,cfg.kMax/10)));
+  // até 3 reinícios a partir do melhor ponto (prática padrão do Nelder-Mead)
+  let r=nelderMead(f,[t0,lk0],[0.2,1],cfg.maxIter,cfg.tol),iter=r.iter;
+  for(let i=0;i<3&&!r.convergiu;i++){r=nelderMead(f,r.x,[0.05,0.5],cfg.maxIter,cfg.tol);iter+=r.iter}
+  const m=1/(1+Math.exp(-r.x[0])),k=Math.exp(r.x[1]),a=m*k,b=(1-m)*k;
+  // limite k→∞ (todas as áreas com a mesma fatia, só o acaso separando): verossimilhança binomial com m = Y/T
+  let lBin=0;for(let i=0;i<N;i++)lBin+=ys[i]*Math.log(m0)+(ns[i]-ys[i])*Math.log(1-m0);
+  Object.assign(reg,{iter,convergiu:r.convergiu,logL:-r.f,logLBinomial:lBin});
+  const semVar="as diferenças entre as áreas são do tamanho esperado pelo acaso: não dá para estimar a força da referência";
+  if(!Number.isFinite(r.f)){reg.motivo="a otimização não convergiu";return reg}
+  if(r.x[1]>lkMax-0.5||(!r.convergiu&&-r.f-lBin<1e-3)){reg.motivo=semVar;return reg}
+  if(!r.convergiu){reg.motivo="a otimização não convergiu";return reg}
+  if(r.x[1]<lkMin+0.5)reg.avisos.push("k muito pequeno: as áreas são muito diferentes entre si e quase não há ajuste");
+  if(!parametrosValidos(a,b)){reg.motivo="parâmetros fora do domínio";return reg}
+  Object.assign(reg,{status:"ok",motivo:"",alpha:a,beta:b,m,k});
+  return reg}
+// função beta incompleta regularizada I_x(a,b) (frações contínuas; aproximação normal quando a e b são enormes)
+function betacf(a,b,x){const FP=1e-300;let c=1,d=1-(a+b)*x/(a+1);if(Math.abs(d)<FP)d=FP;d=1/d;let h=d;
+  for(let m=1;m<=20000;m++){const m2=2*m;let aa=m*(b-m)*x/((a+m2-1)*(a+m2));d=1+aa*d;if(Math.abs(d)<FP)d=FP;c=1+aa/c;if(Math.abs(c)<FP)c=FP;d=1/d;h*=d*c;
+    aa=-(a+m)*(a+b+m)*x/((a+m2)*(a+m2+1));d=1+aa*d;if(Math.abs(d)<FP)d=FP;c=1+aa/c;if(Math.abs(c)<FP)c=FP;d=1/d;const del=d*c;h*=del;if(Math.abs(del-1)<1e-13)break}
+  return h}
+function betai(a,b,x){if(x<=0)return 0;if(x>=1)return 1;
+  if(Math.min(a,b)>2e4){const m=a/(a+b),sd=Math.sqrt(a*b/((a+b)**2*(a+b+1))),z=(x-m)/sd;return 0.5*erfc(-z/Math.SQRT2)}
+  const bt=Math.exp(lgama(a+b)-lgama(a)-lgama(b)+a*Math.log(x)+b*Math.log(1-x));
+  return x<(a+1)/(a+b+2)?bt*betacf(a,b,x)/a:1-bt*betacf(b,a,1-x)/b}
+function erfc(x){const z=Math.abs(x),t=1/(1+z/2),r=t*Math.exp(-z*z-1.26551223+t*(1.00002368+t*(.37409196+t*(.09678418+t*(-.18628806+t*(.27886807+t*(-1.13520398+t*(1.48851587+t*(-.82215223+t*.17087277)))))))));return x>=0?r:2-r}
+// P(θ > ref) pela Beta posterior da área: Beta(y+α, n−y+β)
+function probAcima(y,n,fit,ref){if(!fit||fit.status!=="ok"||!(n>0)||!(ref>0))return null;return 1-betai(y+fit.alpha,n-y+fit.beta,ref)}
+// intervalo de credibilidade do modelo (quantis da Beta posterior), por bisseção; não é margem de erro oficial
+function intervalo(y,n,fit,nivel=0.90){if(!fit||fit.status!=="ok"||!(n>0))return null;const a=y+fit.alpha,b=n-y+fit.beta;
+  const q=p=>{let lo=0,hi=1;for(let i=0;i<60;i++){const mid=(lo+hi)/2;betai(a,b,mid)<p?lo=mid:hi=mid}return(lo+hi)/2};
+  return[q((1-nivel)/2),q(1-(1-nivel)/2)]}
+/* classificação contra a referência exibida: x = fatia ajustada; pAcima = P(θ > referência) pelo modelo.
+   Forte: x ≥ ref × (1+limiar) e pAcima ≥ confiança. Fraco: x ≤ ref × (1−limiar) e pAcima ≤ 1−confiança.
+   Sem pAcima (testes de borda) vale só o limiar. */
+function classifica(x,ref,cfg=MODELO,pAcima=null){
+  if(x==null||!Number.isFinite(x)||!(ref>0))return"sem";
+  const q=x/ref,eps=1e-9,temP=pAcima!=null&&Number.isFinite(pAcima);
+  if(q>=1+cfg.limiar-eps&&(!temP||pAcima>=cfg.confianca))return"forte";
+  if(q<=1-cfg.limiar+eps&&(!temP||pAcima<=1-cfg.confianca))return"fraco";
+  return"inter"}
+// heterogeneidade (manual, seção 4): sqrt[Σ n_i (p_i − p_agr)² / Σ n_i], em fração (×100 = p.p.)
+function heterogeneidade(us){const com=us.filter(u=>u.n>0),T=com.reduce((t,u)=>t+u.n,0);if(!T)return null;
+  const p=com.reduce((t,u)=>t+u.y,0)/T;return Math.sqrt(com.reduce((t,u)=>t+u.n*(u.y/u.n-p)**2,0)/T)}
+function quantil(xs,q){const s=[...xs].sort((a,b)=>a-b);if(!s.length)return null;const i=(s.length-1)*q,lo=Math.floor(i),hi=Math.ceil(i);return s[lo]+(s[hi]-s[lo])*(i-lo)}
+// T07: conciliação da soma das seções com o total oficial do mesmo escopo
+function concilia(soma,oficial){if(oficial==null||!Number.isFinite(oficial))return{status:"pendente",dif:null};const d=soma-oficial;return{status:d===0?"conciliado":"divergente",dif:d}}
+// T08: agrupa por bairro sem perder votos: seção sem bairro mapeado vai para "(sem bairro)" e conta como pendência
+function agrupaPorBairro(secoes){const m=new Map();let semV=0,semN=0;for(const s of secoes){const b=s.bairro||null;const k=b??"(sem bairro)";if(!b){semV+=s.n;semN++}const g=m.get(k)||{bairro:k,y:0,n:0};g.y+=s.y;g.n+=s.n;m.set(k,g)}
+  return{grupos:[...m.values()],cobertura:{secoesSemBairro:semN,validosSemBairro:semV,completa:semN===0}}}
+// T10: o modelo é guardado por eleição + turno + cargo + candidato + área + nível; trocar qualquer um recalcula
+const chaveModelo=o=>[o.ano,o.turno,o.cargo,o.nr,o.area||"CE",o.nivel].join("|");
+/* MODELO-FIM */
+
+/* Indicador de desempenho (versão em MODELO.versao).
+   Fatia ajustada pelo modelo Beta-Binomial da lista de áreas mostrada; classificação contra a referência exibida.
+   Forte: ajustada ≥ referência × (1 + limiar); Fraco: ≤ referência × (1 − limiar); senão Intermediário.
+   Ajuste indisponível na lista: nenhuma classificação ("Sem ajuste"); só a fatia observada. */
+const CAT={forte:{s:"▲",t:"Forte",c:"forte",k:"Forte"},inter:{s:"●",t:"Intermediário",c:"media",k:"Intermediário"},fraco:{s:"▼",t:"Fraco",c:"fraco",k:"Fraco"},semaj:{s:"○",t:"Sem ajuste",c:"media",k:"Sem ajuste"},sem:{s:"–",t:"Sem votos válidos",c:"media",k:"Sem dados"}};
+const ORDEM_CAT=["forte","inter","fraco","semaj","sem"];
+const LIM=Math.round(MODELO.limiar*100);
+S.fits=new Map();
+// um modelo por eleição + turno + cargo + candidato + área aberta + nível (T10); guardado para não reestimar a cada toque
+function modeloDe(gs,area,nivel){
+  const c=S.cand,k=chaveModelo({ano:ANO,turno:TURNO,cargo:c.cargo,nr:c.nr,area,nivel});
+  let f=S.fits.get(k);
+  if(!f){try{f=ajustaBB(gs.map(g=>({y:g.v,n:g.val})))}catch(e){f={versao:MODELO.versao,status:"indisponivel",motivo:String(e.message||e).replace(/\.$/,""),unidades:gs.length,totalN:0,avisos:[]}}
+    f.nivel=nivel;S.fits.set(k,f)}
+  return f}
+function avalia(gs,ref,area,nivel){
+  const T=gs.reduce((t,g)=>t+g.val,0),V=gs.reduce((t,g)=>t+g.v,0),fit=modeloDe(gs,area,nivel);
+  for(const g of gs){g.peso=V?g.v/V:0;g.eleit=T?g.val/T:0;g.ref=ref;g.fit=fit;
+    const a=fatiaAjustada(g.v,g.val,fit);g.adj=a==null?NaN:a;g.pa=probAcima(g.v,g.val,fit,ref);
+    g.cat=!g.val?"sem":fit.status==="ok"?classifica(g.adj,ref,MODELO,g.pa):"semaj"}
+  gs.fit=fit;return gs}
+// a mesma área contra outra referência: o ajuste não muda, só a classificação
+const reclass=(g,ref)=>{const pa=probAcima(g.v,g.val,g.fit,ref);return{...g,ref,pa,cat:!g.val?"sem":g.fit.status==="ok"?classifica(g.adj,ref,MODELO,pa):"semaj"}};
+const p2=x=>isFinite(x)?(x*100).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2})+"%":"–";
+const n4c=x=>Number(x).toLocaleString("pt-BR",{minimumFractionDigits:4,maximumFractionDigits:4});
+const num=x=>Number(x).toLocaleString("pt-BR",{maximumFractionDigits:x>=100?1:x>=1?2:4});
+const CONF=Math.round(MODELO.confianca*100);
+const probTxt=g=>g.pa==null?"":` · probabilidade, pelo modelo, de a fatia da área estar acima da referência: ${Math.round(g.pa*100)}%`;
+const regraTxt=(g)=>g.cat==="forte"?`ajustada ${p2(g.adj)} ≥ referência × 1,${LIM} (${p2(g.ref*(1+MODELO.limiar))}) e, separadamente, pelo menos ${CONF}% de probabilidade de estar acima da referência (não de estar ${LIM}% acima)${probTxt(g)}`:
+  g.cat==="fraco"?`ajustada ${p2(g.adj)} ≤ referência × 0,${100-LIM} (${p2(g.ref*(1-MODELO.limiar))}) e, separadamente, pelo menos ${CONF}% de probabilidade de estar abaixo da referência (não de estar ${LIM}% abaixo)${probTxt(g)}`:
+  g.cat==="inter"?(g.adj>=g.ref*(1+MODELO.limiar)||g.adj<=g.ref*(1-MODELO.limiar)?`ajustada ${p2(g.adj)} passou de ${LIM}% de diferença, mas o modelo não chega a ${CONF}% de probabilidade de a área estar do mesmo lado da referência${probTxt(g)}`:`ajustada ${p2(g.adj)} entre ${p2(g.ref*(1-MODELO.limiar))} e ${p2(g.ref*(1+MODELO.limiar))} (menos de ${LIM}% de diferença da referência)`):
+  g.cat==="semaj"?"sem classificação: o ajuste está indisponível neste nível da área aberta":"sem votos válidos: fatia não calculável";
+function modeloTxt(f){
+  if(!f)return"sem modelo";
+  if(f.status!=="ok")return`ajuste indisponível neste nível da área aberta: ${f.motivo}.`;
+  return`Beta-Binomial ${MODELO.versao} (${MODELO.data}), por máxima verossimilhança com todas as ${fmt.format(f.unidades)} áreas deste nível na área aberta, somando ${fmt.format(f.totalN)} votos válidos, antes de qualquer busca ou filtro da tabela: α = ${n4c(f.alpha)}, β = ${n4c(f.beta)}; padrão m = ${p2(f.m)}; força k = α + β = ${num(f.k)} votos; convergiu em ${f.iter} passos.${f.avisos.length?" Aviso: "+f.avisos.join("; ")+".":""}`}
 const pp=x=>isFinite(x)?(x>=0?"+":"−")+Math.abs(x*100).toLocaleString("pt-BR",{minimumFractionDigits:1,maximumFractionDigits:1})+" p.p.":"–";
 const pctPeso=x=>!isFinite(x)?"–":x===0?"0%":x<0.0005?"<0,1%":(x*100).toLocaleString("pt-BR",{maximumFractionDigits:1,minimumFractionDigits:1})+"%"; // sempre 1 casa: as partes somam o total
-function indicador(g,abrir){const c=CAT[g.cat];return el("button",{type:"button",class:"ind "+c.c+(g.cat==="pot"?" pot":""),title:c.t+" · toque para ver a conta","aria-label":c.t,onclick:abrir},c.s,el("span",{class:"tx"},c.k))}
+// motivo do Intermediário: perto da referência, ou passou de 10% mas sem 90% de probabilidade
+const inconclusivo=g=>g.cat==="inter"&&isFinite(g.adj)&&(g.adj>=g.ref*(1+MODELO.limiar)-1e-12||g.adj<=g.ref*(1-MODELO.limiar)+1e-12);
+const rotulo=g=>g.cat==="inter"?(inconclusivo(g)?"Intermediário: inconclusivo pelo modelo":"Intermediário: próximo da referência"):CAT[g.cat].t;
+function indicador(g,abrir){const c=CAT[g.cat],inc=inconclusivo(g);return el("button",{type:"button",class:"ind "+c.c+(inc?" inc":""),title:rotulo(g)+" · toque para ver como foi calculado","aria-label":rotulo(g)+": ver como foi calculado",onclick:abrir},inc?"◌":c.s,el("span",{class:"tx"},inc?"Inconclusivo":c.k))}
 // a área aberta vista de cima: o indicador dela entre as vizinhas e no Ceará, e o peso nos votos dele
 function contexto(){
   const box=$("#ff-ctx"),A=S.caminho.at(-1);
   if(!A){box.hidden=true;return}
   const cima=S.caminho.slice(0,-1);let rs=S.linhas;for(const p of cima){const f=chaveDe[p.tipo];rs=rs.filter(r=>f(r)===p.k)}
   const pc=soma(rs).p,irmas=agrupa(rs,A.tipo);
-  const naCima=avalia(irmas.map(g=>calc({...g},pc)),pc).find(g=>g.k===A.k);
-  const noCE=avalia(irmas.map(g=>calc({...g},S.ufTot.p)),S.ufTot.p).find(g=>g.k===A.k);
+  const naCima=avalia(irmas.map(g=>calc({...g},pc)),pc,cima.map(p=>p.k).join("/"),A.tipo).find(g=>g.k===A.k);
+  const noCE=naCima&&reclass(naCima,S.ufTot.p);
   if(!naCima||!noCE){box.hidden=true;return}
-  const ind=g=>el("span",{class:"ind "+CAT[g.cat].c+(g.cat==="pot"?" pot":"")},CAT[g.cat].s+" "+CAT[g.cat].t);
+  const ind=g=>el("span",{class:"ind "+CAT[g.cat].c},CAT[g.cat].s+" "+CAT[g.cat].t);
   const cel=(rot,d,...v)=>el("div",{},el("span",{class:"cl"},rot,d),el("div",{class:"cv"},...v));
   const nomeCima=cima.length?cima.at(-1).nome:"Ceará";
+  const ajTxt=isFinite(naCima.adj)?`Fatia ajustada (modelo das ${fmt.format(naCima.fit.unidades)} áreas vizinhas): ${pct(naCima.adj)}.`:`Ajuste: ${modeloTxt(naCima.fit)}`;
   box.replaceChildren(
     cel(A.nome,dica(`Em ${A.nome}, ${pct(naCima.p)} dos votos válidos foram para ele (${fmt.format(naCima.v)} de ${fmt.format(naCima.val)}).`,`Esses ${fmt.format(naCima.v)} votos são ${pctPeso(naCima.v/S.ufTot.v)} de todos os votos que ele teve no Ceará: é o peso de ${A.nome} no resultado dele.`),
       el("b",{},pct(naCima.p)),`dos válidos · ${pctPeso(naCima.v/S.ufTot.v)} dos votos dele no Ceará`),
-    ...(cima.length?[cel(`Comparado com ${nomeCima} (${pct(pc)})`,dica(`Compara ${A.nome} com as outras áreas ${prepos(cima.at(-1))}. Lá, ele teve ${pct(pc)} dos votos válidos; aqui, ${pct(naCima.p)}: diferença de ${pp(naCima.p-pc)} (pontos percentuais).`,`${CAT[naCima.cat].s} ${CAT[naCima.cat].t}: ${naCima.cat==="forte"?"10% ou mais acima":naCima.cat==="inter"?"menos de 10% de diferença":"10% ou mais abaixo"} da referência.`),ind(naCima),el("b",{},pp(naCima.p-pc)))]:[]),
-    cel(`Comparado com o Ceará (${pct(S.ufTot.p)})`,dica(`Compara ${A.nome} com o resultado dele no estado inteiro: ${pct(S.ufTot.p)} no Ceará contra ${pct(noCE.p)} aqui, diferença de ${pp(noCE.p-S.ufTot.p)}.`,`Serve para não se enganar: uma área pode ser forte dentro da região e ainda assim fraca no geral.`),ind(noCE),el("b",{},pp(noCE.p-S.ufTot.p))));
+    ...(cima.length?[cel(`Comparado com ${nomeCima} (${pct(pc)})`,dica(`Compara ${A.nome} com as outras áreas ${prepos(cima.at(-1))}. Lá (incluindo ${A.nome}), ele teve ${pct(pc)} dos votos válidos; aqui, ${pct(naCima.p)}: diferença de ${pp(naCima.p-pc)} (pontos percentuais).`,ajTxt,`${CAT[naCima.cat].s} ${CAT[naCima.cat].t}: ${regraTxt(naCima)}.`),ind(naCima),el("b",{},pp(naCima.p-pc)))]:[]),
+    cel(`Comparado com o Ceará (${pct(S.ufTot.p)})`,dica(`Compara ${A.nome} com o resultado dele no estado inteiro (incluindo ${A.nome}): ${pct(S.ufTot.p)} no Ceará contra ${pct(noCE.p)} aqui, diferença de ${pp(noCE.p-S.ufTot.p)}.`,ajTxt,`${CAT[noCE.cat].s} ${CAT[noCE.cat].t}: ${regraTxt(noCE)}.`,`Serve para não se enganar: uma área pode ser forte dentro da região e ainda assim fraca no geral.`),ind(noCE),el("b",{},pp(noCE.p-S.ufTot.p))));
   box.hidden=false;
 }
+// "Como foi calculado?": numerador, denominador, referência, fórmula, parâmetros e versão (manual, seção 13)
 function contaTexto(g,nomeRef){
-  const c=CAT[g.cat], aj=Math.abs(g.adj-g.p)>=0.0005;
-  return [`Aqui ele teve `,el("b",{},fmt.format(g.v)),` de ${fmt.format(g.val)} votos válidos (`,el("b",{},pct(g.p)),`). `,
-    `Referência ${nomeRef}: ${pct(g.ref)}; diferença de `,el("b",{},pp(g.p-g.ref)),` `,
-    aj?`Como a área tem ${g.val<300?"poucos":"menos"} votos válidos, a fatia ajustada pelo tamanho fica em ${pct(g.adj)}. `:"",
-    `Resultado: `,el("b",{},c.s+" "+c.t),g.cat==="pot"?` (está entre as áreas fracas que, juntas, concentram metade dos votos que faltaram para ele chegar à referência). Pela fatia observada, faltaram ${fmt.format(g.espaco)} votos para ele chegar à referência aqui.`:g.cat==="fraco"&&g.espaco?`. Pela fatia observada, faltaram ${fmt.format(g.espaco)} votos para ele chegar à referência aqui.`:". ",
-    ` Peso: ${pctPeso(g.peso)} dos votos dele e ${pctPeso(g.eleit)} dos votos válidos da área aberta.`,
-    ...(()=>{const po=posicao(g),cp=comparec(g),x=[];if(po)x.push(` Posição aqui: `,el("b",{},po.pos+"º"),` (${po.txt}).`);if(cp)x.push(` Comparecimento: ${pct(cp.c)} dos aptos; brancos e nulos: ${pct(cp.bn)} dos votos.`);return x})()]}
-const badge=ind=>el("span",{class:"badge "+classe(ind)},ROT[classe(ind)]);
+  const c=CAT[g.cat],f=g.fit,ok=f&&f.status==="ok";
+  const L=[["Fatia observada",[el("b",{},fmt.format(g.v))," votos do candidato ÷ ",el("b",{},fmt.format(g.val))," votos válidos = ",el("b",{},g.val?p2(g.p):"não calculável")]],
+    ["Referência",[`fatia dele ${nomeRef}: ${p2(g.ref)} (a conta inclui esta área)`]],
+    ["Diferença observada",[el("b",{},pp(g.p-g.ref))," (observada − referência)"]],
+    ["Fatia ajustada",ok&&g.val?[`(votos + α) ÷ (válidos + α + β) = (${fmt.format(g.v)} + ${n4c(f.alpha)}) ÷ (${fmt.format(g.val)} + ${n4c(f.alpha)} + ${n4c(f.beta)}) = `,el("b",{},p2(g.adj)),` · peso da própria área no ajuste: ${pctPeso(g.val/(g.val+f.k))}`,...(()=>{const iv=intervalo(g.v,g.val,f);return iv?[` · intervalo de 90% do modelo: ${p2(iv[0])} a ${p2(iv[1])} (não é margem de erro oficial)`]:[]})()]:[ok?"não calculável (sem votos válidos)":`indisponível: ${f?f.motivo:"sem modelo"}.`]],
+    ...(ok&&g.val?[["Diferença ajustada",[el("b",{},pp(g.adj-g.ref)),` (ajustada − referência = ${p2(g.adj)} − ${p2(g.ref)})`]]]:[]),
+    ["Indicador",[el("b",{},(inconclusivo(g)?"◌ ":c.s+" ")+rotulo(g)),": "+regraTxt(g)]],
+    ["Peso",[`${pctPeso(g.peso)} dos votos dele e ${pctPeso(g.eleit)} dos votos válidos da área aberta`]]];
+  const po=posicao(g),cp=comparec(g);
+  if(po)L.push(["Posição",[el("b",{},po.pos+"º"),` (${po.txt})`]]);
+  if(cp)L.push(["Comparecimento",[`${pct(cp.c)} dos aptos; brancos e nulos: ${pct(cp.bn)} ${unVoto(cp)}${cp.e>1?` (cada eleitor fez ${cp.e} escolhas para Senador)`:""}`]]);
+  L.push(["Modelo",[modeloTxt(f)]]);
+  return[el("div",{class:"conta"},el("b",{class:"conta-t"},"Como foi calculado?"),el("dl",{},...L.flatMap(([t,v])=>[el("dt",{},t),el("dd",{},...v)])))]}
 
 /* ---------- desenho ---------- */
 function desenha(){
@@ -645,8 +879,8 @@ function desenha(){
   $("#f-foto").style.backgroundImage=i.foto?`url("${i.foto}")`:"";
   $("#f-foto").hidden=!i.foto;
   $("#f-nome").replaceChildren(i.nome,i.sg&&!i.leg?el("span",{class:"pt"}," - "+i.sg):"");
-  $("#f-sub").replaceChildren(el("span",{class:"num"},String(c.nr))," ",CARGOS[c.cargo]||c.ds_cargo," · ",i.leg?"votos dados só ao número do partido":titulo(i.completo));
-  $("#f-situ").hidden=!i.st;$("#f-situ").textContent=i.st;
+  $("#f-sub").replaceChildren(el("span",{class:"num"},String(c.nr))," ",CARGOS[c.cargo]||c.ds_cargo," · dados do 1º turno · ",i.leg?"votos dados só ao número do partido":titulo(i.completo));
+  $("#f-situ").hidden=!i.st;$("#f-situ").textContent=/2º turno/i.test(i.st)?"Situação: vai ao 2º turno":"Situação: "+i.st;$("#f-situ").title="Situação da candidatura no TSE. Os números desta página são do 1º turno (4/10/2026).";
   const rank=S.cands.filter(x=>x.cargo===c.cargo&&!(String(x.nr).length===2&&x.cargo>=6)).sort((a,b)=>b.total-a.total).findIndex(x=>x.nr===c.nr)+1;
   const reg=agrupa(S.linhas,"regiao").map(g=>calc(g,S.ufTot.p)).sort((a,b)=>b.ind-a.ind)[0];
   const munsCom=new Set(S.linhas.filter(r=>r.v>0).map(r=>r.mun)).size;
@@ -656,18 +890,63 @@ function desenha(){
       kpi("Votos "+em,fmt.format(a.v),`${pct(a.p)} dos votos válidos · ${pctPeso(a.v/S.ufTot.v)} dos votos dele no Ceará`,true),
       po?kpi("Posição "+em,po.pos+"º",po.txt+(S.riv.length+1<S.cands.filter(x=>x.cargo===c.cargo).length?` (entre os ${S.riv.length+1} mais votados no Ceará)`:""),false,dica(`Colocação dele ${em} comparando os votos dele com os dos ${S.riv.length} concorrentes mais votados do cargo no Ceará.`,"Para deputados a posição não é calculada: são centenas de candidatos.")):
         kpi("Votos válidos "+em,fmt.format(a.val),`do cargo ${CARGOS[c.cargo]||""}`.trim()),
-      cp?kpi("Comparecimento "+em,pct(cp.c),`abstenção ${pct(1-cp.c)} · brancos e nulos ${pct(cp.bn)} dos votos`,false,dica(`Comparecimento: dos ${fmt.format(a.aptos)} eleitores aptos ${em}, ${fmt.format(a.tot)} votaram para este cargo.`,`Abstenção: quem estava apto e não votou. Brancos e nulos: dos votos dados, quantos não foram para nenhum candidato (${fmt.format(a.tot-a.val)}).`)):kpi("Comparecimento","–",""),
+      cp?kpi("Comparecimento "+em,pct(cp.c),`abstenção ${pct(1-cp.c)} · brancos e nulos ${pct(cp.bn)} ${unVoto(cp)}`,false,dica(cp.e>1?`Comparecimento: para Senador cada eleitor fez ${cp.e} escolhas; ${fmt.format(a.tot)} escolhas ÷ ${cp.e} = ${fmt.format(Math.round(cp.eleit))} eleitores, de ${fmt.format(a.aptos)} aptos ${em}.`:`Comparecimento: dos ${fmt.format(a.aptos)} eleitores aptos ${em}, ${fmt.format(a.tot)} votaram para este cargo.`,`Abstenção: quem estava apto e não votou. Brancos e nulos: dos votos dados, quantos não foram para nenhum candidato (${fmt.format(a.tot-a.val)}).`)):kpi("Comparecimento","–",""),
       kpi("No Ceará",fmt.format(S.ufTot.v)+" votos",`${pct(S.ufTot.p)} dos válidos · ${rank>0?rank+"º no Ceará":""}`));
   } else $("#kpis").replaceChildren(
     kpi("Votos no Ceará",fmt.format(S.ufTot.v),"dos votos válidos: "+pct(S.ufTot.p),true),
     kpi("Posição no Ceará",rank>0?rank+"º no Ceará":"–","entre "+S.cands.filter(x=>x.cargo===c.cargo&&!(String(x.nr).length===2&&x.cargo>=6)).length+" candidatos, pelos votos no estado"),
-    (()=>{const cp=comparec(S.ufTot);return cp?kpi("Comparecimento no Ceará",pct(cp.c),`abstenção ${pct(1-cp.c)} · brancos e nulos ${pct(cp.bn)} dos votos · voto em ${munsCom} de ${Object.keys(S.muns).length} municípios`):kpi("Teve voto em",munsCom+" de "+Object.keys(S.muns).length,"municípios")})(),
+    (()=>{const cp=comparec(S.ufTot);return cp?kpi("Comparecimento no Ceará",pct(cp.c),`abstenção ${pct(1-cp.c)} · brancos e nulos ${pct(cp.bn)} ${unVoto(cp)} · voto em ${munsCom} de ${Object.keys(S.muns).length} municípios`):kpi("Teve voto em",munsCom+" de "+Object.keys(S.muns).length,"municípios")})(),
     kpi("Região mais forte",reg?reg.nome:"–",reg?pct(reg.p)+" dos válidos · média estado "+pct(S.ufTot.p):""));
   cadeiras();
-  {const sc=S.linhas.filter(r=>r.lat==null),locs=new Set(S.linhas.map(r=>chaveDe.local(r))).size;
-   $("#cobertura").textContent=`Cobertura da base: ${fmt.format(S.linhas.length)} seções em ${fmt.format(locs)} locais de votação e ${Object.keys(S.muns).length} municípios. ${sc.length?`${fmt.format(sc.length)} seções (${pct(soma(sc).val/S.ufTot.val)} dos votos válidos) não têm coordenada do local: ficam fora do mapa, mas entram em todas as contas.`:""} Comparecimento = votos do cargo ÷ eleitores aptos da seção; brancos e nulos = votos do cargo − votos válidos.`}
+  resumoTxt(rank);
+  qualidade();
   tabela();
   salvaUrl();
+}
+/* resumo automático: só regras fixas e números calculados (manual, seção 14); falta de dado = frase omitida */
+function resumoTxt(rank){
+  const c=S.cand,nome=info(c).nome,b=(...x)=>el("b",{},...x),out=[];
+  if(!S.caminho.length){const a=S.ufTot;
+    if(a.val)out.push(`No Ceará, `,b(nome),` recebeu `,b(fmt.format(a.v)),` de ${fmt.format(a.val)} votos válidos (`,b(pct(a.p)),`)${rank>0?`, ${rank}º lugar no cargo`:""}.`);
+  }else{
+    const A=S.caminho.at(-1),cima=S.caminho.slice(0,-1);let rc=S.linhas;for(const p of cima){const f=chaveDe[p.tipo];rc=rc.filter(r=>f(r)===p.k)}
+    const a=soma(linhasDoCaminho()),usaCE=S.ref==="uf"||!cima.length,pr=usaCE?S.ufTot.p:soma(rc).p,nr=usaCE?"no Ceará":prepos(cima.at(-1)),porq=S.ref==="uf"?"escolhida em “Comparar com: Ceará”":cima.length?"a área de cima, porque “Comparar com” está em Área aberta":"a área de cima";
+    if(a.val){out.push(`${prepos(A).replace(/^./,x=>x.toUpperCase())}, `,b(nome),` recebeu `,b(fmt.format(a.v)),` de ${fmt.format(a.val)} votos válidos (`,b(pct(a.p)),`). `);
+      if(isFinite(pr)){const d=(a.p-pr)*100,dr=Math.round(Math.abs(d)*10)/10;
+        out.push(dr===0?`O resultado ficou igual à referência ${nr} (${pct(pr)}; ${porq}). `:[`O resultado ficou `,b(dr.toLocaleString("pt-BR",{minimumFractionDigits:1})+" p.p. "+(d>0?"acima":"abaixo")),` da referência ${nr} (${pct(pr)}; ${porq}). `])}
+      if(S.ufTot.v)out.push(`Esses votos são ${pctPeso(a.v/S.ufTot.v)} de todos os votos dele no Ceará.`)}
+  }
+  $("#resumo-txt").replaceChildren(...out.flat());$("#resumo-txt").hidden=!out.length}
+/* qualidade e cobertura (manual, seções 3, 11 e 17) */
+function qualidade(){
+  if(!S.cand||!S.ufTot||!S.G)return;
+  const c=S.cand,nome=info(c).nome,it=[],li=(cls,st,...t)=>el("li",{},el("span",{class:"st "+cls},st),el("span",{},...t.flat())),b=x=>el("b",{},x);
+  const of=S.ofic[c.cargo];
+  if(!of||of instanceof Promise)it.push(li("pd","Pendente","Conferindo com o total oficial do TSE…"));
+  else if(!of.ok)it.push(li("pd","Pendente",`Não foi possível ler o total oficial do TSE agora (${of.erro}); a conferência fica pendente.`));
+  else{
+    const cv=concilia(S.ufTot.v,of.votos[c.nr]),cvl=concilia(S.ufTot.val,of.validos||null);
+    const linha=(r,cc,soma,ofi)=>cc.status==="conciliado"?li("ok","Conferido",`${r}: soma das seções `,b(fmt.format(soma)),` = total oficial do TSE no Ceará.`):
+      cc.status==="divergente"?li("er","Divergência",`${r}: soma das seções `,b(fmt.format(soma)),`, total oficial `,b(fmt.format(ofi)),` (diferença de ${fmt.format(cc.dif)}). Os números da página são os das seções.`):li("pd","Pendente",`${r}: total oficial não encontrado.`);
+    it.push(linha(`Votos de ${nome}`,cv,S.ufTot.v,of.votos[c.nr]),linha(`Votos válidos do cargo`,cvl,S.ufTot.val,of.validos));
+    if(cvl.status==="divergente"){
+      // origem: números com voto na base por seção que não batem com o EA20 (ex.: candidatura cujos votos o TSE não conta como válidos)
+      const difs=S.cands.filter(x=>x.cargo===c.cargo).map(x=>({nr:x.nr,nome:x.nome,sec:x.total,ofi:of.votos[x.nr]})).filter(x=>x.ofi==null?x.sec>0:x.sec!==x.ofi);
+      const somaD=difs.reduce((t,x)=>t+(x.sec-(x.ofi||0)),0);
+      it.push(li(somaD===cvl.dif?"av":"pd",somaD===cvl.dif?"Explicada":"Em análise",difs.length?[`Origem: `,...difs.map((x,i)=>[i?"; ":"",b(`nº ${x.nr}`),` (${titulo(x.nome)}): ${fmt.format(x.sec)} votos na base por seção${x.ofi==null?", mas o número não aparece entre os candidatos com votos válidos no arquivo oficial do TSE (votos não computados como válidos)":`, ${fmt.format(x.ofi)} no TSE`}`]).flat(),somaD===cvl.dif?`. Isso explica toda a diferença de ${fmt.format(cvl.dif)}. A fatia de cada candidato muda menos de 0,01 p.p.`:`. Soma dessas diferenças: ${fmt.format(somaD)} (diferença total ${fmt.format(cvl.dif)}).`]:"Nenhum número com diferença individual foi encontrado; a origem fica em análise."));
+    }
+  }
+  let esp=0;for(const zs of Object.values(S.G.sec||{}))for(const ss of Object.values(zs))esp+=Object.keys(ss).length;
+  const semLoc=S.linhas.filter(r=>r.nrl==null).length;
+  it.push(li(semLoc?"av":"ok",semLoc?"Atenção":"Completo",b(fmt.format(S.linhas.length)),` seções com votos deste cargo; ${fmt.format(esp)} seções no cadastro de locais de votação do TSE.`,semLoc?` ${fmt.format(semLoc)} seções sem local correspondente: entram em todos os totais, mas não no recorte por local ou bairro.`:""));
+  const sb=S.linhas.filter(r=>/^\(?sem bairro\)?$/i.test(r.bairro)),vb=soma(sb);
+  it.push(li(sb.length?"av":"ok",sb.length?"Incompleto":"Completo",sb.length?[`Recorte por bairro: `,b(fmt.format(sb.length)),` seções (${pct(vb.val/S.ufTot.val)} dos votos válidos) sem bairro informado pelo TSE aparecem como "Sem Bairro". Os votos continuam nos totais.`]:"Recorte por bairro: todas as seções têm bairro do local de votação."));
+  const sc=S.linhas.filter(r=>r.lat==null),locs=new Set(S.linhas.map(r=>chaveDe.local(r))).size;
+  it.push(li(sc.length?"av":"ok",sc.length?"Atenção":"Completo",`Mapa, Ceará: ${fmt.format(locs)} locais de votação.`,sc.length?` ${fmt.format(sc.length)} seções (${pct(soma(sc).val/S.ufTot.val)} dos votos válidos) sem coordenada ficam fora do mapa, mas entram em todas as contas.`:""));
+  if(S.caminho.length){const A=S.caminho.at(-1),ra=linhasDoCaminho(),sa=ra.filter(r=>r.lat==null),va=soma(ra).val;
+    it.push(li(sa.length?"av":"ok",sa.length?"Atenção":"Completo",`Mapa, ${A.nome}: `,sa.length?[b(fmt.format(sa.length)),` de ${fmt.format(ra.length)} seções (${pct(va?soma(sa).val/va:NaN)} dos votos válidos da área) sem coordenada, fora do mapa.`]:`todas as ${fmt.format(ra.length)} seções têm coordenada.`))}
+  it.push(li("pd","Versão",`Dados: TSE, votação por seção${S.geracao?` (arquivo gerado em ${S.geracao})`:""}. Indicador: modelo ${MODELO.versao} (${MODELO.data}). Comparecimento = votos do cargo ÷ aptos (Senador: ÷ 2, porque cada eleitor fez 2 escolhas); brancos e nulos = votos do cargo − válidos.`));
+  $("#qual-l").replaceChildren(...it);
 }
 const kpi=(r,v,s,big,d)=>el("div",{class:"kpi"+(big?" big":"")},el("span",{class:"kr"},r,d||null),el("b",{},v),el("small",{},s||""));
 
@@ -704,47 +983,49 @@ function tabela(){
   const tipo=S.ffNivel, ref=S.ref==="pai"?pai.p:S.ufTot.p, nomeRef=S.ref==="pai"&&prof?prepos(S.caminho.at(-1)):"no Ceará";
   document.querySelectorAll("#ref button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===S.ref));
   document.querySelectorAll("#ff-nivel button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===tipo));
-  const piso=Math.min(PISO[tipo]??80,Math.max(30,Math.round(pai.val*0.02)));
   const dondeTxt=prof?prepos(S.caminho.at(-1)).replace(/^em /,"de ").replace(/^no /,"do ").replace(/^na /,"da "):"do Ceará";
   $("#ff-sub").textContent=`${PLURAL[tipo][0].toUpperCase()+PLURAL[tipo].slice(1)} ${dondeTxt}, do melhor para o pior desempenho. Referência: o resultado do candidato ${nomeRef} (${pct(ref)} dos válidos). O indicador considera a fatia de votos e o tamanho de cada área.${tipo!=="secao"?" Toque numa linha para abrir; toque no indicador para ver a conta.":" Toque no indicador para ver a conta."}`;
   trilha("#ff-trilha",pai);
   contexto();
   // ranking: posição pela fatia ajustada pelo tamanho (do melhor para o pior)
-  const gs=avalia(agrupa(rs,tipo).map(g=>calc(g,ref)),ref);
-  const rk=gs.filter(g=>isFinite(g.adj)).sort((a,b)=>b.adj-a.adj||b.v-a.v);
+  const gs=avalia(agrupa(rs,tipo).map(g=>calc(g,ref)),ref,chaveCam,tipo),fit=gs.fit,okFit=fit.status==="ok";
+  // ranking: pela fatia ajustada; sem ajuste, pela fatia observada (avisado no quadro do modelo)
+  const rk=gs.filter(g=>g.val>0).sort((a,b)=>(okFit?b.adj-a.adj:b.p-a.p)||b.v-a.v);
+  {const box=$("#tb-modelo");box.classList.toggle("ind-off",!okFit);
+   box.replaceChildren(...(okFit?[el("b",{},"Ajuste pelo tamanho: "),`modelo ${MODELO.versao}, estimado com as ${fmt.format(fit.unidades)} ${PLURAL[tipo]} ${dondeTxt}. `,el("details",{class:"md"},el("summary",{},"Parâmetros e fórmula"),el("p",{},modeloTxt(fit)," Fatia ajustada = (votos + α) ÷ (válidos + α + β). A referência exibida não entra no modelo; ela só define o indicador."))]:
+     [el("b",{},"Ajuste indisponível neste nível da área aberta: "),fit.motivo+". ","A tabela mostra só a fatia observada, sem indicador; o # segue a fatia observada. ",
+      fit.motivo.startsWith("as diferenças")?"Na prática: daqui não dá para dizer que uma área foi melhor que outra.":""]))}
   rk.forEach((g,i)=>g.rank=i+1);
   for(const g of gs)if(!g.rank)g.rank=null;
   // faixas de resumo por grupo
   for(const g of gs){const po=posicao(g);g.pos=po?po.pos:null;g.posTxt=po&&po.outro?(po.pos===1?"+":"−")+fmt.format(Math.abs(g.v-po.outro.v)):""}
   document.querySelector(".tb th.c-o").hidden=!S.riv;
-  const somaCat={};for(const g of gs){const x=somaCat[g.cat]||(somaCat[g.cat]={n:0,peso:0,eleit:0,v:0,falt:0});x.n++;x.peso+=g.peso;x.eleit+=g.eleit;x.v+=g.v;x.falt+=g.espaco||0}
+  const somaCat={};for(const g of gs){const x=somaCat[g.cat]||(somaCat[g.cat]={n:0,peso:0,eleit:0,v:0,inc:0});x.n++;x.peso+=g.peso;x.eleit+=g.eleit;x.v+=g.v;if(inconclusivo(g))x.inc++}
   if(S.tbCat&&!somaCat[S.tbCat])S.tbCat=null;
   // faixas: quantas áreas há em cada grupo e que parte dos votos dele e dos votos válidos da área aberta elas reúnem
-  const cats=ORDEM_CAT.filter(k=>somaCat[k]&&k!=="sem"), areaNome=prof?S.caminho.at(-1).nome:"Ceará", somaCat_tot={v:gs.reduce((t,g)=>t+g.v,0)};
+  const cats=ORDEM_CAT.filter(k=>somaCat[k]&&k!=="sem"&&k!=="semaj"), areaNome=prof?S.caminho.at(-1).nome:"Ceará", somaCat_tot={v:gs.reduce((t,g)=>t+g.v,0)};
   const unid=n=>`${fmt.format(n)} ${n===1?SING[tipo]:PLURAL[tipo]}`, fem=["regiao","zona","secao"].includes(tipo);
   if(cats.length<=1){const k=cats[0];
-    $("#tb-resumo").replaceChildren(el("p",{class:"rs-tit so"},k?`${fem?"Todas as":"Todos os"} ${unid(gs.length)} ficaram no mesmo grupo: ${CAT[k].s} ${CAT[k].t}.`:"Sem votos válidos para comparar."))}
+    $("#tb-resumo").replaceChildren(...(okFit?[el("p",{class:"rs-tit so"},k?`${fem?"Todas as":"Todos os"} ${unid(gs.length)} ficaram no mesmo grupo: ${CAT[k].s} ${CAT[k].t}.`:"Sem votos válidos para comparar.")]:[]))}
   else{
     const deA=prof?prepos(S.caminho.at(-1)).replace(/^em /,"de ").replace(/^no /,"do ").replace(/^na /,"da "):"do Ceará", emA=prof?prepos(S.caminho.at(-1)):"no Ceará";
     const refTxt=`${pct(ref)} dos votos válidos ${S.ref==="pai"?emA:"no Ceará"}`;
-    const oque={forte:`a fatia de votos dele ficou 10% ou mais ACIMA da referência (${refTxt}).`,
-      inter:`a fatia de votos dele ficou PERTO da referência (${refTxt}): menos de 10% acima ou abaixo.`,
-      pot:`a fatia de votos dele ficou 10% ou mais ABAIXO da referência (${refTxt}) e onde mais votos faltaram para ele chegar a ela: juntos, esses lugares concentram metade dos votos que faltaram em todos os lugares fracos. É uma medida de tamanho, não uma previsão de que o voto vá mudar.`,
-      fraco:`a fatia de votos dele ficou 10% ou mais ABAIXO da referência (${refTxt}), em lugares onde faltaram menos votos.`};
+    const oque={forte:`duas condições: a fatia ajustada ficou ${LIM}% ou mais ACIMA da referência (${refTxt}) e o modelo dá pelo menos ${CONF}% de probabilidade de a fatia da área estar acima da referência (não de estar ${LIM}% acima).`,
+      inter:`a fatia ajustada ficou a menos de ${LIM}% da referência (${refTxt}), ou passou de ${LIM}% mas sem ${CONF}% de probabilidade de estar do mesmo lado da referência.`,
+      fraco:`duas condições: a fatia ajustada ficou ${LIM}% ou mais ABAIXO da referência (${refTxt}) e o modelo dá pelo menos ${CONF}% de probabilidade de a fatia da área estar abaixo da referência (não de estar ${LIM}% abaixo).`};
     const nomeC=titulo(info(S.cand).nome), areaA=prof?S.caminho.at(-1).nome:"Ceará", totA=gs.reduce((t,g)=>t+g.val,0);
     const barra=(rot,v,cor,d)=>el("div",{class:"rs-bar"},el("span",{title:rot},rot),el("i",{},el("em",{style:`width:${Math.min(100,v*100)}%;background:${cor}`})),el("b",{},pctPeso(v)),d);
     const lugares=(n)=>`${fem?(n===1?"desta":"destas"):(n===1?"deste":"destes")} ${n===1?SING[tipo]:fmt.format(n)+" "+PLURAL[tipo]}`;
     $("#tb-resumo").replaceChildren(
-      el("p",{class:"rs-tit"},`${fem?"As":"Os"} ${unid(gs.length)} ${deA} em ${cats.length} grupos. Em cada grupo: primeiro o tamanho dele (quanto dos votos ${deA} é dado ali), depois quanto dos votos de ${nomeC} veio dali. Toque num grupo para ver só ele na tabela.`),
+      el("p",{class:"rs-tit"},`Resumo de toda a área aberta (${unid(gs.length)}; não segue a busca nem o filtro). Barras: tamanho do grupo e parte dos votos de ${nomeC}. Linha: fatia observada do grupo × referência (${pct(ref)} ${S.ref==="pai"?emA:"no Ceará"}). Toque num grupo para filtrar a tabela.`),
       ...cats.map(k=>{const x=somaCat[k],c=CAT[k],corB=c.c==="forte"?"var(--accent)":c.c==="fraco"?"var(--red)":"var(--ink-2)";
-        const mais=x.peso>x.eleit*1.02,menos=x.peso<x.eleit*.98;
         const card=el("div",{class:"rs-card "+c.c,role:"button",tabindex:"0","aria-pressed":String(S.tbCat===k)},
-          el("div",{class:"rh"},el("span",{},`${c.s} ${c.t} `,el("small",{},`· ${fmt.format(x.n)} ${x.n===1?SING[tipo]:PLURAL[tipo]}`)),
-            dica(`${c.s} ${c.t}: ${PLURAL[tipo]} onde ${oque[k]}`,...(k==="pot"||k==="fraco")&&x.falt?[`Pela fatia observada, faltaram ${fmt.format(x.falt)} votos para ${nomeC} chegar à referência nestes lugares.`]:[])),
-          barra(`Votos ${emA}`,x.eleit,"var(--ink-3)",dica(`De todos os votos válidos ${deA} (${fmt.format(totA)}, somando todos os candidatos), ${pctPeso(x.eleit)} (${fmt.format(Math.round(x.eleit*totA))}) foram dados ${lugares(x.n).replace(/^d/,"n")}.`,`É o tamanho do grupo dentro ${deA.replace(/^de /,"de ")}: não depende do candidato.`)),
-          barra(`Votos de ${nomeC}`,x.peso,corB,dica(`Dos votos que ${nomeC} teve ${emA} (${fmt.format(somaCat_tot.v)}), ${pctPeso(x.peso)} (${fmt.format(x.v)}) saíram ${lugares(x.n).replace(/^d/,"d")}.`,prof?`É a parte dos votos dele ${emA}, não dos votos dele no Ceará inteiro.`:"É a parte de todos os votos dele no Ceará.")),
-          (()=>{const vg=x.eleit*totA,fg=vg?x.v/vg:NaN,fA=totA?somaCat_tot.v/totA:NaN;
-            return el("div",{class:"rs-lei "+(mais?"up":menos?"dn":"eq")},`${mais?"↑":menos?"↓":"="} ${lugares(x.n).replace(/^d/,"N")}, ${nomeC} teve o aproveitamento de ${pct(fg)} dos votos; sendo um total de ${fmt.format(x.v)} votos, equivalente a ${pctPeso(x.v/S.ufTot.val)} dos votos válidos do Ceará.`)})());
+          el("div",{class:"rh"},el("span",{},`${c.s} ${c.t} `,el("small",{},`· ${fmt.format(x.n)} ${x.n===1?SING[tipo]:PLURAL[tipo]}${k==="inter"&&x.inc?` (${fmt.format(x.n-x.inc)} próximos da referência, ${fmt.format(x.inc)} inconclusivos ◌)`:""}`)),
+            dica(`${c.s} ${c.t}: ${PLURAL[tipo]} onde ${oque[k]}`)),
+          barra(`Votos ${emA}`,x.eleit,"var(--ink-3)",dica(`De todos os votos válidos ${deA} (${fmt.format(totA)}, somando todos os candidatos), ${pctPeso(x.eleit)} (${fmt.format(Math.round(x.eleit*totA))}) foram dados ${lugares(x.n).replace(/^d/,"n")}.`,`É o tamanho do grupo dentro ${deA.replace(/^de /,"de ")}: a soma dos votos válidos de todos os candidatos nestas áreas. Os votos de cada área não dependem do candidato, mas quais áreas entram neste grupo dependem da classificação dele.`)),
+          barra(`Votos de ${nomeC}`,x.peso,corB,dica(`Dos votos que ${nomeC} teve ${emA} (${fmt.format(somaCat_tot.v)}), ${pctPeso(x.peso)} (${fmt.format(x.v)}) saíram ${lugares(x.n).replace(/^d/,"d")}.`,prof?`É a parte dos votos dele ${emA}, não dos votos dele no Ceará inteiro.`:"É a parte de todos os votos dele no Ceará.",`Se esta barra for maior que a de cima, a fatia do grupo está acima da fatia dele ${emA}${S.ref==="uf"&&prof?" (a área aberta, não o Ceará: a referência do indicador é o Ceará e aparece na linha de baixo)":""}.`)),
+          (()=>{const vg=Math.round(x.eleit*totA),fg=vg?x.v/vg:NaN,d=fg-ref,dz=Math.abs(d)<0.0005,refN=S.ref==="pai"?emA:"no Ceará";
+            return el("div",{class:"rs-lei "+(dz?"eq":d>0?"up":"dn")},`${dz?"=":d>0?"↑":"↓"} Fatia observada do grupo: ${pct(fg)} (${fmt.format(x.v)} de ${fmt.format(vg)} votos válidos), ${dz?"igual à":pp(d)+" em relação à"} referência ${refN} (${pct(ref)}).`)})());
         const vai=()=>{S.tbCat=S.tbCat===k?null:k;S.tbMax=300;tabela();$("#tb-rola").scrollTop=0};
         card.addEventListener("click",vai);card.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();vai()}});
         return card}));
@@ -770,18 +1051,19 @@ function tabela(){
       el("td",{class:"c-n"},g.rank?g.rank+"º":"–"),
       el("td",{class:"c-a"},el("b",{},g.nome),
         (()=>{const sub=nomesCam.has(g.sub)?"":g.sub;return sub?el("small",{},sub):null})(),
-        el("small",{class:"mob"},`teve ${fmt.format(g.v)} de ${fmt.format(g.val)} · peso ${pctPeso(g.peso)}`)),
+        el("small",{class:"mob"},`teve ${fmt.format(g.v)} de ${fmt.format(g.val)}${isFinite(g.adj)?` · ajustada ${pct(g.adj)}`:""} · peso ${pctPeso(g.peso)}`)),
       el("td",{class:"c-d"},indicador(g,e=>{e.stopPropagation();det()})),
-      el("td",{class:"c-p"},el("b",{},pct(g.p))),
+      el("td",{class:"c-p"},el("b",{},g.val?pct(g.p):"–")),
+      el("td",{class:"c-j"},isFinite(g.adj)?pct(g.adj):"–"),
       el("td",{class:"c-v"},el("b",{},fmt.format(g.v)),el("small",{},"de "+fmt.format(g.val))),
       S.riv?el("td",{class:"c-o"},el("b",{},g.pos?g.pos+"º":"–"),g.posTxt?el("small",{},g.posTxt):null):null,
       el("td",{class:"c-w"},pctPeso(g.peso)));
     if(podeAbrir){const ir=()=>navega($("#ff-nivel"),()=>{S.caminho=caminhoAte(g)});tr.addEventListener("click",ir);tr.addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target===tr)ir()})}
     tr.addEventListener("mouseenter",()=>destaca(g));tr.addEventListener("mouseleave",()=>destaca(null));
     linhas.push(tr);
-    if(S.tbAberto===g.k)linhas.push(el("tr",{class:"det"},el("td",{colspan:"7"},...contaTexto(g,nomeRefCurto))));
+    if(S.tbAberto===g.k)linhas.push(el("tr",{class:"det"},el("td",{colspan:"8"},...contaTexto(g,nomeRefCurto))));
   }
-  $("#tb-corpo").replaceChildren(...(linhas.length?linhas:[el("tr",{},el("td",{colspan:"7",class:"vazio-g"},q?"Nada encontrado com essa busca.":"Nada para mostrar nesta área."))]));
+  $("#tb-corpo").replaceChildren(...(linhas.length?linhas:[el("tr",{},el("td",{colspan:"8",class:"vazio-g"},q?"Nada encontrado com essa busca.":"Nada para mostrar nesta área."))]));
   $("#tb-nota").hidden=tipo!=="bairro";
   const resto=filt.length-mostra.length, bm=$("#tb-mais");
   bm.hidden=resto<=0; if(resto>0)bm.textContent=`Mostrar mais ${fmt.format(Math.min(300,resto))} (faltam ${fmt.format(resto)})`;
@@ -793,8 +1075,54 @@ function tabela(){
   if(exP)ex.push(` Já ${exP.nome} teve ${pct(exP.p)}, mas com só ${fmt.format(exP.val)} votos válidos; ajustada pelo tamanho, a fatia fica em ${pct(exP.adj)} e a área aparece como ${CAT[exP.cat].s} ${CAT[exP.cat].t}.`);
   $("#exemplo").textContent=ex.join("");
   mapa(rs,ref,(q||S.tbCat)?filt:null);
+  distribuicao(filt,ref,tipo,nomeRefCurto,dondeTxt,(q||S.tbCat)?gs.length:0);
+  S.csv={linhas:filt,total:gs.length,tipo,ref,nomeRef:nomeRefCurto,fit,donde:dondeTxt,okFit};
   salvaUrl();
 }
+
+/* distribuição entre as áreas: mediana, quartis, heterogeneidade e histograma da fatia observada (manual, seções 4 e 13) */
+function distribuicao(gs,ref,tipo,nomeRef,donde,total){
+  const com=gs.filter(g=>g.val>0),ps=com.map(g=>g.p),N=com.length;
+  $("#dist-sub").textContent=`Fatia observada ${["regiao","zona","secao"].includes(tipo)?"das":"dos"} ${fmt.format(N)} ${PLURAL[tipo]} ${donde} com votos válidos${total?` que passam no filtro da tabela (${fmt.format(gs.length)} de ${fmt.format(total)}; a dispersão e a mediana são deste recorte)`:""}. Descreve como o voto se espalha; não explica causas.`;
+  if(N<2){$("#dist-k").replaceChildren();$("#dist-g").replaceChildren(el("p",{class:"hist-l"},"Poucas áreas para mostrar uma distribuição."));return}
+  const het=heterogeneidade(com.map(g=>({y:g.v,n:g.val}))),md=quantil(ps,.5),q1=quantil(ps,.25),q3=quantil(ps,.75);
+  const k=(r,v,s)=>el("div",{},el("span",{},r),el("b",{},v),s?el("small",{},s):null);
+  $("#dist-k").replaceChildren(k("Mediana",pct(md),`metade ${["regiao","zona","secao"].includes(tipo)?"das":"dos"} ${PLURAL[tipo]} abaixo`),k("Metade do meio",`${pct(q1)} a ${pct(q3)}`,"do 1º ao 3º quartil"),
+    k("Dispersão",(het*100).toLocaleString("pt-BR",{minimumFractionDigits:1,maximumFractionDigits:1})+" p.p.","desvio ponderado pelos válidos"),k("Referência",pct(ref),nomeRef));
+  // histograma: até 24 faixas de largura "redonda"
+  const lo=Math.min(...ps),hi=Math.max(...ps),span=Math.max(hi-lo,1e-4),passos=[.001,.002,.0025,.005,.01,.02,.025,.05,.1];
+  const w=passos.find(s=>span/s<=24)||.1,a0=Math.floor(lo/w)*w,nb=Math.max(1,Math.ceil((hi-a0)/w+1e-9));
+  const cont=new Array(nb).fill(0);for(const p of ps)cont[Math.min(nb-1,Math.floor((p-a0)/w+1e-9))]++;
+  const mx=Math.max(...cont),lab=$("#dist-g");
+  const leg=el("p",{class:"hist-l",role:"status"},"Toque ou passe o mouse numa barra para ver a faixa.");
+  const fx=i=>`${pct(a0+i*w)} a ${pct(a0+(i+1)*w)}`;
+  const bars=cont.map((n,i)=>{const bt=el("span",{class:"hb",role:"button",tabindex:"0","aria-label":`${n} ${n===1?SING[tipo]:PLURAL[tipo]} com fatia de ${fx(i)}`},el("i",{style:`height:${n?Math.max(2,n/mx*100):0}%`}));
+    const mostra=()=>{bars.forEach(x=>x.removeAttribute("aria-pressed"));bt.setAttribute("aria-pressed","true");leg.textContent=`${fmt.format(n)} ${n===1?SING[tipo]:PLURAL[tipo]} com fatia observada de ${fx(i)}.`};
+    bt.addEventListener("pointerenter",mostra);bt.addEventListener("click",mostra);bt.addEventListener("focus",mostra);return bt});
+  const h=el("div",{class:"hist",role:"group","aria-label":"Histograma da fatia observada"},...bars);
+  const xr=(ref-a0)/(nb*w);if(xr>=0&&xr<=1){h.append(el("div",{class:"ref"+(xr>.7?" dir":""),style:`left:${(xr*100).toFixed(2)}%`},el("span",{},"referência "+pct(ref))))}
+  lab.replaceChildren(h,el("div",{class:"hist-x"},el("span",{},pct(a0)),el("span",{},pct(a0+nb*w))),leg);
+}
+
+/* exportação da tabela (CSV com fonte, data, versão e notas metodológicas) */
+function baixaCSV(){
+  const X=S.csv;if(!X||!S.cand)return;
+  const f=X.fit,ok=f.status==="ok",n4=x=>x==null||!isFinite(x)?"":String(Math.round(x*1e6)/1e6).replace(".",","),q=s=>`"${String(s??"").replace(/"/g,'""')}"`;
+  const nome=info(S.cand).nome,area=S.caminho.length?S.caminho.map(p=>p.nome).join(" > "):"Ceará";
+  const cab=[`# Mapa de Votos 2026 - Ceará · Eleições 2026, 1º turno · ${CARGOS[S.cand.cargo]||""} · ${nome} (${S.cand.nr})`,
+    `# Área aberta: ${area} · Linhas: ${PLURAL[X.tipo]} ${X.donde} · Referência: fatia ${X.nomeRef} = ${n4(X.ref)}`,
+    `# Consulta: ${location.href}`,
+    `# Filtros da tabela: busca=${S.tbQ?JSON.stringify(S.tbQ):"(nenhuma)"}; grupo=${S.tbCat?CAT[S.tbCat].t:"(todos)"}; ordenação=${{rank:"ranking",nome:"área",p:"fatia observada",adj:"fatia ajustada",v:"votos",pos:"colocação do candidato",peso:"peso"}[S.tb.col]||S.tb.col} ${S.tb.dir>0?"crescente":"decrescente"}; linhas exportadas: ${X.linhas.length} de ${X.total}.`,
+    `# ordem_ranking = posição da área no ranking da página (pela fatia ${X.okFit?"ajustada":"observada"}, da maior para a menor). comparecimento = votos_do_cargo ÷ escolhas_por_eleitor ÷ aptos; abstencao = 1 − comparecimento; brancos_nulos = votos_do_cargo − votos_validos. colocacao_candidato = colocação do candidato na área entre ${S.riv?S.riv.length+1:0} candidatos do cargo (coluna "Posição" da página; vazia para deputados).`,
+    `# Fonte: TSE, Portal de Dados Abertos (votação por seção${S.geracao?`, arquivo gerado em ${S.geracao}`:""}; eleitorado por local de votação). Exportado em ${new Date().toLocaleString("pt-BR")}.`,
+    `# Modelo ${MODELO.versao} (${MODELO.data}): ${ok?`Beta-Binomial por máxima verossimilhança; alfa=${n4(f.alpha)}; beta=${n4(f.beta)}; unidades=${f.unidades}; validos=${f.totalN}`:`ajuste indisponível (${f.motivo})`}.`,
+    `# fatia_ajustada é estimativa do modelo, não resultado oficial. Forte/Fraco: duas condições separadas: ajustada ${LIM}% acima/abaixo da referência E probabilidade (modelo) >= ${CONF}% de estar acima/abaixo da referência (prob_acima_referencia; não é a probabilidade de passar dos ${LIM}%). Bairro = bairro do local de votação. Não indica preferência individual nem previsão.`];
+  const head=["ordem_ranking","area","detalhe","votos_candidato","votos_validos","fatia_observada","fatia_ajustada","prob_acima_referencia","referencia","diferenca_pp","indicador","peso_votos_candidato","colocacao_candidato","aptos","votos_do_cargo","escolhas_por_eleitor","eleitores_que_votaram","comparecimento","abstencao","brancos_nulos","brancos_nulos_pct","status_ajuste"];
+  const rows=X.linhas.map(g=>[g.rank??"",q(g.nome),q(g.sub),g.v,g.val,g.val?n4(g.p):"",n4(g.adj),n4(g.pa),n4(g.ref),g.val?n4((g.p-g.ref)*100):"",q(rotulo(g)),n4(g.peso),g.pos??"",...(()=>{const cp=comparec(g);return cp?[g.aptos,g.tot,cp.e,Math.round(cp.eleit),n4(cp.c),n4(1-cp.c),g.tot-g.val,n4(cp.bn)]:["","","","","","","",""]})(),ok?"ok":"indisponivel"]);
+  const txt="\ufeff"+[...cab,head.join(";"),...rows.map(r=>r.join(";"))].join("\r\n");
+  const a=el("a",{href:URL.createObjectURL(new Blob([txt],{type:"text/csv;charset=utf-8"})),download:`mapa-votos-${S.cand.cargo}-${S.cand.nr}-${X.tipo}.csv`});
+  document.body.append(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000)}
+$("#tb-csv").addEventListener("click",baixaCSV);
 
 /* ---------- mapa ---------- */
 let M=null,camada=null,ultimoEnq=null,MK=new Map(),MKmun=true,MKon=[];
@@ -812,22 +1140,24 @@ function mapa(rs,ref,sel){
   if(camada)camada.remove();camada=L.layerGroup().addTo(M);MK=new Map();
   const porMun=S.caminho.length<2&&!S.caminho.some(p=>p.tipo==="municipio");MKmun=porMun;
   // os votos de cada círculo somam todas as seções (com ou sem coordenada); a coordenada só define onde o círculo fica
-  const gs=avalia(agrupa(rs,porMun?"municipio":"local").map(g=>calc(g,ref)),ref);
+  const nv=porMun?"municipio":"local",gs=avalia(agrupa(rs,nv).map(g=>calc(g,ref)),ref,S.caminho.map(p=>p.k).join("/"),nv);
   const marca=sel?new Set(sel.flatMap(g=>g.rs.map(r=>porMun?String(r.mun):chaveDe.local(r)))):null;
   const max=Math.max(1,...gs.map(g=>g.v)),pts=[],ptsSel=[];let semCoord=0;
   for(const g of gs){const cc=g.rs.filter(x=>x.lat!=null&&x.lon!=null);if(!cc.length){semCoord++;continue}
     const r=cc[0],c=cor(CAT[g.cat].c);
     let w=0,lat=0,lon=0;for(const x of cc){const p=x.val||1;lat+=x.lat*p;lon+=x.lon*p;w+=p}lat/=w;lon/=w;
-    const fora=marca&&!marca.has(g.k),pot=g.cat==="pot";
-    const st={color:c,weight:pot?3:1,fillOpacity:fora?.06:pot?.35:.55,opacity:fora?.15:1};
+    const fora=marca&&!marca.has(g.k);
+    const st={color:c,weight:1,fillOpacity:fora?.06:.55,opacity:fora?.15:1};
     const mk=L.circleMarker([lat,lon],{radius:3+13*Math.sqrt(g.v/max),fillColor:c,...st});MK.set(g.k,{mk,c,w:st.weight,o:st.fillOpacity});
-    mk.bindPopup(el("div",{},el("b",{},g.nome),el("br"),porMun?r.reg:`${r.bairro} · ${S.muns[r.mun]}`,el("br"),`${fmt.format(g.v)} de ${fmt.format(g.val)} votos válidos (${pct(g.p)}) · ${CAT[g.cat].s} ${CAT[g.cat].t}`)).addTo(camada);
+    mk.bindPopup(el("div",{},el("b",{},g.nome),el("br"),porMun?r.reg:`${r.bairro} · ${S.muns[r.mun]}`,el("br"),`${fmt.format(g.v)} de ${fmt.format(g.val)} votos válidos (${pct(g.p)}${isFinite(g.adj)?`; ajustada ${pct(g.adj)}`:""}) · ${CAT[g.cat].s} ${CAT[g.cat].t}`)).addTo(camada);
     pts.push([lat,lon]);if(!fora)ptsSel.push([lat,lon])}
   const enq=S.caminho.map(p=>p.k).join("/")+"|"+(marca?[...marca].slice(0,50).join(","):"");
   const alvo=marca&&ptsSel.length?ptsSel:pts;
   if(alvo.length&&enq!==ultimoEnq){M.invalidateSize();M.fitBounds(alvo,{padding:[24,24],maxZoom:15})}
   const un=porMun?["município","municípios"]:["local","locais"];
+  const nvTab=S.ffNivel,difUn=nvTab!==(porMun?"municipio":"local");
   $("#leg-nivel").textContent=(porMun?"Um círculo por município":"Um círculo por local de votação")+" · maior = mais votos"+
+    (difUn?` · Atenção: o mapa mostra ${porMun?"municípios":"locais de votação"} e a tabela mostra ${PLURAL[nvTab]}; a cor de cada círculo vem do ajuste feito entre os ${porMun?"municípios":"locais"}, então pode diferir da classificação da linha da tabela`:"")+
     (marca?" · em destaque, só o que está na busca ou no filtro da tabela":"")+(semCoord?` · ${semCoord} ${semCoord===1?un[0]:un[1]} sem coordenada fora do mapa (os votos entram na tabela)`:"");
   ultimoEnq=enq;setTimeout(()=>M.invalidateSize(),60);
 }
