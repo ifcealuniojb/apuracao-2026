@@ -6,7 +6,7 @@ import PAGINA from "./pagina.html";
 import MAPA from "./mapa.json";
 export { Coletor } from "./coletor.js";
 
-const HASH = "6759745aa38067f8de78fe83e1a89a39335050957617aae481c56c6e090b09e3";
+const HASH = "b5c0d451ec9bdb4cbda5fb495e77c9341e31cc0d7e93c40e34412014cac3b77a";
 const COOKIE = "p2t";
 const HTML = PAGINA.replace("__MAPA__", JSON.stringify(MAPA));
 
