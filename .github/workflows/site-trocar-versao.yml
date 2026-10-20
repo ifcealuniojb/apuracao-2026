@@ -22,8 +22,8 @@ on:
         description: "Qual versão (para apagar o teste, escolha qualquer versão da página)"
         type: choice
         options:
-          - "mapa-votos/v2-bb-mle-1 · Mapa de Votos, manual de diagnóstico"
-          - "mapa-votos/v1-2026-10-14 · Mapa de Votos, indicador de 14/10 (no ar desde 14/10)"
+          - "mapa-votos/v2-bb-mle-1 · Mapa de Votos, manual de diagnóstico (no ar desde 20/10)"
+          - "mapa-votos/v1-2026-10-14 · Mapa de Votos, indicador de 14/10 (esteve no ar de 14/10 a 20/10)"
           - "apuracao/v1-2026-10-14-1430 · Apuração, versão 2026-10-14 14h30 (no ar desde 14/10)"
       destino:
         description: "Onde colocar"
