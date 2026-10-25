@@ -516,7 +516,7 @@ function renderMapa(){
   const leg = $("#leg");
   if (st.modoMapa === "apur") leg.innerHTML = `<span>0%<span class="grad" style="background:linear-gradient(90deg,${mistura("#056E4F",.12)},#056E4F)"></span>100% das seções apuradas</span><span><i style="background:${empty}"></i>sem votos ainda</span>`;
   else leg.innerHTML = (st.pres ? st.pres.cands.map(c => `<span><i style="background:${cor[c.sq]}"></i>${esc(c.nome)} lidera</span>`).join("") : "") +
-    `<span>cor mais forte = apuração mais adiantada</span><span><i style="background:transparent;border:2.5px solid var(--ink)"></i>2º turno para governador</span>`;
+    `<span>cor mais forte = apuração mais adiantada</span>` + (st.vista === "mundo" ? `<span><i style="background:var(--surface);border:1.5px solid var(--ink);border-radius:50%"></i>cidade com seção eleitoral</span>` : `<span><i style="background:transparent;border:2.5px solid var(--ink)"></i>2º turno para governador</span>`);
   const z = st.presUF.ZZ;
   if (z && z.pst > 0){ const [a] = [...z.cands].sort((x,y) => y.v - x.v); $("#ext").textContent = `Exterior: ${pct(z.pst)} apurado · ${a.nome} lidera com ${pct(a.pv)}`; }
   else $("#ext").textContent = "";
@@ -706,7 +706,8 @@ function mundoVista(v){
   st.vista = v;
   document.querySelectorAll("[data-vista]").forEach(x => x.setAttribute("aria-pressed", x.dataset.vista === v));
   const m = v === "mundo";
-  $("#svg").hidden = m; $("#svgM").hidden = !m; $("#zoomM").hidden = !m; $("#paises").hidden = !m; $("#mundoInfo").hidden = !m;
+  $("#svg").toggleAttribute("hidden", m); $("#svgM").toggleAttribute("hidden", !m); $("#zoomM").hidden = !m; // em SVG, só o atributo "hidden" funciona
+  $("#paises").hidden = !m; $("#mundoInfo").hidden = !m;
   $("#mapaTit").textContent = m ? "Presidente no exterior" : "Presidente por estado";
   $("#tip").hidden = true;
   if (m){ mundoPinta(); mundoCarrega(); } else clearTimeout(mun.timer);
