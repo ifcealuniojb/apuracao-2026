@@ -212,7 +212,7 @@ footer p{margin:4px 0}
     <div class="acoes">
       <button class="btn" id="bSom" type="button" aria-pressed="false">🔇 Som desligado</button>
       <button class="btn" id="bNotif" type="button">🔔 Ativar notificações</button>
-      <button class="btn" id="bPausa" type="button" aria-pressed="false">⏸ Pausar</button>
+      <button class="btn" id="bPausa" type="button" aria-pressed="false" hidden style="display:none">⏸ Pausar</button><!-- Pausar/Retomar tirado em 25/10/2026 (pedido do João) -->
       <button class="btn" id="bAtu" type="button">↻ Atualizar</button>
       <button class="btn" id="bSim" type="button" hidden style="display:none">▶ Simular</button><!-- simulação desligada no dia da eleição (25/10/2026) -->
     </div>
@@ -603,6 +603,8 @@ const TSE = "https://resultados.tse.jus.br/oficial/ele2026/";
 const TSE_UFS = "AC AL AM AP BA CE DF ES GO MA MG MS MT PA PB PE PI PR RJ RN RO RR RS SC SE SP TO".split(" ");
 const TSE_GOV = ["AC", "AM", "DF", "ES", "RN", "TO"];
 const TSE_INT = { antes: 60000, apurando: 10000, fim: 300000 };
+// Agendado (pedido do João, 25/10/2026): a partir das 16h55 de Brasília já busca a cada 10 s, mesmo antes da 1ª seção apurada.
+const TSE_AGENDA = Date.parse("2026-10-25T16:55:00-03:00");
 const tseArq = (ele, uf, cargo) => { const u = uf.toLowerCase(); return `${TSE}${ele}/dados/${u}/${u}-c${String(cargo).padStart(4, "0")}-e${ele.padStart(6, "0")}-u.json`; };
 // objeto do arquivo, null se o TSE ainda não publicou (404/403), undefined se falhou
 async function tseBaixa(url){
@@ -641,7 +643,7 @@ async function pacote(sim){
   let fase = "antes";
   if (br && br.tf === "s" && TSE_GOV.every(uf => tse.arqs["g/" + uf]?.tf === "s" || tse.arqs["g/" + uf] === null)) fase = "fim";
   else if (br && +br.e?.est > 0) fase = "apurando";
-  return { t: Date.now(), fase, intervalo: TSE_INT[fase], falhas, p: sec("p"), g: sec("g"), g1: g1 || tse.gov1 || {} };
+  return { t: Date.now(), fase, intervalo: fase === "antes" && Date.now() >= TSE_AGENDA ? TSE_INT.apurando : TSE_INT[fase], falhas, p: sec("p"), g: sec("g"), g1: g1 || tse.gov1 || {} };
 }
 function leGov1(g1){
   // estados com 2º turno para governador e finalistas, pelo resultado do 1º turno
@@ -728,7 +730,10 @@ function intervalo(){
   const ms = st.coleta?.intervalo || 60000;
   // espera o intervalo da fase (com 1 s de folga)
   const idade = st.coleta ? Math.max(0, Date.now() - st.coleta.t) : 0;
-  return Math.max(2000, ms - Math.min(idade, ms) + 1000);
+  const espera = Math.max(2000, ms - Math.min(idade, ms) + 1000);
+  // não passa do horário agendado: às 16h55 busca de novo e já entra no ritmo de 10 s
+  const falta = TSE_AGENDA - Date.now();
+  return falta > 0 ? Math.min(espera, falta + 500) : espera;
 }
 async function ciclo(){
   clearTimeout(st.timer);
@@ -749,7 +754,7 @@ async function ciclo(){
 }
 function relogio(){
   const h = $("#hora"), s = Math.max(0, Math.round((st.prox - Date.now()) / 1000));
-  h.textContent = (h.dataset.base || "") + (st.pausado ? " · atualização automática pausada" : SIM ? "" : ` · próxima em ${s}s`);
+  h.textContent = (h.dataset.base || "") + (st.pausado ? " · atualização automática pausada" : ""); // contagem "próxima em Ns" tirada em 25/10/2026 (pedido do João)
 }
 setInterval(relogio, 1000);
 
