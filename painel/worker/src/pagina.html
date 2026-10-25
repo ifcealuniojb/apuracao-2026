@@ -222,7 +222,7 @@ svg.mundo circle.ci.sel{stroke:var(--gold);stroke-width:calc(1.4px / var(--z,1))
 .zoom .zz button{width:30px;text-align:center;padding:5px 0;font-size:15px}
 .paises{margin-top:12px}
 .pais-lista{max-height:340px;overflow:auto;margin:0 -6px;padding:0 6px}
-.pais-det{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:12px;overflow-x:auto}
+.pais-det{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:12px}
 .pd-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:6px}
 .pd-head b{font-size:16px}.pd-head span{font-size:12.5px;color:var(--ink-2)}
 .pd-x{all:unset;cursor:pointer;margin-left:auto;font-size:20px;line-height:1;color:var(--ink-2);padding:0 4px}
@@ -231,6 +231,12 @@ svg.mundo circle.ci.sel{stroke:var(--gold);stroke-width:calc(1.4px / var(--z,1))
 .pais-det td{padding:5px 6px;border-bottom:1px solid var(--line);white-space:nowrap}
 .pais-det td small{color:var(--ink-3)}
 .pais-det tr.tot td{font-weight:800;border-bottom:0}
+@media (max-width:640px){
+  svg.mundo{height:min(82vw,60vh)}
+  .pais-det table{font-size:12px}
+  .pais-det th,.pais-det td{white-space:normal;padding:4px 4px}
+  .pais-det td small{display:block}
+}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -582,7 +588,7 @@ function mundoMonta(){
   for (const [iso, d] of Object.entries(MUNDO.pais)) h += `<path class="pa" data-iso="${iso}" d="${d}"/>`;
   h += `<g id="cidM">` + Object.entries(MUNDO.cid).map(([nm, [iso, x, y]]) => `<circle class="ci" data-nm="${esc(nm)}" data-iso="${iso}" cx="${x}" cy="${y}" r="2.6"/>`).join("") + `</g>`;
   svg.innerHTML = h;
-  mundoVB();
+  requestAnimationFrame(() => { const k = mundoK(), nh = MUNDO.w / k; mun.vb = [0, (MUNDO.h - nh) / 2, MUNDO.w, nh]; mundoVB(); });
   const tip = $("#tip"), box = $("#mapbox");
   const mostra = (ev, html) => {
     tip.innerHTML = html; tip.hidden = false;
@@ -609,18 +615,22 @@ function mundoMonta(){
   });
   for (const b of document.querySelectorAll("[data-zoom]")) b.onclick = () => {
     const z = b.dataset.zoom;
+    const k = mundoK();
     if (z === "+" || z === "-"){
       const [x, y, w, hh] = mun.vb, f = z === "+" ? 1/1.6 : 1.6;
-      const nw = Math.max(60, Math.min(MUNDO.w, w * f)), nh = nw * MUNDO.h / MUNDO.w;
+      const nw = Math.max(60, Math.min(Math.max(MUNDO.w, MUNDO.h * k), w * f)), nh = nw / k;
       mun.vb = [x + (w - nw) / 2, y + (hh - nh) / 2, nw, nh];
-    } else if (z === "Mundo") mun.vb = [0, 0, MUNDO.w, MUNDO.h];
-    else {
-      const [x, y, w, hh] = MUNDO.reg[z], k = MUNDO.w / MUNDO.h;
+    } else {
+      const [x, y, w, hh] = z === "Mundo" ? [0, 0, MUNDO.w, MUNDO.h] : MUNDO.reg[z];
       const nw = Math.max(w, hh * k), nh = nw / k;
       mun.vb = [x + (w - nw) / 2, y + (hh - nh) / 2, nw, nh];
     }
     mundoVB();
   };
+}
+function mundoK(){ // largura / altura do desenho na tela
+  const b = $("#svgM").getBoundingClientRect();
+  return b.width > 0 && b.height > 0 ? b.width / b.height : MUNDO.w / MUNDO.h;
 }
 function mundoArrasta(ev){
   const a = mun.arrasto, svg = $("#svgM"), b = svg.getBoundingClientRect();
