@@ -4,12 +4,13 @@
 // Aqui fica apenas o SHA-256 da chave: a chave em si não está no código.
 import PAGINA from "./pagina.html";
 import MAPA from "./mapa.json";
+import MUNDO from "./mundo.json"; // mapa-múndi (Natural Earth 1:110m, domínio público) + cidades do exterior
 import URNA from "./urna.mp3"; // som do alerta (urna eletrônica)
 export { Coletor } from "./coletor.js";
 
 const HASH = "b5c0d451ec9bdb4cbda5fb495e77c9341e31cc0d7e93c40e34412014cac3b77a";
 const COOKIE = "p2t";
-const HTML = PAGINA.replace("__MAPA__", JSON.stringify(MAPA));
+const HTML = PAGINA.replace("__MAPA__", JSON.stringify(MAPA)).replace("__MUNDO__", JSON.stringify(MUNDO));
 
 const CSP = [
   "default-src 'none'",

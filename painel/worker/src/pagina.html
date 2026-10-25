@@ -203,6 +203,34 @@ footer .tri b{color:var(--ink)}
 .pa-fechar{all:unset;cursor:pointer;margin-top:16px;padding:9px 22px;border-radius:999px;background:rgba(255,255,255,.14);font-weight:800;font-size:14px}
 .pa-fechar:hover{background:rgba(255,255,255,.24)}
 .pa-fechar:focus-visible{outline:2px solid var(--lime);outline-offset:2px}
+/* mapa-múndi (exterior) */
+.seg-vista{margin-left:auto}
+.seg-vista + .seg{margin-left:0}
+svg.mundo{max-height:60vh;touch-action:none;cursor:grab;background:var(--surface-2);border-radius:12px}
+svg.mundo:active{cursor:grabbing}
+svg.mundo path.pa{fill:var(--map-empty);stroke:var(--map-line);stroke-width:calc(.6px / var(--z,1));transition:fill .6s ease}
+svg.mundo path.pa.x{opacity:.6}
+svg.mundo path.pa.tem{cursor:pointer;stroke:var(--ink-3)}
+svg.mundo path.pa.tem:hover{stroke:var(--ink);stroke-width:calc(1.2px / var(--z,1))}
+svg.mundo path.pa.sel{stroke:var(--gold);stroke-width:calc(2px / var(--z,1))}
+svg.mundo circle.ci{fill:var(--surface);stroke:var(--ink);stroke-width:calc(.7px / var(--z,1));cursor:pointer}
+svg.mundo circle.ci.sel{stroke:var(--gold);stroke-width:calc(1.4px / var(--z,1))}
+.zoom{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;align-items:center}
+.zoom button{all:unset;cursor:pointer;padding:5px 11px;border-radius:999px;font-size:12.5px;font-weight:700;color:var(--ink-2);background:var(--surface-2);border:1px solid var(--line)}
+.zoom button:hover{color:var(--ink)}
+.zoom .zz{margin-left:auto;display:flex;gap:6px}
+.zoom .zz button{width:30px;text-align:center;padding:5px 0;font-size:15px}
+.paises{margin-top:12px}
+.pais-lista{max-height:340px;overflow:auto;margin:0 -6px;padding:0 6px}
+.pais-det{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:12px;overflow-x:auto}
+.pd-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.pd-head b{font-size:16px}.pd-head span{font-size:12.5px;color:var(--ink-2)}
+.pd-x{all:unset;cursor:pointer;margin-left:auto;font-size:20px;line-height:1;color:var(--ink-2);padding:0 4px}
+.pais-det table{width:100%;border-collapse:collapse;font-size:13px}
+.pais-det th{text-align:left;font-size:11.5px;color:var(--ink-3);font-weight:800;padding:4px 6px;border-bottom:1px solid var(--line);white-space:nowrap}
+.pais-det td{padding:5px 6px;border-bottom:1px solid var(--line);white-space:nowrap}
+.pais-det td small{color:var(--ink-3)}
+.pais-det tr.tot td{font-weight:800;border-bottom:0}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -237,7 +265,11 @@ footer .tri b{color:var(--ink)}
     </div>
     <section class="card mapa">
       <div class="mapa-head">
-        <h3>Presidente por estado</h3>
+        <h3 id="mapaTit">Presidente por estado</h3>
+        <div class="seg seg-vista" role="group" aria-label="Brasil ou exterior">
+          <button type="button" data-vista="br" aria-pressed="true">Brasil</button>
+          <button type="button" data-vista="mundo" aria-pressed="false">🌎 Mundo</button>
+        </div>
         <div class="seg" role="group" aria-label="O que o mapa mostra">
           <button type="button" data-modo="lider" aria-pressed="true">Quem lidera</button>
           <button type="button" data-modo="apur" aria-pressed="false">Apuração</button>
@@ -245,10 +277,17 @@ footer .tri b{color:var(--ink)}
       </div>
       <div class="mapbox" id="mapbox">
         <svg class="br" id="svg" role="img" aria-label="Mapa do Brasil por estado"></svg>
+        <svg class="br mundo" id="svgM" role="img" aria-label="Mapa-múndi: Presidente no exterior" hidden></svg>
+        <div class="zoom" id="zoomM" hidden>
+          <button type="button" data-zoom="Mundo">Mundo</button><button type="button" data-zoom="Américas">Américas</button><button type="button" data-zoom="Europa">Europa</button><button type="button" data-zoom="África">África</button><button type="button" data-zoom="Ásia e Oceania">Ásia e Oceania</button>
+          <span class="zz"><button type="button" data-zoom="+" aria-label="Aproximar">＋</button><button type="button" data-zoom="-" aria-label="Afastar">－</button></span>
+        </div>
         <div class="tip" id="tip" hidden></div>
       </div>
       <div class="leg" id="leg"></div>
       <div class="exterior" id="ext"></div>
+      <div class="exterior" id="mundoInfo" hidden></div>
+      <div class="paises" id="paises" hidden></div>
     </section>
   </div>
 
@@ -298,7 +337,7 @@ const SIM = false;
 if (SIM) document.body.classList.add("sim");
 const st = {
   pres: null, presUF: {}, gov: {}, govUFs: [], fin1: {},     // dados atuais
-  modoMapa: "lider", ordem: guarda.get("p2t-ordem", "desc"),
+  vista: "br", modoMapa: "lider", ordem: guarda.get("p2t-ordem", "desc"),
   som: false, avisados: SIM ? {} : guarda.get("p2t-avisos", {}),
   prox: 0, timer: null, pausado: false, sel: null, carregou: false,
 };
@@ -481,6 +520,197 @@ function renderMapa(){
   const z = st.presUF.ZZ;
   if (z && z.pst > 0){ const [a] = [...z.cands].sort((x,y) => y.v - x.v); $("#ext").textContent = `Exterior: ${pct(z.pst)} apurado · ${a.nome} lidera com ${pct(a.pv)}`; }
   else $("#ext").textContent = "";
+  mundoPinta();
+}
+
+/* ---------- Mapa-múndi: Presidente no exterior (pedido do João, 25/10/2026) ----------
+   Votos: arquivos do TSE por cidade do exterior (186 cidades; zz<cidade>-c0001-e006258-u.json).
+   País de cada cidade: tabela própria (mundo.json → cid). Contornos: Natural Earth 1:110m (domínio público).
+   As cidades só são buscadas enquanto a vista "Mundo" está aberta, a cada 30 s, com a pergunta "mudou?". */
+const MUNDO = __MUNDO__;
+const mun = {lista:null, dados:{}, timer:null, carregando:false, feitos:0, vb:[0, 0, MUNDO.w, MUNDO.h], sel:null, arrasto:null, montado:false};
+async function mundoCarrega(){
+  if (mun.carregando) return;
+  mun.carregando = true; clearTimeout(mun.timer);
+  try {
+    if (!mun.lista){
+      const cfg = await tseBaixa(`${TSE}6258/config/mun-e006258-cm.json`);
+      const zz = cfg?.abr?.find(a => String(a.cd).toLowerCase() === "zz");
+      if (zz) mun.lista = zz.mu.map(m => ({cd:m.cd, nm:m.nm}));
+    }
+    if (mun.lista){
+      mun.feitos = 0; mundoInfo();
+      const fila = [...mun.lista];
+      const trab = async () => { while (fila.length){ const c = fila.shift();
+        const j = await tseBaixa(`${TSE}6258/dados/zz/zz${c.cd}-c0001-e006258-u.json`);
+        if (j) mun.dados[c.nm] = {r:parse(j), st:+j.s?.st || 0, ts:+j.s?.ts || 0};
+        else if (j === null) delete mun.dados[c.nm];
+        mun.feitos++; if (mun.feitos % 20 === 0) mundoInfo(); } };
+      await Promise.all(Array.from({length:8}, trab));
+    }
+  } catch {}
+  mun.carregando = false;
+  mundoPinta();
+  if (st.vista === "mundo") mun.timer = setTimeout(mundoCarrega, 30000);
+}
+function mundoPaises(){
+  const P = {};
+  for (const [nm, d] of Object.entries(mun.dados)){
+    const iso = MUNDO.cid[nm]?.[0] || "??";
+    const p = P[iso] ||= {iso, nome:MUNDO.nome[iso] || "Outros", te:0, st:0, ts:0, v:{}, cid:[]};
+    p.te += d.r.te; p.st += d.st; p.ts += d.ts; p.cid.push(nm);
+    for (const c of d.r.cands) p.v[c.sq] = (p.v[c.sq] || 0) + c.v;
+  }
+  for (const p of Object.values(P)){
+    const tot = Object.values(p.v).reduce((a, b) => a + b, 0);
+    p.pst = p.ts ? 100 * p.st / p.ts : 0;
+    p.cands = (st.pres?.cands || []).map(c => ({...c, v:p.v[c.sq] || 0, pv: tot ? 100 * (p.v[c.sq] || 0) / tot : 0}));
+    p.cid.sort((a, b) => (mun.dados[b].r.te - mun.dados[a].r.te));
+  }
+  return P;
+}
+function mundoCor(r, cor, empty){ // mesma regra do mapa do Brasil
+  if (!r || !(r.pst > 0) || !r.cands?.length) return empty;
+  if (st.modoMapa === "apur") return mistura("#056E4F", .12 + .88 * r.pst / 100);
+  const [a, b] = [...r.cands].sort((x, y) => y.v - x.v);
+  return b && a.v === b.v ? "#9aa3ab" : mistura(cor[a.sq] || "#777", .3 + .7 * r.pst / 100);
+}
+function mundoMonta(){
+  if (mun.montado) return; mun.montado = true;
+  const svg = $("#svgM");
+  let h = MUNDO.outros.map(d => `<path class="pa x" d="${d}"/>`).join("");
+  for (const [iso, d] of Object.entries(MUNDO.pais)) h += `<path class="pa" data-iso="${iso}" d="${d}"/>`;
+  h += `<g id="cidM">` + Object.entries(MUNDO.cid).map(([nm, [iso, x, y]]) => `<circle class="ci" data-nm="${esc(nm)}" data-iso="${iso}" cx="${x}" cy="${y}" r="2.6"/>`).join("") + `</g>`;
+  svg.innerHTML = h;
+  mundoVB();
+  const tip = $("#tip"), box = $("#mapbox");
+  const mostra = (ev, html) => {
+    tip.innerHTML = html; tip.hidden = false;
+    const b = box.getBoundingClientRect();
+    let x = ev.clientX - b.left, y = ev.clientY - b.top;
+    x = Math.max(95, Math.min(b.width - 95, x));
+    tip.style.left = x + "px"; tip.style.top = Math.max(y, 120) + "px";
+  };
+  const alvo = ev => ev.target.dataset?.nm ? {nm:ev.target.dataset.nm} : ev.target.dataset?.iso ? {iso:ev.target.dataset.iso} : null;
+  svg.addEventListener("pointermove", ev => {
+    if (mun.arrasto){ mundoArrasta(ev); tip.hidden = true; return; }
+    const a = alvo(ev); a ? mostra(ev, a.nm ? tipCidade(a.nm) : tipPais(a.iso)) : tip.hidden = true;
+  });
+  svg.addEventListener("pointerleave", () => { tip.hidden = true; mun.arrasto = null; });
+  svg.addEventListener("pointerdown", ev => { mun.arrasto = {x:ev.clientX, y:ev.clientY, vb:[...mun.vb], moveu:false}; });
+  svg.addEventListener("pointerup", ev => {
+    const a = mun.arrasto; mun.arrasto = null;
+    if (a?.moveu) return;
+    const t = alvo(ev); if (!t) return;
+    const iso = t.iso || MUNDO.cid[t.nm]?.[0];
+    mostra(ev, t.nm ? tipCidade(t.nm) : tipPais(iso));
+    mun.sel = iso; mundoPinta();
+    $("#paisDet")?.scrollIntoView({behavior:"smooth", block:"nearest"});
+  });
+  for (const b of document.querySelectorAll("[data-zoom]")) b.onclick = () => {
+    const z = b.dataset.zoom;
+    if (z === "+" || z === "-"){
+      const [x, y, w, hh] = mun.vb, f = z === "+" ? 1/1.6 : 1.6;
+      const nw = Math.max(60, Math.min(MUNDO.w, w * f)), nh = nw * MUNDO.h / MUNDO.w;
+      mun.vb = [x + (w - nw) / 2, y + (hh - nh) / 2, nw, nh];
+    } else if (z === "Mundo") mun.vb = [0, 0, MUNDO.w, MUNDO.h];
+    else {
+      const [x, y, w, hh] = MUNDO.reg[z], k = MUNDO.w / MUNDO.h;
+      const nw = Math.max(w, hh * k), nh = nw / k;
+      mun.vb = [x + (w - nw) / 2, y + (hh - nh) / 2, nw, nh];
+    }
+    mundoVB();
+  };
+}
+function mundoArrasta(ev){
+  const a = mun.arrasto, svg = $("#svgM"), b = svg.getBoundingClientRect();
+  const dx = ev.clientX - a.x, dy = ev.clientY - a.y;
+  if (!a.moveu && Math.hypot(dx, dy) < 5) return;
+  a.moveu = true;
+  const esc_ = a.vb[2] / b.width;
+  mun.vb = [a.vb[0] - dx * esc_, a.vb[1] - dy * esc_, a.vb[2], a.vb[3]];
+  mundoVB();
+}
+function mundoVB(){
+  let [x, y, w, h] = mun.vb;
+  x = Math.max(-w * .3, Math.min(MUNDO.w - w * .7, x)); y = Math.max(-h * .3, Math.min(MUNDO.h - h * .7, y));
+  mun.vb = [x, y, w, h];
+  const svg = $("#svgM"); svg.setAttribute("viewBox", mun.vb.map(n => n.toFixed(1)).join(" "));
+  const z = MUNDO.w / w; // círculos e bordas mantêm o tamanho na tela
+  svg.style.setProperty("--z", z);
+  for (const c of svg.querySelectorAll("circle.ci")) c.setAttribute("r", (2.6 / Math.sqrt(z)).toFixed(2));
+}
+function tipPais(iso){
+  const p = mundoPaises()[iso], nome = MUNDO.nome[iso] || iso;
+  if (!p) return `<b>${esc(nome)}</b><br>Sem seção eleitoral brasileira`;
+  if (!(p.pst > 0)) return `<b>${esc(nome)}</b><br>${fmt(p.te)} eleitores · sem votos ainda`;
+  const ord = [...p.cands].sort((a, b) => b.v - a.v);
+  return `<b>${esc(nome)}</b> · ${pct(p.pst)} apurado` + ord.map(c => `<div class="l"><span>${esc(c.nome)}</span><b>${pct(c.pv)}</b></div>`).join("") +
+    `<div style="opacity:.75;margin-top:3px">${fmt(p.te)} eleitores · ${p.cid.length} ${p.cid.length > 1 ? "cidades" : "cidade"}</div>`;
+}
+function tipCidade(nm){
+  const d = mun.dados[nm], iso = MUNDO.cid[nm]?.[0], nome = `${nm} (${MUNDO.nome[iso] || ""})`;
+  if (!d) return `<b>${esc(nome)}</b><br>Sem dados ainda`;
+  const r = d.r;
+  if (!(r.pst > 0)) return `<b>${esc(nome)}</b><br>${fmt(r.te)} eleitores · sem votos ainda`;
+  const ord = [...r.cands].sort((a, b) => b.v - a.v);
+  return `<b>${esc(nome)}</b> · ${pct(r.pst)} apurado` + ord.map(c => `<div class="l"><span>${esc(c.nome)}</span><b>${pct(c.pv)}</b></div>`).join("");
+}
+function mundoInfo(){
+  const t = mun.lista ? mun.lista.length : 186;
+  $("#mundoInfo").textContent = mun.carregando ? `Lendo as cidades do exterior no TSE… ${mun.feitos} de ${t}` :
+    `${Object.keys(mun.dados).length} cidades do exterior · atualiza a cada 30 s enquanto o mapa-múndi está aberto`;
+}
+function mundoPinta(){
+  if (st.vista !== "mundo") return;
+  mundoMonta(); mundoInfo();
+  const cor = st.pres ? cores(st.pres.cands) : {};
+  const empty = getComputedStyle(document.documentElement).getPropertyValue("--map-empty").trim();
+  const P = mundoPaises();
+  for (const el of document.querySelectorAll("#svgM path.pa[data-iso]")){
+    const p = P[el.dataset.iso];
+    el.style.fill = p ? mundoCor(p, cor, empty) : "";
+    el.classList.toggle("tem", !!p); el.classList.toggle("sel", el.dataset.iso === mun.sel);
+  }
+  for (const el of document.querySelectorAll("#svgM circle.ci")){
+    const d = mun.dados[el.dataset.nm];
+    el.style.fill = d && d.r.pst > 0 ? mundoCor(d.r, cor, empty) : "";
+    el.classList.toggle("sel", el.dataset.iso === mun.sel);
+  }
+  // lista de países (mais eleitores primeiro) e detalhe do país escolhido
+  const lista = Object.values(P).sort((a, b) => b.te - a.te);
+  let det = "";
+  const s = mun.sel && P[mun.sel];
+  if (s){
+    const nomes = (st.pres?.cands || []);
+    det = `<div class="pais-det" id="paisDet"><div class="pd-head"><b>${esc(s.nome)}</b><span>${pct(s.pst)} apurado · ${fmt(s.te)} eleitores</span><button type="button" class="pd-x" aria-label="Fechar">×</button></div>
+      <table><thead><tr><th>Cidade</th><th>Apurado</th>${nomes.map(c => `<th style="color:${cor[c.sq]}">${esc(c.nome)}</th>`).join("")}</tr></thead><tbody>` +
+      s.cid.map(nm => { const r = mun.dados[nm].r;
+        return `<tr><td>${esc(nm)}</td><td>${pct(r.pst)}</td>${nomes.map(c => { const k = r.cands.find(x => x.sq === c.sq);
+          return `<td>${k ? fmt(k.v) : "–"}${r.pst > 0 && k ? ` <small>${pct(k.pv)}</small>` : ""}</td>`; }).join("")}</tr>`; }).join("") +
+      (s.cid.length > 1 ? `<tr class="tot"><td>Total</td><td>${pct(s.pst)}</td>${s.cands.map(c => `<td>${fmt(c.v)}${s.pst > 0 ? ` <small>${pct(c.pv)}</small>` : ""}</td>`).join("")}</tr>` : "") +
+      `</tbody></table></div>`;
+  }
+  $("#paises").innerHTML = det + `<div class="est-head"><h3>Exterior por país</h3><div class="placar">${lista.length} países</div></div><div class="pais-lista">` +
+    lista.map(p => {
+      let li = `<span style="color:var(--ink-3)">–</span>`;
+      if (p.pst > 0){ const [a, b] = [...p.cands].sort((x, y) => y.v - x.v);
+        li = b && a.v === b.v ? "Empate" : `<span style="color:${cor[a.sq]}">${esc(a.nome)}</span><small>${pct(a.pv)}${b ? " × " + pct(b.pv) : ""}</small>`; }
+      return `<div class="er ${p.iso === mun.sel ? "sel" : ""}" data-pais="${p.iso}"><div class="u">${p.iso}</div><div class="n">${esc(p.nome)}</div>
+        <div class="bx"><div class="ba"><i style="width:${p.pst}%"></i></div><div class="pa">${pct(p.pst)} apurado</div></div><div class="li">${li}</div></div>`;
+    }).join("") + `</div>`;
+  $("#paises .pd-x")?.addEventListener("click", () => { mun.sel = null; mundoPinta(); });
+  for (const r of document.querySelectorAll("#paises [data-pais]")) r.onclick = () => { mun.sel = r.dataset.pais; mundoPinta(); $("#paisDet")?.scrollIntoView({behavior:"smooth", block:"nearest"}); };
+}
+function mundoVista(v){
+  st.vista = v;
+  document.querySelectorAll("[data-vista]").forEach(x => x.setAttribute("aria-pressed", x.dataset.vista === v));
+  const m = v === "mundo";
+  $("#svg").hidden = m; $("#svgM").hidden = !m; $("#zoomM").hidden = !m; $("#paises").hidden = !m; $("#mundoInfo").hidden = !m;
+  $("#mapaTit").textContent = m ? "Presidente no exterior" : "Presidente por estado";
+  $("#tip").hidden = true;
+  if (m){ mundoPinta(); mundoCarrega(); } else clearTimeout(mun.timer);
+  renderMapa();
 }
 
 /* ---------- Governadores ---------- */
@@ -824,6 +1054,7 @@ function botoes(){
     document.querySelectorAll("[data-modo]").forEach(x => x.setAttribute("aria-pressed", x === b));
     renderMapa();
   };
+  for (const b of document.querySelectorAll("[data-vista]")) b.onclick = () => mundoVista(b.dataset.vista);
   const pintaOrd = () => document.querySelectorAll("[data-ord]").forEach(x => x.setAttribute("aria-pressed", x.dataset.ord === st.ordem));
   pintaOrd();
   for (const b of document.querySelectorAll("[data-ord]")) b.onclick = () => { st.ordem = b.dataset.ord; guarda.set("p2t-ordem", st.ordem); pintaOrd(); renderGovs(); };
