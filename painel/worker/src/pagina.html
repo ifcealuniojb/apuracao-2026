@@ -643,7 +643,9 @@ function mundoArrasta(ev){
 }
 function mundoVB(){
   let [x, y, w, h] = mun.vb;
-  x = Math.max(-w * .3, Math.min(MUNDO.w - w * .7, x)); y = Math.max(-h * .3, Math.min(MUNDO.h - h * .7, y));
+  // não deixa o mapa sumir da tela; se o recorte é maior que o mundo, centraliza
+  x = w >= MUNDO.w ? (MUNDO.w - w) / 2 : Math.max(-w * .3, Math.min(MUNDO.w - w * .7, x));
+  y = h >= MUNDO.h ? (MUNDO.h - h) / 2 : Math.max(-h * .3, Math.min(MUNDO.h - h * .7, y));
   mun.vb = [x, y, w, h];
   const svg = $("#svgM"); svg.setAttribute("viewBox", mun.vb.map(n => n.toFixed(1)).join(" "));
   const z = MUNDO.w / w; // círculos e bordas mantêm o tamanho na tela
