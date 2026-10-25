@@ -214,7 +214,7 @@ footer p{margin:4px 0}
       <button class="btn" id="bNotif" type="button">🔔 Ativar notificações</button>
       <button class="btn" id="bPausa" type="button" aria-pressed="false">⏸ Pausar</button>
       <button class="btn" id="bAtu" type="button">↻ Atualizar</button>
-      <button class="btn" id="bSim" type="button">▶ Simular</button>
+      <button class="btn" id="bSim" type="button" hidden style="display:none">▶ Simular</button><!-- simulação desligada no dia da eleição (25/10/2026) -->
     </div>
   </div>
 </header>
@@ -286,7 +286,9 @@ const mi = n => n >= 1e6 ? (n/1e6).toLocaleString("pt-BR",{maximumFractionDigits
 const guarda = { get(k, d){ try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } },
                  set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
 
-const SIM = new URLSearchParams(location.search).has("sim");
+// Simulação desligada no dia da eleição (25/10/2026, pedido do João): botão escondido e ?sim=1 abre o painel real.
+// Para religar: const SIM = new URLSearchParams(location.search).has("sim"); e tirar o hidden/display:none do botão bSim.
+const SIM = false;
 if (SIM) document.body.classList.add("sim");
 const st = {
   pres: null, presUF: {}, gov: {}, govUFs: [], fin1: {},     // dados atuais
