@@ -36,7 +36,15 @@ for linha in open(sys.argv[2],encoding="utf-8"):
     nm,iso,lat,lon=linha.rstrip("\n").split("\t")
     x,y=P(float(lon),float(lat)); cid[nm]=[iso,x,y]
     assert iso in nomes, iso
-json.dump({"w":W,"h":H,"pais":pais,"outros":outros,"nome":nomes,"cid":cid,
+def caixa(l1,la1,l2,la2): # recorte de uma região, já projetado: [x, y, largura, altura]
+    xs=[];ys=[]
+    for i in range(21):
+        for lat in (la1,la2, la1+(la2-la1)*i/20):
+            for lon in (l1,l2, l1+(l2-l1)*i/20):
+                x,y=P(lon,lat); xs.append(x); ys.append(y)
+    return [round(min(xs),1),round(min(ys),1),round(max(xs)-min(xs),1),round(max(ys)-min(ys),1)]
+reg={"Américas":caixa(-128,60,-32,-56),"Europa":caixa(-26,64,44,31),"África":caixa(-26,38,56,-36),"Ásia e Oceania":caixa(42,56,178,-46)}
+json.dump({"w":W,"h":H,"pais":pais,"outros":outros,"nome":nomes,"cid":cid,"reg":reg,
   "fonte":"Natural Earth 1:110m admin 0 countries (domínio público), projeção Equal Earth; cidades: tabela própria (cidades do exterior do TSE)"},
   open(sys.argv[3],"w",encoding="utf-8"),ensure_ascii=False,separators=(",",":"))
 print("w",W,"h",H,"paises",len(pais),"cidades",len(cid))
