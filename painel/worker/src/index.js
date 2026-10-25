@@ -8,7 +8,11 @@ import MUNDO from "./mundo.json"; // mapa-múndi (Natural Earth 1:110m, domínio
 import URNA from "./urna.mp3"; // som do alerta (urna eletrônica)
 export { Coletor } from "./coletor.js";
 
-const HASH = "b5c0d451ec9bdb4cbda5fb495e77c9341e31cc0d7e93c40e34412014cac3b77a";
+const HASH = "b5c0d451ec9bdb4cbda5fb495e77c9341e31cc0d7e93c40e34412014cac3b77a"; // chave do João (20/10/2026)
+// Chave para compartilhar (25/10/2026, pedido do João). Para cortar o acesso de quem recebeu esse link, basta tirar
+// esta linha da lista CHAVES (o link do João continua valendo).
+const HASH_COMPARTILHADO = "b56c157e0f36f16777ed1f4822500a68dced12a32d334cf0b5c863a4bc88a8ca";
+const CHAVES = [HASH, HASH_COMPARTILHADO];
 const COOKIE = "p2t";
 const HTML = PAGINA.replace("__MAPA__", JSON.stringify(MAPA)).replace("__MUNDO__", JSON.stringify(MUNDO));
 
@@ -52,7 +56,7 @@ export default {
 
     const k = url.searchParams.get("k");
     if (k && url.pathname === "/") {
-      if (!/^[A-Za-z0-9_-]{16,64}$/.test(k) || (await sha256(k)) !== HASH) return nada();
+      if (!/^[A-Za-z0-9_-]{16,64}$/.test(k) || !CHAVES.includes(await sha256(k))) return nada();
       // guarda a chave num cookie e tira ela do endereço (Lax desde 25/10, como no As Cunhãs: com Strict, quem abre
       // pelo link vindo de outro app perde o cookie no redirecionamento e cai no 404)
       url.searchParams.delete("k");
@@ -62,7 +66,7 @@ export default {
       });
     }
     const c = cookie(req);
-    if (!c || (await sha256(c)) !== HASH) return nada();
+    if (!c || !CHAVES.includes(await sha256(c))) return nada();
 
     if (url.pathname === "/urna.mp3") {
       return new Response(URNA, { headers: { ...BASE, "content-type": "audio/mpeg", "cache-control": "private, max-age=86400" } });
