@@ -588,7 +588,8 @@ function mundoMonta(){
   for (const [iso, d] of Object.entries(MUNDO.pais)) h += `<path class="pa" data-iso="${iso}" d="${d}"/>`;
   h += `<g id="cidM">` + Object.entries(MUNDO.cid).map(([nm, [iso, x, y]]) => `<circle class="ci" data-nm="${esc(nm)}" data-iso="${iso}" cx="${x}" cy="${y}" r="2.6"/>`).join("") + `</g>`;
   svg.innerHTML = h;
-  requestAnimationFrame(() => { const k = mundoK(), nh = MUNDO.w / k; mun.vb = [0, (MUNDO.h - nh) / 2, MUNDO.w, nh]; mundoVB(); });
+  mundoVB(); // primeiro o mundo inteiro (no computador a altura do desenho vem daqui)
+  requestAnimationFrame(() => { const k = mundoK(), nh = MUNDO.w / k; mun.vb = [0, (MUNDO.h - nh) / 2, MUNDO.w, nh]; mundoVB(); }); // no celular, a altura é fixa
   const tip = $("#tip"), box = $("#mapbox");
   const mostra = (ev, html) => {
     tip.innerHTML = html; tip.hidden = false;
