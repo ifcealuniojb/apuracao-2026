@@ -5,29 +5,31 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
 <meta name="referrer" content="no-referrer">
-<title>2º turno ao vivo</title>
+<title>Tritonia · 2º turno ao vivo</title>
 <style>
-/* Mesma identidade do site: azul-marinho + limão, cartões brancos arredondados, fonte arredondada do sistema. */
+/* Identidade da Tritonia (manual da marca, 25/10/2026): Abissal #182633, Coral #F7660B, Tridente #056E4F, Corrente #00ADC8.
+   Os nomes das variáveis ficaram os antigos: --navy = Abissal, --lime = Coral (destaque), --accent = Tridente.
+   Cores dos candidatos/partidos não mudam. Fonte do sistema (sem fontes externas). */
 :root{
-  --navy:#1b2a38; --navy-2:#24384a; --navy-mute:#9fb0bf; --lime:#d6f08f;
-  --bg:#f3f4f1; --surface:#ffffff; --surface-2:#f7f8f5; --ink:#17222e; --ink-2:#465363; --ink-3:#7b8692;
-  --line:#e2e5df; --accent:#4c7a1c; --accent-soft:#e8f3d2; --gold:#a67c00; --gold-soft:#fbf1cf;
-  --red:#b0412e; --red-soft:#f7e4df; --gray-soft:#eceee9; --map-empty:#e4e8e2; --map-line:#ffffff;
+  --navy:#182633; --navy-2:#243849; --navy-mute:#9fb0c0; --lime:#F7660B;
+  --bg:#f3f5f7; --surface:#ffffff; --surface-2:#f7f9fa; --ink:#182633; --ink-2:#465564; --ink-3:#7b8794;
+  --line:#e1e6ea; --accent:#056E4F; --accent-soft:#dff1ea; --gold:#a67c00; --gold-soft:#fbf1cf;
+  --red:#b0412e; --red-soft:#f7e4df; --gray-soft:#eceff2; --map-empty:#e3e8ec; --map-line:#ffffff;
   --shadow:0 1px 2px rgba(23,34,46,.05),0 10px 28px -14px rgba(23,34,46,.18);
   --radius:16px;
   --sans: ui-rounded,"SF Pro Rounded",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
   color-scheme:light;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --navy:#0d1620; --navy-2:#172532; --lime:#cdea7e;
+  --navy:#101a24; --navy-2:#1d2d3c; --lime:#F7660B;
   --bg:#0f151b; --surface:#16202a; --surface-2:#1b2631; --ink:#eaf0f4; --ink-2:#b2bdc8; --ink-3:#83909c;
-  --line:#26333f; --accent:#a9d45a; --accent-soft:#22331a; --gold:#f2c230; --gold-soft:#3a2f0c;
+  --line:#26333f; --accent:#00ADC8; --accent-soft:#0d2e35; --gold:#f2c230; --gold-soft:#3a2f0c;
   --red:#ef8a78; --red-soft:#3b1d18; --gray-soft:#22303c; --map-empty:#24313c; --map-line:#0f151b;
   --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px -14px rgba(0,0,0,.6); color-scheme:dark}}
 :root[data-theme="dark"]{
-  --navy:#0d1620; --navy-2:#172532; --lime:#cdea7e;
+  --navy:#101a24; --navy-2:#1d2d3c; --lime:#F7660B;
   --bg:#0f151b; --surface:#16202a; --surface-2:#1b2631; --ink:#eaf0f4; --ink-2:#b2bdc8; --ink-3:#83909c;
-  --line:#26333f; --accent:#a9d45a; --accent-soft:#22331a; --gold:#f2c230; --gold-soft:#3a2f0c;
+  --line:#26333f; --accent:#00ADC8; --accent-soft:#0d2e35; --gold:#f2c230; --gold-soft:#3a2f0c;
   --red:#ef8a78; --red-soft:#3b1d18; --gray-soft:#22303c; --map-empty:#24313c; --map-line:#0f151b;
   --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px -14px rgba(0,0,0,.6); color-scheme:dark}
 *{box-sizing:border-box}
@@ -42,17 +44,18 @@ button{font-family:inherit;cursor:pointer}
 /* topo */
 header.top{background:var(--navy);color:#fff;padding-top:env(safe-area-inset-top);position:sticky;top:0;z-index:50}
 .top .wrap{display:flex;align-items:center;gap:12px;padding-block:12px;flex-wrap:wrap}
-.logo{width:38px;height:38px;border-radius:11px;background:var(--lime);color:var(--navy);display:grid;place-items:center;flex:none}
+.logo{width:46px;height:38px;color:#fff;display:grid;place-items:center;flex:none}
+.logo svg{width:46px;height:38px;display:block}
 .brand h1{font-weight:800;font-size:20px;letter-spacing:-.02em;margin:0;display:flex;align-items:center;gap:8px}
 .vivo{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--lime)}
-.vivo i{width:8px;height:8px;border-radius:50%;background:var(--lime);box-shadow:0 0 0 0 rgba(214,240,143,.7);animation:pulso 1.8s infinite}
+.vivo i{width:8px;height:8px;border-radius:50%;background:var(--lime);box-shadow:0 0 0 0 rgba(247,102,11,.7);animation:pulso 1.8s infinite}
 .vivo.off{color:var(--navy-mute)} .vivo.off i{background:var(--navy-mute);animation:none}
-@keyframes pulso{70%{box-shadow:0 0 0 9px rgba(214,240,143,0)}100%{box-shadow:0 0 0 0 rgba(214,240,143,0)}}
+@keyframes pulso{70%{box-shadow:0 0 0 9px rgba(247,102,11,0)}100%{box-shadow:0 0 0 0 rgba(247,102,11,0)}}
 .brand small{display:block;color:var(--navy-mute);font-size:12px;margin-top:1px}
 .acoes{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
 .btn{all:unset;box-sizing:border-box;cursor:pointer;display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px;border-radius:999px;background:var(--navy-2);color:#fff;font-size:13px;font-weight:700;white-space:nowrap}
 .btn:hover{filter:brightness(1.15)}
-.btn.on{background:var(--lime);color:var(--navy)}
+.btn.on{background:var(--lime);color:#fff}
 .btn:focus-visible{outline:2px solid var(--lime);outline-offset:2px}
 @media (max-width:640px){.acoes{margin-left:0;width:100%}.btn{height:32px;padding:0 10px;font-size:12.5px}}
 
@@ -180,20 +183,22 @@ svg.br line{stroke:var(--ink-3);stroke-width:1}
 
 footer{color:var(--ink-3);font-size:12px;padding:10px 0 30px}
 footer p{margin:4px 0}
+footer .tri{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);text-align:center;color:var(--ink-2)}
+footer .tri b{color:var(--ink)}
 .erro{background:var(--red-soft);color:var(--red);border-radius:12px;padding:10px 14px;font-size:13px;margin-bottom:14px}
 /* aviso de Presidente eleito: destaque no centro da tela (os governadores seguem no canto) */
 .pres-aviso{position:fixed;inset:0;z-index:200;display:grid;place-items:center;padding:20px;background:rgba(13,22,32,.55);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);animation:fundo .4s ease}
 @keyframes fundo{from{opacity:0}}
 .pa-card{position:relative;width:min(440px,100%);background:var(--navy);color:#fff;border-radius:28px;padding:30px 24px 22px;text-align:center;border:4px solid var(--lime);box-shadow:0 30px 80px -20px rgba(0,0,0,.6);animation:sobe .7s cubic-bezier(.2,1.5,.4,1)}
 @keyframes sobe{from{transform:translateY(40px) scale(.85);opacity:0}}
-.pa-estrela{position:absolute;top:-34px;left:50%;width:68px;height:68px;transform:translateX(-50%);animation:gira 6s linear infinite;border-radius:20px;background:var(--lime);color:var(--navy);display:grid;place-items:center;border:4px solid var(--navy)}
-.pa-estrela svg{width:34px;height:34px;display:block}
+.pa-estrela{position:absolute;top:-34px;left:50%;width:68px;height:68px;transform:translateX(-50%);animation:gira 6s linear infinite;border-radius:20px;background:var(--navy);color:#fff;display:grid;place-items:center;border:4px solid var(--lime)}
+.pa-estrela svg{width:40px;height:34px;display:block}
 @keyframes gira{50%{transform:translateX(-50%) rotate(12deg) scale(1.06)}}
 .pa-top{font-size:12px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--lime);margin:12px 0 14px}
 .pa-foto{width:128px;height:168px;margin:0 auto 14px;border-radius:20px;background:var(--gray-soft) center/cover no-repeat;border:4px solid var(--lime)}
 .pa-nome{font-size:30px;font-weight:900;letter-spacing:-.02em;line-height:1.1}
 .pa-part{font-size:14px;font-weight:700;color:var(--navy-mute);margin-top:4px}
-.pa-sel{display:inline-block;margin:14px 0 10px;background:var(--lime);color:var(--navy);font-weight:900;font-size:18px;padding:7px 18px;border-radius:999px}
+.pa-sel{display:inline-block;margin:14px 0 10px;background:var(--lime);color:#fff;font-weight:900;font-size:18px;padding:7px 18px;border-radius:999px}
 .pa-txt{font-size:13.5px;color:#dbe5ee;line-height:1.45}
 .pa-fechar{all:unset;cursor:pointer;margin-top:16px;padding:9px 22px;border-radius:999px;background:rgba(255,255,255,.14);font-weight:800;font-size:14px}
 .pa-fechar:hover{background:rgba(255,255,255,.24)}
@@ -204,7 +209,7 @@ footer p{margin:4px 0}
 <body>
 <header class="top">
   <div class="wrap">
-    <div class="logo" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></div>
+    <div class="logo" aria-hidden="true"><svg viewBox="0 0 318 265" aria-hidden="true"><path d="M159 193.2L70 47.1998L248 47.1998L159 193.2Z" fill="currentColor"/><path fill-rule="evenodd" clip-rule="evenodd" d="M149.195 22.1998L158.694 0.199829H12.6948L0 22.1206L15.0201 46.9498H40.732L25.7599 22.1998H149.195Z" fill="#056E4F"/><path fill-rule="evenodd" clip-rule="evenodd" d="M228.105 127.8L242.059 147.282L317.326 22.1786L305.087 0L276.068 0.0701777L262.813 22.1021L291.739 22.0321L228.105 127.8Z" fill="#F7660B"/><path fill-rule="evenodd" clip-rule="evenodd" d="M94.3499 135.37L70.5 137.7L146.305 264.057L171.631 264.562L186.5 238.7L174.061 216.197L159 241.7L94.3499 135.37Z" fill="#00ADC8"/></svg></div>
     <div class="brand">
       <h1>2º turno <span class="vivo off" id="vivo"><i></i><span id="vivoTxt">aguardando</span></span></h1>
       <small id="hora">Carregando…</small>
@@ -262,6 +267,7 @@ footer p{margin:4px 0}
   <footer>
     <p>Dados oficiais do TSE (resultados.tse.jus.br), lidos diretamente do TSE por este navegador (a cada 3 s durante a apuração). Contornos dos estados: IBGE.</p>
     <p>"Eleito matematicamente" é um cálculo deste painel: a vantagem do primeiro colocado já é maior que o número de eleitores das seções que faltam apurar. A situação oficial é a divulgada pelo TSE.</p>
+      <p class="tri">Desenvolvido por <b>Tritonia Soluções Tecnológicas</b> · Inteligência que transforma</p>
   </footer>
 </main>
 <div class="toasts" id="toasts" aria-live="assertive"></div>
@@ -459,7 +465,7 @@ function renderMapa(){
     p.classList.toggle("gov", st.govUFs.includes(uf));
     let fill = empty;
     if (r && r.pst > 0){
-      if (st.modoMapa === "apur") fill = mistura("#4c7a1c", .12 + .88 * r.pst / 100);
+      if (st.modoMapa === "apur") fill = mistura("#056E4F", .12 + .88 * r.pst / 100);
       else {
         const [a, b] = [...r.cands].sort((x,y) => y.v - x.v);
         fill = a.v === b.v ? "#9aa3ab" : mistura(cor[a.sq] || "#777", .3 + .7 * r.pst / 100);
@@ -469,7 +475,7 @@ function renderMapa(){
     p.classList.toggle("sel", p.dataset.uf === st.sel);
   }
   const leg = $("#leg");
-  if (st.modoMapa === "apur") leg.innerHTML = `<span>0%<span class="grad" style="background:linear-gradient(90deg,${mistura("#4c7a1c",.12)},#4c7a1c)"></span>100% das seções apuradas</span><span><i style="background:${empty}"></i>sem votos ainda</span>`;
+  if (st.modoMapa === "apur") leg.innerHTML = `<span>0%<span class="grad" style="background:linear-gradient(90deg,${mistura("#056E4F",.12)},#056E4F)"></span>100% das seções apuradas</span><span><i style="background:${empty}"></i>sem votos ainda</span>`;
   else leg.innerHTML = (st.pres ? st.pres.cands.map(c => `<span><i style="background:${cor[c.sq]}"></i>${esc(c.nome)} lidera</span>`).join("") : "") +
     `<span>cor mais forte = apuração mais adiantada</span><span><i style="background:transparent;border:2.5px solid var(--ink)"></i>2º turno para governador</span>`;
   const z = st.presUF.ZZ;
@@ -825,7 +831,7 @@ function botoes(){
   // mantém a tela acesa enquanto o painel está aberto (quando o navegador permite)
   const acordado = async () => { try { if (document.visibilityState === "visible") await navigator.wakeLock?.request("screen"); } catch {} };
   acordado(); document.addEventListener("visibilitychange", acordado);
-  document.addEventListener("visibilitychange", () => { document.title = "2º turno ao vivo"; });
+  document.addEventListener("visibilitychange", () => { document.title = "Tritonia · 2º turno ao vivo"; });
 }
 
 (async () => {
