@@ -276,7 +276,7 @@ svg.mundo circle.ci.sel{stroke:var(--gold);stroke-width:calc(1.4px / var(--z,1))
 .reg-c .ba{margin:3px 0 1px}
 .reg-c small{font-size:11px;color:var(--ink-3)}
 @media (max-width:1020px){.reg-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
-@media (max-width:640px){.reg-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.evo-leg .evo-nota{margin-left:0;width:100%}}
+@media (max-width:640px){.reg-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.evo-leg .evo-nota{margin-left:0;width:100%}.evo-svg text.fim{font-size:11.5px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -792,7 +792,7 @@ function renderEvo(){
   const box = $("#evo"); if (!box) return;
   const r = st.pres, cands = r ? r.cands : [], cor = r ? cores(cands) : {};
   const W = Math.max(280, box.clientWidth - 32), H = W < 520 ? 210 : 250;
-  const pad = {l:40, r:W < 520 ? 96 : 110, t:12, b:26}; // à direita, espaço para "LULA 51,2%"
+  const pad = {l:40, r:W < 520 ? 104 : 112, t:12, b:26}; // à direita, espaço para "LULA 51,2%"
   let svg = "";
   if (hist.length && cands.length){
     let lo = 100, hi = 0;
