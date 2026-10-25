@@ -260,7 +260,7 @@ footer p{margin:4px 0}
   <div class="grid" id="govs"></div>
 
   <footer>
-    <p>Dados oficiais do TSE (resultados.tse.jus.br), lidos diretamente do TSE por este navegador (a cada 10 s durante a apuração). Contornos dos estados: IBGE.</p>
+    <p>Dados oficiais do TSE (resultados.tse.jus.br), lidos diretamente do TSE por este navegador (a cada 3 s durante a apuração). Contornos dos estados: IBGE.</p>
     <p>"Eleito matematicamente" é um cálculo deste painel: a vantagem do primeiro colocado já é maior que o número de eleitores das seções que faltam apurar. A situação oficial é a divulgada pelo TSE.</p>
   </footer>
 </main>
@@ -602,17 +602,27 @@ function verificaAvisos(){
 const TSE = "https://resultados.tse.jus.br/oficial/ele2026/";
 const TSE_UFS = "AC AL AM AP BA CE DF ES GO MA MG MS MT PA PB PE PI PR RJ RN RO RR RS SC SE SP TO".split(" ");
 const TSE_GOV = ["AC", "AM", "DF", "ES", "RN", "TO"];
-const TSE_INT = { antes: 60000, apurando: 10000, fim: 300000 };
-// Agendado (pedido do João, 25/10/2026): a partir das 16h55 de Brasília já busca a cada 10 s, mesmo antes da 1ª seção apurada.
+const TSE_INT = { antes: 60000, apurando: 3000, fim: 300000 }; // 3 s na apuração (pedido do João, 25/10/2026)
+// Agendado (pedido do João, 25/10/2026): a partir das 16h55 de Brasília já busca a cada 3 s, mesmo antes da 1ª seção apurada.
 const TSE_AGENDA = Date.parse("2026-10-25T16:55:00-03:00");
 const tseArq = (ele, uf, cargo) => { const u = uf.toLowerCase(); return `${TSE}${ele}/dados/${u}/${u}-c${String(cargo).padStart(4, "0")}-e${ele.padStart(6, "0")}-u.json`; };
-// objeto do arquivo, null se o TSE ainda não publicou (404/403), undefined se falhou
+// objeto do arquivo, null se o TSE ainda não publicou (404/403), undefined se falhou.
+// Pergunta "mudou?" (pedido do João, 25/10/2026): com cache "no-cache" o navegador revalida cada arquivo no TSE
+// (If-None-Match/If-Modified-Since); se não mudou, o TSE responde 304 só com cabeçalhos (~300 bytes) e o navegador
+// devolve a cópia que já tinha. Se a data do arquivo (Last-Modified) é a mesma, reaproveita o objeto já lido.
+const tseVisto = {};
 async function tseBaixa(url){
   for (let i = 0; i < 2; i++){
     try {
-      const r = await fetch(url, {cache:"no-store", credentials:"omit", referrerPolicy:"no-referrer"});
+      const r = await fetch(url, {cache:"no-cache", credentials:"omit", referrerPolicy:"no-referrer"});
       if (r.status === 404 || r.status === 403) return null;
-      if (r.ok) return await r.json();
+      if (r.ok){
+        const lm = r.headers.get("last-modified"), v = tseVisto[url];
+        if (lm && v && v.lm === lm) return v.j; // não mudou
+        const j = await r.json();
+        tseVisto[url] = {lm, j};
+        return j;
+      }
     } catch {}
     await new Promise(r => setTimeout(r, 600));
   }
@@ -726,12 +736,12 @@ function atualizarSim(){
 /* ---------- Ciclo ---------- */
 function intervalo(){
   if (SIM) return 2000;
-  // a fase vem do arquivo nacional do Presidente: 10 s durante a apuração, 1 min antes de começar, 5 min depois de totalizado
+  // a fase vem do arquivo nacional do Presidente: 3 s durante a apuração, 1 min antes de começar, 5 min depois de totalizado
   const ms = st.coleta?.intervalo || 60000;
   // espera o intervalo da fase (com 1 s de folga)
   const idade = st.coleta ? Math.max(0, Date.now() - st.coleta.t) : 0;
-  const espera = Math.max(2000, ms - Math.min(idade, ms) + 1000);
-  // não passa do horário agendado: às 16h55 busca de novo e já entra no ritmo de 10 s
+  const espera = Math.max(1000, ms - Math.min(idade, ms));
+  // não passa do horário agendado: às 16h55 busca de novo e já entra no ritmo de 3 s
   const falta = TSE_AGENDA - Date.now();
   return falta > 0 ? Math.min(espera, falta + 500) : espera;
 }
