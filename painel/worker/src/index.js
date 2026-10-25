@@ -21,7 +21,7 @@ const CSP = [
   "script-src 'unsafe-inline'",
   "style-src 'unsafe-inline'",
   "connect-src https://resultados.tse.jus.br",
-  "img-src https://resultados.tse.jus.br data:",
+  "img-src https://resultados.tse.jus.br https://apuracao2026.goatcounter.com data:", // GoatCounter: contador silencioso (25/10/2026)
   "media-src 'self'",
   "base-uri 'none'",
   "form-action 'none'",
@@ -66,7 +66,8 @@ export default {
       });
     }
     const c = cookie(req);
-    if (!c || !CHAVES.includes(await sha256(c))) return nada();
+    const hc = c ? await sha256(c) : "";
+    if (!hc || !CHAVES.includes(hc)) return nada();
 
     if (url.pathname === "/urna.mp3") {
       return new Response(URNA, { headers: { ...BASE, "content-type": "audio/mpeg", "cache-control": "private, max-age=86400" } });
@@ -82,7 +83,8 @@ export default {
       }
     }
 
-    return new Response(HTML, {
+    // no contador, só "joao" ou "compartilhado" (nunca a chave)
+    return new Response(HTML.replace("__QUEM__", hc === HASH ? "joao" : "compartilhado"), {
       headers: { ...BASE, "content-type": "text/html; charset=utf-8", "content-security-policy": CSP, "x-frame-options": "DENY" },
     });
   },

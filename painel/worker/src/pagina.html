@@ -723,9 +723,25 @@ function mundoVista(v){
   $("#paises").hidden = !m; $("#mundoInfo").hidden = !m;
   $("#mapaTit").textContent = m ? "Presidente no exterior" : "Presidente por estado";
   $("#tip").hidden = true;
-  if (m){ mundoPinta(); mundoCarrega(); } else clearTimeout(mun.timer);
+  if (m){ mundoPinta(); mundoCarrega(); if (!contouMundo){ contouMundo = true; contar({p: "painel-2turno-mundo", t: "Painel do 2º turno: mapa-múndi aberto", e: "true"}); } } else clearTimeout(mun.timer);
   renderMapa();
 }
+
+/* ---------- Contador de acessos silencioso (GoatCounter), pedido do João em 25/10/2026 ----------
+   Mesma exceção do site público: só uma imagem de contagem, sem cookies e sem dados pessoais.
+   Caminho fixo, sem a chave: /painel-2turno/joao (chave do João) ou /painel-2turno/compartilhado (link compartilhado). */
+const QUEM = "__QUEM__";
+function contar(extra){
+  try {
+    if (location.hostname !== "painel-2turno.joao-antonio-araujo62.workers.dev") return; // não conta testes
+    if (navigator.webdriver) return;
+    const q = new URLSearchParams(Object.assign({s: [screen.width, screen.height, Math.round(devicePixelRatio || 1)].join(","), rnd: Math.random().toString(36).slice(2)}, extra));
+    const img = new Image(); img.referrerPolicy = "no-referrer";
+    img.src = "https://apuracao2026.goatcounter.com/count?" + q.toString();
+  } catch {}
+}
+contar({p: "/painel-2turno/" + QUEM, t: "Painel do 2º turno (Tritonia) · " + (QUEM === "compartilhado" ? "link compartilhado" : "João"), r: document.referrer || ""});
+let contouMundo = false;
 
 /* ---------- Governadores ---------- */
 function cardGov(uf){
