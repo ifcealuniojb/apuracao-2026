@@ -849,9 +849,9 @@ function renderRegioes(){
     const lid = tot && ord[0] && ord[1] && ord[0].rv > ord[1].rv ? ord[0] : null;
     const fill = lid ? cor[lid.sq] : "var(--ink-3)";
     const mapa = `<svg class="reg-mapa" viewBox="0 0 ${MAPA.w} ${MAPA.h}" aria-hidden="true">${UFS.map(uf => `<path d="${MAPA.uf[uf]}" style="fill:${ufs.includes(uf) ? fill : empty}"/>`).join("")}</svg>`;
-    return `<div class="reg"><div class="reg-head"><b>${nome}</b><span>${pct(p, 2)} apurado</span></div><div class="ba"><i style="width:${p}%"></i></div>${mapa}` +
-      ord.map(c => `<div class="reg-c"><div><b>${tot ? pct(c.rp, 2) : "–"}</b><span>${esc(c.nome)}</span></div><div class="ba"><i style="width:${c.rp}%;background:${cor[c.sq]}"></i></div><small>${fmt(c.rv)} votos</small></div>`).join("") + `</div>`;
-  });
+    return {p, h: `<div class="reg"><div class="reg-head"><b>${nome}</b><span>${pct(p, 2)} apurado</span></div><div class="ba"><i style="width:${p}%"></i></div>${mapa}` +
+      ord.map(c => `<div class="reg-c"><div><b>${tot ? pct(c.rp, 2) : "–"}</b><span>${esc(c.nome)}</span></div><div class="ba"><i style="width:${c.rp}%;background:${cor[c.sq]}"></i></div><small>${fmt(c.rv)} votos</small></div>`).join("") + `</div>`};
+  }).sort((x, y) => y.p - x.p).map(x => x.h); // mais apuradas primeiro (pedido do João, 25/10/2026); empate mantém a ordem N, NE, CO, SE, S
   box.innerHTML = `<div class="est-head"><h3>Regiões</h3><div class="placar"><span>Presidente · soma dos estados (sem o exterior)</span></div></div><div class="reg-grid">${cards.join("")}</div>`;
 }
 let evoRedim = 0;
