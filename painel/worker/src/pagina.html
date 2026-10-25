@@ -238,6 +238,45 @@ svg.mundo circle.ci.sel{stroke:var(--gold);stroke-width:calc(1.4px / var(--z,1))
   .pais-det th,.pais-det td{white-space:normal;padding:4px 4px}
   .pais-det td small{display:block}
 }
+/* minuto a minuto e regiões (25/10/2026) */
+.bloco{padding:16px;margin-top:16px}
+.evo-leg{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12.5px;color:var(--ink-2);margin:4px 0 6px}
+.evo-leg i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:3px;margin-right:6px}
+.evo-leg .evo-nota{color:var(--ink-3);margin-left:auto}
+.evo-box{position:relative}
+.evo-svg{display:block;max-width:100%;touch-action:pan-y}
+.evo-svg line.g{stroke:var(--line);stroke-width:1}
+.evo-svg line.g.meio{stroke:var(--ink-3);stroke-dasharray:4 4}
+.evo-svg text{font:600 11px var(--sans);fill:var(--ink-3)}
+.evo-svg text.ey{text-anchor:end;dominant-baseline:central}
+.evo-svg text.ex{text-anchor:middle}
+.evo-svg text.fim{font-weight:800;font-size:12.5px;fill:var(--ink);dominant-baseline:central}
+.evo-svg polyline.ln{fill:none;stroke-width:2.2;stroke-linejoin:round;stroke-linecap:round}
+.evo-svg circle.pt{stroke:var(--surface);stroke-width:2}
+.evo-svg line.mira{stroke:var(--ink-3);stroke-width:1}
+.evo-svg rect.hit{fill:transparent;cursor:crosshair}
+.evo-vazio{padding:30px 10px;text-align:center;color:var(--ink-3);font-size:13px}
+.evo-rod{font-size:12px;color:var(--ink-3);margin-top:6px}
+.evo-tab{margin-top:6px;font-size:12.5px;color:var(--ink-2)}
+.evo-tab summary{cursor:pointer;font-weight:700}
+.evo-tab table{border-collapse:collapse;margin-top:6px;width:100%;max-width:560px}
+.evo-tab th,.evo-tab td{text-align:left;padding:3px 8px 3px 0;border-bottom:1px solid var(--line)}
+.reg-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-top:8px}
+.reg{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.reg-head{display:flex;justify-content:space-between;align-items:baseline;gap:6px;flex-wrap:wrap}
+.reg-head b{font-size:15px}.reg-head span{font-size:12px;color:var(--ink-3)}
+.reg .ba{height:6px;border-radius:99px;background:var(--gray-soft);overflow:hidden;margin:6px 0}
+.reg .ba i{display:block;height:100%;border-radius:99px;background:var(--accent);transition:width .8s ease}
+.reg-mapa{display:block;width:100%;max-width:150px;height:auto;margin:6px auto 8px}
+.reg-mapa path{stroke:var(--surface-2);stroke-width:4;transition:fill .6s ease}
+.reg-c{margin-top:6px}
+.reg-c > div:first-child{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
+.reg-c b{font-size:17px;font-weight:800;letter-spacing:-.02em}
+.reg-c span{font-size:11.5px;font-weight:700;color:var(--ink-2)}
+.reg-c .ba{margin:3px 0 1px}
+.reg-c small{font-size:11px;color:var(--ink-3)}
+@media (max-width:1020px){.reg-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:640px){.reg-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.evo-leg .evo-nota{margin-left:0;width:100%}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -298,6 +337,9 @@ svg.mundo circle.ci.sel{stroke:var(--gold);stroke-width:calc(1.4px / var(--z,1))
     </section>
   </div>
 
+  <section class="card bloco" id="evo" aria-live="off"></section>
+  <section class="card bloco" id="regioes"></section>
+
   <div class="sec-head">
     <div>
       <h2>Governadores</h2>
@@ -356,7 +398,7 @@ function parse(j){
     cands.push({n:k.n, sq:k.sqcand, nome:k.nmu, partido:p.sg, v:+k.vap || 0, pv:num(k.pvapn), st:k.st || "", seq:+k.seq || 9});
   cands.sort((a,b) => a.seq - b.seq);
   return { pst:num(j.s.pstn), tf:j.tf === "s", te:+j.e.te || 0, est:+j.e.est || 0, esnt:+j.e.esnt || 0,
-           vv:+j.v.vv || 0, hora:(j.dg||"") + " " + (j.hg||""), cands };
+           vv:+j.v.vv || 0, hora:(j.dg||"") + " " + (j.hg||""), sst:+j.s?.st || 0, sts:+j.s?.ts || 0, cands };
 }
 // os dois finalistas do 1º turno (com os votos do 1º turno, usados só na simulação)
 function finalistas(j){
@@ -728,6 +770,93 @@ function mundoVista(v){
   renderMapa();
 }
 
+/* ---------- Minuto a minuto e Regiões (pedido do João, 25/10/2026) ----------
+   O TSE não publica o histórico: o painel guarda neste aparelho um ponto a cada atualização do arquivo nacional
+   do Presidente (horário do TSE). Regiões: soma dos arquivos dos estados (votos e seções). */
+const HIST_K = "p2t-hist-6258";
+let hist = guarda.get(HIST_K, []);
+if (!Array.isArray(hist)) hist = [];
+function histRegistra(){
+  const r = st.pres; if (SIM || !r || !(r.pst > 0)) return;
+  const h = r.hora.trim(), ult = hist[hist.length - 1];
+  if (ult && ult.h === h) return;
+  const m = h.match(/(\d+)\/(\d+)\/(\d+) (\d+):(\d+):(\d+)/); if (!m) return;
+  const x = Date.parse(`${m[3]}-${m[2]}-${m[1]}T${m[4]}:${m[5]}:${m[6]}-03:00`);
+  if (ult && x < ult.x) return;
+  hist.push({h, x, pst: r.pst, p: Object.fromEntries(r.cands.map(c => [c.sq, +c.pv.toFixed(2)]))});
+  if (hist.length > 3000) hist = hist.slice(-3000);
+  guarda.set(HIST_K, hist);
+}
+const hhmm = x => new Date(x).toLocaleTimeString("pt-BR", {hour:"2-digit", minute:"2-digit", timeZone:"America/Sao_Paulo"});
+function renderEvo(){
+  const box = $("#evo"); if (!box) return;
+  const r = st.pres, cands = r ? r.cands : [], cor = r ? cores(cands) : {};
+  const W = Math.max(280, box.clientWidth - 32), H = W < 520 ? 210 : 250;
+  const pad = {l:40, r:W < 520 ? 74 : 104, t:12, b:26};
+  let svg = "";
+  if (hist.length && cands.length){
+    let lo = 100, hi = 0;
+    for (const p of hist) for (const c of cands){ const v = p.p[c.sq]; if (v != null){ lo = Math.min(lo, v); hi = Math.max(hi, v); } }
+    lo = Math.max(0, Math.min(45, Math.floor((lo - 3) / 5) * 5)); hi = Math.min(100, Math.max(55, Math.ceil((hi + 3) / 5) * 5));
+    const passo = hi - lo > 40 ? 10 : 5;
+    const x0 = hist[0].x, x1 = Math.max(hist[hist.length - 1].x, x0 + 60000);
+    const X = x => pad.l + (W - pad.l - pad.r) * (x - x0) / (x1 - x0), Y = v => pad.t + (H - pad.t - pad.b) * (hi - v) / (hi - lo);
+    for (let v = lo; v <= hi; v += passo) svg += `<line class="g${v === 50 ? " meio" : ""}" x1="${pad.l}" x2="${W - pad.r}" y1="${Y(v)}" y2="${Y(v)}"/><text class="ey" x="${pad.l - 6}" y="${Y(v)}">${v}%</text>`;
+    const nt = W < 520 ? 3 : 6;
+    for (let i = 0; i <= nt; i++){ const x = x0 + (x1 - x0) * i / nt; svg += `<text class="ex" x="${X(x)}" y="${H - 6}">${hhmm(x)}</text>`; }
+    const ult = hist[hist.length - 1], fim = [];
+    for (const c of cands){
+      const pts = hist.filter(p => p.p[c.sq] != null).map(p => `${X(p.x).toFixed(1)},${Y(p.p[c.sq]).toFixed(1)}`);
+      if (pts.length > 1) svg += `<polyline class="ln" style="stroke:${cor[c.sq]}" points="${pts.join(" ")}"/>`;
+      const v = ult.p[c.sq]; if (v == null) continue;
+      svg += `<circle class="pt" style="fill:${cor[c.sq]}" cx="${X(ult.x)}" cy="${Y(v)}" r="4"/>`;
+      fim.push({y: Y(v), t: `${c.nome.split(" ")[0]} ${pct(v, 1)}`, c: cor[c.sq]});
+    }
+    fim.sort((a, b) => a.y - b.y); if (fim.length === 2 && fim[1].y - fim[0].y < 16){ const m = (fim[0].y + fim[1].y) / 2; fim[0].y = m - 8; fim[1].y = m + 8; }
+    for (const f of fim) svg += `<text class="fim" x="${W - pad.r + 8}" y="${f.y}">${esc(f.t)}</text>`;
+    svg += `<line class="mira" id="evoMira" x1="0" x2="0" y1="${pad.t}" y2="${H - pad.b}" visibility="hidden"/><rect class="hit" x="${pad.l}" y="${pad.t}" width="${W - pad.l - pad.r}" height="${H - pad.t - pad.b}"/>`;
+    box._escala = {X, x0, x1, pad, W};
+  }
+  const desde = hist.length ? hhmm(hist[0].x) : "";
+  box.innerHTML = `<div class="est-head"><h3>Minuto a minuto</h3><div class="placar">${r ? `<span><b>${pct(r.pst, 2)}</b> das seções apuradas</span>` : ""}</div></div>
+    <div class="evo-leg">${cands.map(c => `<span><i style="background:${cor[c.sq]}"></i>${esc(c.nome)}</span>`).join("")}<span class="evo-nota">% dos votos válidos · horário do TSE</span></div>
+    <div class="evo-box">${hist.length ? `<svg class="evo-svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Evolução do percentual de votos válidos do Presidente ao longo da apuração">${svg}</svg><div class="tip evo-tip" id="evoTip" hidden></div>`
+      : `<div class="evo-vazio">A curva começa quando o TSE publicar seções apuradas.</div>`}</div>
+    <div class="evo-rod">${hist.length ? `Registrado por este aparelho desde ${desde} (${hist.length} ${hist.length > 1 ? "atualizações" : "atualização"} do TSE). O TSE não publica o histórico; com o painel fechado, a curva liga os pontos por uma reta.` : ""}</div>
+    ${hist.length ? `<details class="evo-tab"><summary>Ver em tabela</summary><table><thead><tr><th>Horário (TSE)</th><th>Apurado</th>${cands.map(c => `<th>${esc(c.nome)}</th>`).join("")}</tr></thead><tbody>${hist.slice(-30).reverse().map(p => `<tr><td>${p.h.split(" ")[1]}</td><td>${pct(p.pst, 2)}</td>${cands.map(c => `<td>${p.p[c.sq] != null ? pct(p.p[c.sq], 2) : "–"}</td>`).join("")}</tr>`).join("")}</tbody></table></details>` : ""}`;
+  const svgEl = box.querySelector(".evo-svg"); if (!svgEl) return;
+  const tip = box.querySelector("#evoTip"), mira = box.querySelector("#evoMira");
+  const mostra = ev => {
+    const e = box._escala, b = svgEl.getBoundingClientRect(), mx = ev.clientX - b.left;
+    let best = hist[0], bd = Infinity; for (const p of hist){ const d = Math.abs(e.X(p.x) - mx); if (d < bd){ bd = d; best = p; } }
+    const x = e.X(best.x); mira.setAttribute("x1", x); mira.setAttribute("x2", x); mira.setAttribute("visibility", "visible");
+    tip.innerHTML = `<b>${best.h.split(" ")[1]}</b> · ${pct(best.pst, 2)} apurado` + [...cands].sort((a, c) => (best.p[c.sq] || 0) - (best.p[a.sq] || 0)).map(c => `<div class="l"><span>${esc(c.nome)}</span><b>${best.p[c.sq] != null ? pct(best.p[c.sq], 2) : "–"}</b></div>`).join("");
+    tip.hidden = false; tip.style.left = Math.max(95, Math.min(b.width - 95, x)) + "px"; tip.style.top = "90px";
+  };
+  svgEl.addEventListener("pointermove", mostra); svgEl.addEventListener("pointerdown", mostra);
+  svgEl.addEventListener("pointerleave", () => { tip.hidden = true; mira.setAttribute("visibility", "hidden"); });
+}
+const REGIOES = [["Norte", "AC AM AP PA RO RR TO"], ["Nordeste", "AL BA CE MA PB PE PI RN SE"], ["Centro-Oeste", "DF GO MS MT"], ["Sudeste", "ES MG RJ SP"], ["Sul", "PR RS SC"]].map(([n, u]) => [n, u.split(" ")]);
+function renderRegioes(){
+  const box = $("#regioes"); if (!box) return;
+  const r = st.pres, cands = r ? r.cands : [], cor = r ? cores(cands) : {};
+  const empty = getComputedStyle(document.documentElement).getPropertyValue("--map-empty").trim();
+  const cards = REGIOES.map(([nome, ufs]) => {
+    let s = 0, t = 0; const v = {};
+    for (const uf of ufs){ const x = st.presUF[uf]; if (!x) continue; s += x.sst || 0; t += x.sts || 0; for (const c of x.cands) v[c.sq] = (v[c.sq] || 0) + c.v; }
+    const tot = Object.values(v).reduce((a, b) => a + b, 0), p = t ? 100 * s / t : 0;
+    const ord = cands.map(c => ({...c, rv: v[c.sq] || 0, rp: tot ? 100 * (v[c.sq] || 0) / tot : 0})).sort((a, b) => b.rv - a.rv);
+    const lid = tot && ord[0] && ord[1] && ord[0].rv > ord[1].rv ? ord[0] : null;
+    const fill = lid ? cor[lid.sq] : "var(--ink-3)";
+    const mapa = `<svg class="reg-mapa" viewBox="0 0 ${MAPA.w} ${MAPA.h}" aria-hidden="true">${UFS.map(uf => `<path d="${MAPA.uf[uf]}" style="fill:${ufs.includes(uf) ? fill : empty}"/>`).join("")}</svg>`;
+    return `<div class="reg"><div class="reg-head"><b>${nome}</b><span>${pct(p, 2)} apurado</span></div><div class="ba"><i style="width:${p}%"></i></div>${mapa}` +
+      ord.map(c => `<div class="reg-c"><div><b>${tot ? pct(c.rp, 2) : "–"}</b><span>${esc(c.nome)}</span></div><div class="ba"><i style="width:${c.rp}%;background:${cor[c.sq]}"></i></div><small>${fmt(c.rv)} votos</small></div>`).join("") + `</div>`;
+  });
+  box.innerHTML = `<div class="est-head"><h3>Regiões</h3><div class="placar"><span>Presidente · soma dos estados (sem o exterior)</span></div></div><div class="reg-grid">${cards.join("")}</div>`;
+}
+let evoRedim = 0;
+addEventListener("resize", () => { clearTimeout(evoRedim); evoRedim = setTimeout(renderEvo, 200); });
+
 /* ---------- Contador de acessos silencioso (GoatCounter), pedido do João em 25/10/2026 ----------
    Mesma exceção do site público: só uma imagem de contagem, sem cookies e sem dados pessoais.
    Caminho fixo, sem a chave: /painel-2turno/joao (chave do João) ou /painel-2turno/compartilhado (link compartilhado). */
@@ -939,6 +1068,7 @@ async function atualizarReal(){
   for (const uf of [...UFS, "ZZ"]) if (uf in d.p) st.presUF[uf] = d.p[uf] ? parse(d.p[uf]) : null;
   for (const uf of st.govUFs) if (uf in d.g) st.gov[uf] = d.g[uf] ? parse(d.g[uf]) : null;
   st.coleta = d;
+  histRegistra();
   return d.falhas || 0;
 }
 
@@ -1017,7 +1147,7 @@ async function ciclo(){
   let falhas = 0;
   try { falhas = SIM ? atualizarSim() : await atualizarReal(); $("#erro").hidden = true; }
   catch (e) { $("#erro").textContent = "Não foi possível ler os dados do TSE agora. Nova tentativa em instantes."; $("#erro").hidden = false; }
-  renderPres(); renderMapa(); renderEstados(); renderGovs(); verificaAvisos();
+  renderPres(); renderMapa(); renderEstados(); renderEvo(); renderRegioes(); renderGovs(); verificaAvisos();
   const r = st.pres, andando = r && r.est > 0 && !r.tf;
   $("#vivo").classList.toggle("off", !andando || st.pausado);
   $("#vivoTxt").textContent = st.pausado ? "pausado" : SIM ? "simulação" : r?.tf ? "totalizado" : andando ? "ao vivo" : "aguardando";
