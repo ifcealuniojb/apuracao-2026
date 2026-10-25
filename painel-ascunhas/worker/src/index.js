@@ -3,6 +3,7 @@
 // /dados (coletor do painel-2turno) continua respondendo, mas a página não usa mais.
 // Aqui fica apenas o SHA-256 da chave: a chave em si não está no código.
 import PAGINA from "./pagina.html";
+import FORA from "./fora.html"; // tela temporária "fora do ar"
 import URNA from "./urna.mp3"; // som do alerta (urna eletrônica)
 import MAPA from "../../../painel/worker/src/mapa.json";
 
@@ -21,6 +22,11 @@ const CSP = [
   "form-action 'none'",
   "frame-ancestors 'none'",
 ].join("; ");
+
+// FORA DO AR (pedido do João, 25/10/2026, 00h50): quem tem a chave vê a tela temporária no lugar do painel;
+// sem a chave continua 404. Para retomar: FORA_DO_AR = false (o painel em si não foi alterado).
+const FORA_DO_AR = true;
+const CSP_FORA = "default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'";
 
 const BASE = {
   "x-robots-tag": "noindex, nofollow",
@@ -61,6 +67,14 @@ export default {
     }
     const c = cookie(req);
     if (!c || (await sha256(c)) !== HASH) return nada();
+
+    if (FORA_DO_AR) {
+      if (url.pathname !== "/") return nada();
+      return new Response(FORA, {
+        status: 503,
+        headers: { ...BASE, "content-type": "text/html; charset=utf-8", "content-security-policy": CSP_FORA, "x-frame-options": "DENY", "retry-after": "3600" },
+      });
+    }
 
     if (url.pathname === "/urna.mp3") {
       return new Response(URNA, { headers: { ...BASE, "content-type": "audio/mpeg", "cache-control": "private, max-age=86400" } });
