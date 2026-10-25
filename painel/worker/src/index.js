@@ -1,9 +1,10 @@
 // Painel pessoal do 2º turno. Só abre com o link secreto (?k=...), que vira um cookie.
-// Os dados do TSE são coletados aqui no servidor (Durable Object "Coletor", uma só instância) e entregues
-// em /dados: o TSE é consultado no máximo a cada 10 s durante a apuração, não importa quantos navegadores abertos.
+// Desde 25/10/2026 a página lê o TSE direto do navegador (o TSE passou a recusar o coletor no Cloudflare em 24/10).
+// O Durable Object "Coletor" e /dados continuam aqui (o painel-ascunhas tem um vínculo com ele), mas a página não usa mais.
 // Aqui fica apenas o SHA-256 da chave: a chave em si não está no código.
 import PAGINA from "./pagina.html";
 import MAPA from "./mapa.json";
+import URNA from "./urna.mp3"; // som do alerta (urna eletrônica)
 export { Coletor } from "./coletor.js";
 
 const HASH = "b5c0d451ec9bdb4cbda5fb495e77c9341e31cc0d7e93c40e34412014cac3b77a";
@@ -14,8 +15,9 @@ const CSP = [
   "default-src 'none'",
   "script-src 'unsafe-inline'",
   "style-src 'unsafe-inline'",
-  "connect-src 'self'",
+  "connect-src https://resultados.tse.jus.br",
   "img-src https://resultados.tse.jus.br data:",
+  "media-src 'self'",
   "base-uri 'none'",
   "form-action 'none'",
   "frame-ancestors 'none'",
@@ -45,20 +47,25 @@ export default {
     if (req.method !== "GET" && req.method !== "HEAD") return nada();
     const url = new URL(req.url);
     if (url.pathname === "/robots.txt") return new Response("User-agent: *\nDisallow: /\n", { headers: { ...BASE, "content-type": "text/plain" } });
-    if (url.pathname !== "/" && url.pathname !== "/dados") return nada();
+    if (url.pathname !== "/" && url.pathname !== "/dados" && url.pathname !== "/urna.mp3") return nada();
 
     const k = url.searchParams.get("k");
     if (k && url.pathname === "/") {
       if (!/^[A-Za-z0-9_-]{16,64}$/.test(k) || (await sha256(k)) !== HASH) return nada();
-      // guarda a chave num cookie e tira ela do endereço
+      // guarda a chave num cookie e tira ela do endereço (Lax desde 25/10, como no As Cunhãs: com Strict, quem abre
+      // pelo link vindo de outro app perde o cookie no redirecionamento e cai no 404)
       url.searchParams.delete("k");
       return new Response(null, {
         status: 302,
-        headers: { ...BASE, location: url.pathname + url.search, "set-cookie": `${COOKIE}=${k}; Path=/; Max-Age=7776000; HttpOnly; Secure; SameSite=Strict` },
+        headers: { ...BASE, location: url.pathname + url.search, "set-cookie": `${COOKIE}=${k}; Path=/; Max-Age=7776000; HttpOnly; Secure; SameSite=Lax` },
       });
     }
     const c = cookie(req);
     if (!c || (await sha256(c)) !== HASH) return nada();
+
+    if (url.pathname === "/urna.mp3") {
+      return new Response(URNA, { headers: { ...BASE, "content-type": "audio/mpeg", "cache-control": "private, max-age=86400" } });
+    }
 
     if (url.pathname === "/dados") {
       try {

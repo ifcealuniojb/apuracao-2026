@@ -9,6 +9,11 @@ type = "Text"
 globs = ["**/*.html"]
 fallthrough = true
 
+[[rules]]
+type = "Data"
+globs = ["**/*.mp3"]
+fallthrough = true
+
 [[durable_objects.bindings]]
 name = "COLETOR"
 class_name = "Coletor"

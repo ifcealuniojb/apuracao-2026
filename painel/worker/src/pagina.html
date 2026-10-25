@@ -84,6 +84,8 @@ main{padding:18px 0 40px}
 @media (max-width:1020px){.estados{flex:none;max-height:460px}.est-lista{flex:1 1 auto;max-height:400px}}
 @media (max-width:520px){.er{grid-template-columns:30px minmax(0,1fr) 140px}.er .bx{display:none}}
 @media (max-width:1020px){.topo-grid{grid-template-columns:minmax(0,1fr)}}
+body.sim .card.pres{position:relative;overflow:hidden}
+body.sim .card.pres::after{content:"SIMULAÇÃO";position:absolute;right:-8px;bottom:6px;font-size:54px;font-weight:900;letter-spacing:.06em;color:var(--ink);opacity:.06;pointer-events:none;transform:rotate(-6deg)}
 .eyebrow{font-size:11.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-2)}
 
 /* presidente */
@@ -179,6 +181,23 @@ svg.br line{stroke:var(--ink-3);stroke-width:1}
 footer{color:var(--ink-3);font-size:12px;padding:10px 0 30px}
 footer p{margin:4px 0}
 .erro{background:var(--red-soft);color:var(--red);border-radius:12px;padding:10px 14px;font-size:13px;margin-bottom:14px}
+/* aviso de Presidente eleito: destaque no centro da tela (os governadores seguem no canto) */
+.pres-aviso{position:fixed;inset:0;z-index:200;display:grid;place-items:center;padding:20px;background:rgba(13,22,32,.55);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);animation:fundo .4s ease}
+@keyframes fundo{from{opacity:0}}
+.pa-card{position:relative;width:min(440px,100%);background:var(--navy);color:#fff;border-radius:28px;padding:30px 24px 22px;text-align:center;border:4px solid var(--lime);box-shadow:0 30px 80px -20px rgba(0,0,0,.6);animation:sobe .7s cubic-bezier(.2,1.5,.4,1)}
+@keyframes sobe{from{transform:translateY(40px) scale(.85);opacity:0}}
+.pa-estrela{position:absolute;top:-34px;left:50%;width:68px;height:68px;transform:translateX(-50%);animation:gira 6s linear infinite;border-radius:20px;background:var(--lime);color:var(--navy);display:grid;place-items:center;border:4px solid var(--navy)}
+.pa-estrela svg{width:34px;height:34px;display:block}
+@keyframes gira{50%{transform:translateX(-50%) rotate(12deg) scale(1.06)}}
+.pa-top{font-size:12px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--lime);margin:12px 0 14px}
+.pa-foto{width:128px;height:168px;margin:0 auto 14px;border-radius:20px;background:var(--gray-soft) center/cover no-repeat;border:4px solid var(--lime)}
+.pa-nome{font-size:30px;font-weight:900;letter-spacing:-.02em;line-height:1.1}
+.pa-part{font-size:14px;font-weight:700;color:var(--navy-mute);margin-top:4px}
+.pa-sel{display:inline-block;margin:14px 0 10px;background:var(--lime);color:var(--navy);font-weight:900;font-size:18px;padding:7px 18px;border-radius:999px}
+.pa-txt{font-size:13.5px;color:#dbe5ee;line-height:1.45}
+.pa-fechar{all:unset;cursor:pointer;margin-top:16px;padding:9px 22px;border-radius:999px;background:rgba(255,255,255,.14);font-weight:800;font-size:14px}
+.pa-fechar:hover{background:rgba(255,255,255,.24)}
+.pa-fechar:focus-visible{outline:2px solid var(--lime);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -241,11 +260,12 @@ footer p{margin:4px 0}
   <div class="grid" id="govs"></div>
 
   <footer>
-    <p>Dados oficiais do TSE (resultados.tse.jus.br), coletados por este painel no servidor (a cada 10 s durante a apuração) e repassados a quem está com ele aberto. Contornos dos estados: IBGE.</p>
+    <p>Dados oficiais do TSE (resultados.tse.jus.br), lidos diretamente do TSE por este navegador (a cada 10 s durante a apuração). Contornos dos estados: IBGE.</p>
     <p>"Eleito matematicamente" é um cálculo deste painel: a vantagem do primeiro colocado já é maior que o número de eleitores das seções que faltam apurar. A situação oficial é a divulgada pelo TSE.</p>
   </footer>
 </main>
 <div class="toasts" id="toasts" aria-live="assertive"></div>
+<div class="pres-aviso" id="presAviso" aria-live="assertive" hidden></div>
 
 <script>
 "use strict";
@@ -267,6 +287,7 @@ const guarda = { get(k, d){ try { const v = localStorage.getItem(k); return v ==
                  set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
 
 const SIM = new URLSearchParams(location.search).has("sim");
+if (SIM) document.body.classList.add("sim");
 const st = {
   pres: null, presUF: {}, gov: {}, govUFs: [], fin1: {},     // dados atuais
   modoMapa: "lider", ordem: guarda.get("p2t-ordem", "desc"),
@@ -505,20 +526,38 @@ function renderGovs(){
 }
 
 /* ---------- Alertas: aviso na tela, som e notificação ---------- */
+// Som do alerta: o som da urna eletrônica (arquivo /urna.mp3 servido pelo próprio painel; o mesmo do As Cunhãs).
 let audio = null;
 function tocar(){
   if (!st.som) return;
   try {
-    audio = audio || new (window.AudioContext || window.webkitAudioContext)();
-    if (audio.state === "suspended") audio.resume();
-    const t0 = audio.currentTime;
-    [[659.25,0],[783.99,.16],[1046.5,.32],[1318.5,.5]].forEach(([f, d]) => {
-      const o = audio.createOscillator(), g = audio.createGain();
-      o.type = "triangle"; o.frequency.value = f;
-      g.gain.setValueAtTime(0.0001, t0 + d); g.gain.exponentialRampToValueAtTime(0.35, t0 + d + .02); g.gain.exponentialRampToValueAtTime(0.0001, t0 + d + .55);
-      o.connect(g).connect(audio.destination); o.start(t0 + d); o.stop(t0 + d + .6);
-    });
+    audio = audio || new Audio("/urna.mp3");
+    audio.currentTime = 0;
+    const p = audio.play(); if (p) p.catch(() => {}); // o navegador só toca depois de um toque na página
   } catch {}
+}
+function avisarPresidente(titulo, c, texto, img, mat){
+  const box = $("#presAviso");
+  box.innerHTML = `<div class="pa-card" role="alertdialog" aria-label="${esc(titulo)}">
+    <div class="pa-estrela" aria-hidden="true">${$(".logo").innerHTML}</div>
+    <div class="pa-top">${SIM ? "Simulação · " : ""}Presidente da República</div>
+    ${img ? `<div class="pa-foto" style="background-image:url('${img}')"></div>` : ""}
+    <div class="pa-nome">${esc(c.nome)}</div>
+    <div class="pa-part">${esc(c.partido)} · ${esc(c.n)}</div>
+    <div class="pa-sel">${mat ? "Eleito(a) matematicamente" : "Eleito(a)"}</div>
+    <div class="pa-txt">${esc(texto)}</div>
+    <button type="button" class="pa-fechar">Fechar</button>
+  </div>`;
+  box.hidden = false;
+  const fecha = () => { box.hidden = true; box.innerHTML = ""; };
+  box.querySelector(".pa-fechar").onclick = fecha;
+  box.onclick = e => { if (e.target === box) fecha(); };
+  tocar();
+  try {
+    if ("Notification" in window && Notification.permission === "granted")
+      new Notification(titulo, {body: texto, tag: "BR", icon: img || undefined, requireInteraction: true});
+  } catch {}
+  document.title = "★ " + titulo;
 }
 function avisar(chave, titulo, texto, img){
   const t = document.createElement("div"); t.className = "toast";
@@ -546,29 +585,67 @@ function verificaAvisos(){
     const c = r.cands.find(x => x.sq === s.c.sq);
     const titulo = `${cargo}: ${c.nome} (${c.partido}) ${s.k === "mat" ? "eleito(a) matematicamente" : "eleito(a)"}`;
     const texto = `${pct(c.pv, 2)} dos votos válidos com ${pct(r.pst, 2)} das seções apuradas. Vantagem de ${fmt(s.dif)} votos; faltam ${mi(r.esnt)} eleitores.`;
-    avisar(chave, titulo, texto, foto(c, uf));
+    if (uf === "BR") avisarPresidente(titulo, c, texto, foto(c, uf), s.k === "mat");
+    else avisar(chave, titulo, texto, foto(c, uf));
     const alvo = uf === "BR" ? $("#pres") : document.getElementById("gov-" + uf);
     if (alvo){ alvo.classList.remove("flash"); void alvo.offsetWidth; alvo.classList.add("flash"); }
   }
 }
 
 /* ---------- Carga ---------- */
-// Os dados vêm do coletor no servidor (/dados), que consulta o TSE uma vez para todos os navegadores.
-async function pacote(sim){
-  for (let i = 0; i < 3; i++){
+// Os dados vêm direto do TSE (resultados.tse.jus.br), lidos por este navegador.
+// Desde 24/10/2026 o TSE recusa as consultas feitas pelos servidores do Cloudflare (o coletor recebia
+// 403/404 e ficava vazio); o TSE libera a leitura para qualquer navegador (CORS aberto).
+// Monta o mesmo pacote que o coletor montava: {t, fase, intervalo, falhas, p, g, g1} ou {p1, g1} na simulação.
+const TSE = "https://resultados.tse.jus.br/oficial/ele2026/";
+const TSE_UFS = "AC AL AM AP BA CE DF ES GO MA MG MS MT PA PB PE PI PR RJ RN RO RR RS SC SE SP TO".split(" ");
+const TSE_GOV = ["AC", "AM", "DF", "ES", "RN", "TO"];
+const TSE_INT = { antes: 60000, apurando: 10000, fim: 300000 };
+const tseArq = (ele, uf, cargo) => { const u = uf.toLowerCase(); return `${TSE}${ele}/dados/${u}/${u}-c${String(cargo).padStart(4, "0")}-e${ele.padStart(6, "0")}-u.json`; };
+// objeto do arquivo, null se o TSE ainda não publicou (404/403), undefined se falhou
+async function tseBaixa(url){
+  for (let i = 0; i < 2; i++){
     try {
-      const r = await fetch("/dados" + (sim ? "?sim=1" : ""), {cache:"no-store", credentials:"same-origin"});
+      const r = await fetch(url, {cache:"no-store", credentials:"omit", referrerPolicy:"no-referrer"});
+      if (r.status === 404 || r.status === 403) return null;
       if (r.ok) return await r.json();
     } catch {}
-    await new Promise(r => setTimeout(r, 800 * (i+1)));
+    await new Promise(r => setTimeout(r, 600));
   }
-  throw new Error("coletor sem resposta");
+  return undefined;
+}
+const tse = { arqs: {}, gov1: null, sim: null };
+async function tseGov1(){
+  if (tse.gov1) return tse.gov1;
+  const g = await Promise.all(TSE_GOV.map(uf => tseBaixa(tseArq("6259", uf, 3))));
+  if (g.some(x => !x)) return undefined; // tenta de novo na próxima
+  return (tse.gov1 = Object.fromEntries(TSE_GOV.map((uf, i) => [uf, g[i]])));
+}
+async function pacote(sim){
+  if (sim){
+    if (tse.sim) return tse.sim;
+    const ufs = ["BR", ...TSE_UFS, "ZZ"];
+    const [p, g1] = await Promise.all([Promise.all(ufs.map(uf => tseBaixa(tseArq("6257", uf, 1)))), tseGov1()]);
+    if (p.some(x => !x) || !g1) throw new Error("falha ao montar a simulação");
+    return (tse.sim = { p1: Object.fromEntries(ufs.map((uf, i) => [uf, p[i]])), g1 });
+  }
+  const alvos = [["p", "BR", "6258", 1], ...[...TSE_UFS, "ZZ"].map(uf => ["p", uf, "6258", 1]), ...TSE_GOV.map(uf => ["g", uf, "6260", 3])];
+  const [res, g1] = await Promise.all([Promise.all(alvos.map(([, uf, e, c]) => tseBaixa(tseArq(e, uf, c)))), tseGov1()]);
+  let falhas = 0;
+  alvos.forEach(([s, uf], i) => { if (res[i] === undefined) falhas++; else tse.arqs[s + "/" + uf] = res[i]; });
+  if (falhas === alvos.length && !Object.keys(tse.arqs).length) throw new Error("TSE sem resposta");
+  const sec = s => Object.fromEntries(Object.entries(tse.arqs).filter(([k]) => k.startsWith(s + "/")).map(([k, v]) => [k.slice(2), v]));
+  const br = tse.arqs["p/BR"];
+  let fase = "antes";
+  if (br && br.tf === "s" && TSE_GOV.every(uf => tse.arqs["g/" + uf]?.tf === "s" || tse.arqs["g/" + uf] === null)) fase = "fim";
+  else if (br && +br.e?.est > 0) fase = "apurando";
+  return { t: Date.now(), fase, intervalo: TSE_INT[fase], falhas, p: sec("p"), g: sec("g"), g1: g1 || tse.gov1 || {} };
 }
 function leGov1(g1){
   // estados com 2º turno para governador e finalistas, pelo resultado do 1º turno
   for (const uf of UFS){ const j = g1?.[uf]; const f = j ? finalistas(j) : []; if (f.length === 2 && !st.govUFs.includes(uf)){ st.govUFs.push(uf); st.fin1[uf] = f; } }
 }
-let ultimo = null; // último pacote do coletor
+let ultimo = null; // último pacote lido do TSE
 async function inicio(){
   if (SIM){ const d = await pacote(true); leGov1(d.g1); prepSim(d); }
   else { ultimo = await pacote(false); leGov1(ultimo.g1); }
@@ -594,7 +671,25 @@ function prepSim(d){
     const v = {}; for (const a of j.carg[0].agr) for (const p of a.par) for (const k of p.cand) v[k.sqcand] = +k.vap || 0;
     sim.uf[uf] = {te:+j.e.te, v, atraso:aleat(0, 8), ritmo:aleat(2.2, 5.5), vies:aleat(-.18, .18)};
   }
+  viradaDemo();
   for (const uf of st.govUFs) sim.gov[uf] = {te:sim.uf[uf].te, atraso:aleat(0, 8), ritmo:aleat(2.2, 5.5), vies:aleat(-.15, .15)};
+}
+// Demonstração (igual ao As Cunhãs): a simulação termina com vitória do Lula. Só aqui no navegador, só na simulação:
+// troca os votos dos dois finalistas em MG (e, se ainda não bastar, em SP). Nada muda nos dados do TSE.
+const VIRADA = ["MG", "SP"];
+function viradaDemo(){
+  const lula = sim.presC.find(c => c.partido === "PT"), outro = sim.presC.find(c => c !== lula);
+  if (!lula || !outro) return;
+  const total = sq => Object.values(sim.uf).reduce((t, u) => t + (u.v[sq] || 0), 0);
+  sim.trocados = [];
+  for (const uf of VIRADA){
+    if (total(lula.sq) > total(outro.sq)) break;
+    const u = sim.uf[uf]; if (!u) continue;
+    [u.v[lula.sq], u.v[outro.sq]] = [u.v[outro.sq], u.v[lula.sq]];
+    sim.trocados.push(uf);
+  }
+  const bar = $("#simbar");
+  if (bar && sim.trocados.length) bar.textContent = `SIMULAÇÃO DE DEMONSTRAÇÃO: resultado fictício. Votos do 1º turno com os dos dois candidatos trocados em ${sim.trocados.join(" e ")}. Não é resultado real.`;
 }
 function simCorrida(cfg, cands, votos){
   const p = Math.max(0, Math.min(100, (sim.t - cfg.atraso) * cfg.ritmo)), f = p / 100;
@@ -627,9 +722,9 @@ function atualizarSim(){
 /* ---------- Ciclo ---------- */
 function intervalo(){
   if (SIM) return 2000;
-  // o coletor diz a fase: 10 s durante a apuração, 1 min antes de começar, 5 min depois de totalizado
+  // a fase vem do arquivo nacional do Presidente: 10 s durante a apuração, 1 min antes de começar, 5 min depois de totalizado
   const ms = st.coleta?.intervalo || 60000;
-  // espera o próximo dado novo do coletor (com 1 s de folga)
+  // espera o intervalo da fase (com 1 s de folga)
   const idade = st.coleta ? Math.max(0, Date.now() - st.coleta.t) : 0;
   return Math.max(2000, ms - Math.min(idade, ms) + 1000);
 }
@@ -660,10 +755,10 @@ setInterval(relogio, 1000);
 function botoes(){
   const bSom = $("#bSom"), bN = $("#bNotif"), bSim = $("#bSim");
   const pintaSom = () => { bSom.textContent = st.som ? "🔊 Som ligado" : "🔇 Som desligado"; bSom.classList.toggle("on", st.som); bSom.setAttribute("aria-pressed", st.som); };
-  st.som = guarda.get("p2t-som", false); pintaSom();
-  bSom.onclick = () => { st.som = !st.som; guarda.set("p2t-som", st.som); pintaSom(); if (st.som) tocar(); };
+  st.som = SIM ? guarda.get("p2t-som-sim", true) : guarda.get("p2t-som", false); pintaSom();
+  bSom.onclick = () => { st.som = !st.som; guarda.set(SIM ? "p2t-som-sim" : "p2t-som", st.som); pintaSom(); if (st.som) tocar(); };
   // o navegador só libera o som depois de um clique na página
-  document.addEventListener("pointerdown", () => { if (st.som && !audio) try { audio = new (window.AudioContext || window.webkitAudioContext)(); } catch {} }, {once:true});
+  document.addEventListener("pointerdown", () => { try { audio = audio || new Audio("/urna.mp3"); audio.load(); } catch {} }, {once:true});
 
   const pintaN = () => {
     if (!("Notification" in window)){ bN.textContent = "🔕 Sem notificações"; bN.disabled = true; return; }
