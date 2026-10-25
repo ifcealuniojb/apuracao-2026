@@ -85,7 +85,8 @@ main{padding:18px 0 40px}
 .er .li{text-align:right;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .er .li small{display:block;font-weight:600;color:var(--ink-3);font-size:11px}
 @media (max-width:1020px){.estados{flex:none;max-height:460px}.est-lista{flex:1 1 auto;max-height:400px}}
-@media (max-width:520px){.er{grid-template-columns:30px minmax(0,1fr) 140px}.er .bx{display:none}}
+.er .pm{display:none}
+@media (max-width:520px){.er{grid-template-columns:30px minmax(0,1fr) 140px}.er .bx{display:none}.er .pm{display:block;font-size:11.5px;font-weight:500;color:var(--ink-3);margin-top:1px}} /* no celular, o % apurado vai embaixo do nome (25/10/2026) */
 @media (max-width:1020px){.topo-grid{grid-template-columns:minmax(0,1fr)}}
 body.sim .card.pres{position:relative;overflow:hidden}
 body.sim .card.pres::after{content:"SIMULAÇÃO";position:absolute;right:-8px;bottom:6px;font-size:54px;font-weight:900;letter-spacing:.06em;color:var(--ink);opacity:.06;pointer-events:none;transform:rotate(-6deg)}
@@ -489,7 +490,7 @@ function renderEstados(){
     }
     return `<div class="er" data-uf="${uf}">
       <div class="u ${st.govUFs.includes(uf) ? "ug" : ""}" title="${st.govUFs.includes(uf) ? "2º turno para governador" : ""}">${uf === "ZZ" ? "EX" : uf}</div>
-      <div class="n">${NOME[uf]}</div>
+      <div class="n">${NOME[uf]}<small class="pm">${pct(p)} apurado</small></div>
       <div class="bx"><div class="ba"><i style="width:${p}%"></i></div><div class="pa">${pct(p)} apurado</div></div>
       <div class="li">${li}</div></div>`;
   }).join("");
@@ -709,7 +710,7 @@ function mundoPinta(){
       let li = `<span style="color:var(--ink-3)">–</span>`;
       if (p.pst > 0){ const [a, b] = [...p.cands].sort((x, y) => y.v - x.v);
         li = b && a.v === b.v ? "Empate" : `<span style="color:${cor[a.sq]}">${esc(a.nome)}</span><small>${pct(a.pv)}${b ? " × " + pct(b.pv) : ""}</small>`; }
-      return `<div class="er ${p.iso === mun.sel ? "sel" : ""}" data-pais="${p.iso}"><div class="u">${p.iso}</div><div class="n">${esc(p.nome)}</div>
+      return `<div class="er ${p.iso === mun.sel ? "sel" : ""}" data-pais="${p.iso}"><div class="u">${p.iso}</div><div class="n">${esc(p.nome)}<small class="pm">${pct(p.pst)} apurado</small></div>
         <div class="bx"><div class="ba"><i style="width:${p.pst}%"></i></div><div class="pa">${pct(p.pst)} apurado</div></div><div class="li">${li}</div></div>`;
     }).join("") + `</div>`;
   $("#paises .pd-x")?.addEventListener("click", () => { mun.sel = null; mundoPinta(); });
