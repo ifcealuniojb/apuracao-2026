@@ -269,7 +269,7 @@ footer p{margin:4px 0}
 
   <footer>
     <p class="cred">Painel do 2º turno desenvolvido para o podcast As Cunhãs.</p>
-    <p>Dados oficiais do TSE (resultados.tse.jus.br), coletados por este painel no servidor (a cada 10 s durante a apuração) e repassados a quem está com ele aberto. Contornos dos estados: IBGE.</p>
+    <p>Dados oficiais do TSE (resultados.tse.jus.br), lidos diretamente do TSE por este navegador (a cada 10 s durante a apuração). Contornos dos estados: IBGE.</p>
     <p>"Eleito matematicamente" é um cálculo deste painel: a vantagem do primeiro colocado já é maior que o número de eleitores das seções que faltam apurar. A situação oficial é a divulgada pelo TSE.</p>
     <p class="dev">Desenvolvido por <b>Tritonia Soluções Tecnológicas</b></p>
   </footer>
@@ -604,22 +604,59 @@ function verificaAvisos(){
 }
 
 /* ---------- Carga ---------- */
-// Os dados vêm do coletor no servidor (/dados), que consulta o TSE uma vez para todos os navegadores.
-async function pacote(sim){
-  for (let i = 0; i < 3; i++){
+// Os dados vêm direto do TSE (resultados.tse.jus.br), lidos por este navegador.
+// Desde 24/10/2026 o TSE recusa as consultas feitas pelos servidores do Cloudflare (o coletor recebia
+// 403/404 e ficava vazio); o TSE libera a leitura para qualquer navegador (CORS aberto).
+// Monta o mesmo pacote que o coletor montava: {t, fase, intervalo, falhas, p, g, g1} ou {p1, g1} na simulação.
+const TSE = "https://resultados.tse.jus.br/oficial/ele2026/";
+const TSE_UFS = "AC AL AM AP BA CE DF ES GO MA MG MS MT PA PB PE PI PR RJ RN RO RR RS SC SE SP TO".split(" ");
+const TSE_GOV = ["AC", "AM", "DF", "ES", "RN", "TO"];
+const TSE_INT = { antes: 60000, apurando: 10000, fim: 300000 };
+const tseArq = (ele, uf, cargo) => { const u = uf.toLowerCase(); return `${TSE}${ele}/dados/${u}/${u}-c${String(cargo).padStart(4, "0")}-e${ele.padStart(6, "0")}-u.json`; };
+// objeto do arquivo, null se o TSE ainda não publicou (404/403), undefined se falhou
+async function tseBaixa(url){
+  for (let i = 0; i < 2; i++){
     try {
-      const r = await fetch("/dados" + (sim ? "?sim=1" : ""), {cache:"no-store", credentials:"same-origin"});
+      const r = await fetch(url, {cache:"no-store", credentials:"omit", referrerPolicy:"no-referrer"});
+      if (r.status === 404 || r.status === 403) return null;
       if (r.ok) return await r.json();
     } catch {}
-    await new Promise(r => setTimeout(r, 800 * (i+1)));
+    await new Promise(r => setTimeout(r, 600));
   }
-  throw new Error("coletor sem resposta");
+  return undefined;
+}
+const tse = { arqs: {}, gov1: null, sim: null };
+async function tseGov1(){
+  if (tse.gov1) return tse.gov1;
+  const g = await Promise.all(TSE_GOV.map(uf => tseBaixa(tseArq("6259", uf, 3))));
+  if (g.some(x => !x)) return undefined; // tenta de novo na próxima
+  return (tse.gov1 = Object.fromEntries(TSE_GOV.map((uf, i) => [uf, g[i]])));
+}
+async function pacote(sim){
+  if (sim){
+    if (tse.sim) return tse.sim;
+    const ufs = ["BR", ...TSE_UFS, "ZZ"];
+    const [p, g1] = await Promise.all([Promise.all(ufs.map(uf => tseBaixa(tseArq("6257", uf, 1)))), tseGov1()]);
+    if (p.some(x => !x) || !g1) throw new Error("falha ao montar a simulação");
+    return (tse.sim = { p1: Object.fromEntries(ufs.map((uf, i) => [uf, p[i]])), g1 });
+  }
+  const alvos = [["p", "BR", "6258", 1], ...[...TSE_UFS, "ZZ"].map(uf => ["p", uf, "6258", 1]), ...TSE_GOV.map(uf => ["g", uf, "6260", 3])];
+  const [res, g1] = await Promise.all([Promise.all(alvos.map(([, uf, e, c]) => tseBaixa(tseArq(e, uf, c)))), tseGov1()]);
+  let falhas = 0;
+  alvos.forEach(([s, uf], i) => { if (res[i] === undefined) falhas++; else tse.arqs[s + "/" + uf] = res[i]; });
+  if (falhas === alvos.length && !Object.keys(tse.arqs).length) throw new Error("TSE sem resposta");
+  const sec = s => Object.fromEntries(Object.entries(tse.arqs).filter(([k]) => k.startsWith(s + "/")).map(([k, v]) => [k.slice(2), v]));
+  const br = tse.arqs["p/BR"];
+  let fase = "antes";
+  if (br && br.tf === "s" && TSE_GOV.every(uf => tse.arqs["g/" + uf]?.tf === "s" || tse.arqs["g/" + uf] === null)) fase = "fim";
+  else if (br && +br.e?.est > 0) fase = "apurando";
+  return { t: Date.now(), fase, intervalo: TSE_INT[fase], falhas, p: sec("p"), g: sec("g"), g1: g1 || tse.gov1 || {} };
 }
 function leGov1(g1){
   // estados com 2º turno para governador e finalistas, pelo resultado do 1º turno
   for (const uf of UFS){ const j = g1?.[uf]; const f = j ? finalistas(j) : []; if (f.length === 2 && !st.govUFs.includes(uf)){ st.govUFs.push(uf); st.fin1[uf] = f; } }
 }
-let ultimo = null; // último pacote do coletor
+let ultimo = null; // último pacote lido do TSE
 async function inicio(){
   if (SIM){ const d = await pacote(true); leGov1(d.g1); prepSim(d); }
   else { ultimo = await pacote(false); leGov1(ultimo.g1); }
@@ -696,9 +733,9 @@ function atualizarSim(){
 /* ---------- Ciclo ---------- */
 function intervalo(){
   if (SIM) return 2000;
-  // o coletor diz a fase: 10 s durante a apuração, 1 min antes de começar, 5 min depois de totalizado
+  // a fase vem do arquivo nacional do Presidente: 10 s durante a apuração, 1 min antes de começar, 5 min depois de totalizado
   const ms = st.coleta?.intervalo || 60000;
-  // espera o próximo dado novo do coletor (com 1 s de folga)
+  // espera o intervalo da fase (com 1 s de folga)
   const idade = st.coleta ? Math.max(0, Date.now() - st.coleta.t) : 0;
   return Math.max(2000, ms - Math.min(idade, ms) + 1000);
 }

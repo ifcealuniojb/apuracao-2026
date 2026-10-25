@@ -1,6 +1,6 @@
 // Painel do 2º turno com a identidade do As Cunhãs. Só abre com o link secreto (?k=...), que vira um cookie.
-// Não consulta o TSE por conta própria: lê o MESMO coletor do painel pessoal (Durable Object "Coletor" do
-// Worker painel-2turno, uma só instância). Abrir os dois painéis não aumenta as consultas ao TSE.
+// Desde 24/10/2026 a página lê o TSE direto do navegador (o TSE passou a recusar o coletor no Cloudflare).
+// /dados (coletor do painel-2turno) continua respondendo, mas a página não usa mais.
 // Aqui fica apenas o SHA-256 da chave: a chave em si não está no código.
 import PAGINA from "./pagina.html";
 import URNA from "./urna.mp3"; // som do alerta (urna eletrônica)
@@ -14,7 +14,7 @@ const CSP = [
   "default-src 'none'",
   "script-src 'unsafe-inline'",
   "style-src 'unsafe-inline'",
-  "connect-src 'self'",
+  "connect-src https://resultados.tse.jus.br",
   "img-src https://resultados.tse.jus.br data:",
   "media-src 'self'",
   "base-uri 'none'",
